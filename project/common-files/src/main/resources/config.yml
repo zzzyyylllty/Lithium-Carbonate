@@ -1,0 +1,22 @@
+# lithiumcarbon Configuration
+debug: false
+
+id:
+  range:
+    min: 100000000
+    max: 9999999999
+
+database:
+  enable: false  # true: MySQL; false: SQLite
+  host: localhost
+  port: 3306
+  user: x_angelkawaii_x
+  password: angelkawaii2
+  database: lithiumcarbon
+  table: lithiumcarbon_data
+
+default:
+  sanity: 40.0
+  max-sanity: 100.0
+  darkness: 15.0
+  max-darkness: 100.0

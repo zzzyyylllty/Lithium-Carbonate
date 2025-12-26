@@ -1,0 +1,66 @@
+test_loot:
+  define:
+#    region_a:
+#      type: worldguard
+#      region_name: sample_region
+    region_b:
+      type: vanilla
+      from: 'world 0 0 0'
+      to: 'world 100 100 100'
+      block:
+        - chest
+#      condition:
+#        - 'check &block == "chest"'
+#        - 'js: block == "chest"'
+    region_c:
+      type: world
+      world_name: world_nether
+      block:
+        - chest
+    region_d:
+      type: specify
+      locations:
+        - 'world 114 51 4'
+      regenerate:
+        # If this block is air, regenerate it
+        # Only works on specify mode!
+        enabled: true
+        replace: chest
+  elements:
+    glass:
+      type: mc # Optional, null for mc
+      parameters:
+        material: GLASS
+        name: "Sample Glass"
+    diamond:
+      type: mc # Optional, null for mc
+      parameters:
+        material: DIAMOND
+        name: "<blue>Diamond!"
+        lore: |
+          <aqua>Hello, Diamonds!
+#    craftengine_item:
+#      type: external
+#      source: craftengine
+#      item: default:topaz
+#    sertraline_item:
+#      type: external
+#      source: sertraline
+#      item: sertraline_pills_14
+  pools:
+    - rolls: 5
+      conditions:
+        js: |
+          player.name != "AmeChan"
+        ke:
+          all [ check player name != "AmeChan" check player name != "ChoTenChan" ]
+      loots:
+        - type: element
+          item: glass
+        - type: item
+          item: minecraft:glass # craftengine:topaz
+      # mode: ALL - Optional, require js and kether must all true, accept values: ANY, ALL
+  agent:
+    onOpen:
+      js: |
+        player.sendMessage(mmUtil.deserialize("Hello world, " + player.name + "!"))
