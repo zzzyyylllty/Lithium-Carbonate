@@ -12,9 +12,11 @@ data class Condition(
     val mode: ConditionMode = ConditionMode.ALL
 ){
     fun validate(extraVariables: Map<String, Any>, player: Player): Boolean {
+
         val data = defaultData + extraVariables + mapOf("player" to player, "mode" to mode.name)
         val jsEnd = js?.eval(SimpleBindings(data))?.toBooleanTolerance()
         val keEnd = kether?.evalKether(player, data)?.toBooleanTolerance()
+
         return if (mode == ConditionMode.ALL) {
             if (jsEnd == null && keEnd == null) true
             else if (jsEnd == null || keEnd == null) jsEnd ?: true && keEnd ?: true
@@ -24,6 +26,7 @@ data class Condition(
             else if (jsEnd == null || keEnd == null) jsEnd ?: false || keEnd ?: false
             else jsEnd || keEnd
         }
+
     }
 }
 

@@ -1,6 +1,6 @@
 package io.github.zzzyyylllty.lithiumcarbon.function.javascript
 
-import io.github.zzzyyylllty.sertraline.logger.severeS
+import io.github.zzzyyylllty.lithiumcarbon.logger.severeS
 import org.bukkit.event.Cancellable
 import org.bukkit.event.Event
 

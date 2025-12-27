@@ -1,10 +1,8 @@
 package io.github.zzzyyylllty.lithiumcarbon.data
 
 import com.google.gson.Gson
-import io.github.zzzyyylllty.lithiumcarbon.LithiumCarbon
 import io.github.zzzyyylllty.lithiumcarbon.api.LithiumCarbonAPI
-import io.github.zzzyyylllty.sertraline.api.SertralineAPI
-import io.github.zzzyyylllty.sertraline.event.SertralineCustomScriptDataLoadEvent
+import io.github.zzzyyylllty.lithiumcarbon.event.LithiumCarbonCustomScriptDataLoadEvent
 import io.github.zzzyyylllty.sertraline.function.javascript.EventUtil
 import io.github.zzzyyylllty.sertraline.function.javascript.ItemStackUtil
 import io.github.zzzyyylllty.sertraline.function.javascript.PlayerUtil
@@ -20,6 +18,7 @@ import org.bukkit.Bukkit
 import org.bukkit.entity.Player
 import taboolib.common.LifeCycle
 import taboolib.common.platform.Awake
+import taboolib.common.platform.function.submitAsync
 import javax.script.CompiledScript
 import javax.script.SimpleBindings
 
@@ -45,7 +44,7 @@ fun registerExternalData() {
             "Bukkit" to Bukkit::class.java,
             "Gson" to Gson::class.java
         ))
-    val event = SertralineCustomScriptDataLoadEvent(defaultData)
+    val event = LithiumCarbonCustomScriptDataLoadEvent(defaultData)
     event.call()
     defaultData = event.defaultData
 }
@@ -61,11 +60,15 @@ data class Agents(
 data class Agent(
     val trigger: String,
     val js: CompiledScript? = null,
+    val asyncJs: CompiledScript? = null,
     val kether: List<String>? = null,
 ){
     fun runAgent(extraVariables: Map<String, Any>, player: Player) {
         val data = defaultData + extraVariables + mapOf("player" to player, "trigger" to trigger)
         js?.eval(SimpleBindings(data))
         kether?.evalKether(player, data)
+        submitAsync {
+            asyncJs?.eval(SimpleBindings(data))
+        }
     }
 }

@@ -1,5 +1,6 @@
 package io.github.zzzyyylllty.lithiumcarbon.util
 
+import io.github.zzzyyylllty.sertraline.debugMode.devLog
 import taboolib.module.nms.MinecraftVersion
 import taboolib.module.nms.MinecraftVersion.versionId
 
@@ -9,6 +10,16 @@ class VersionHelper {
     }
     val isUniversal: Boolean by lazy {
         MinecraftVersion.isUniversal
+    }
+    val isSertralinePremium by lazy {
+        try {
+            val classInstance = Class.forName("io.github.zzzyyylllty.lithiumcarbon.premium.PremiumHelper")
+            return@lazy (classInstance != null)
+        } catch (e: ClassNotFoundException) {
+            return@lazy false
+        } catch (e: Exception) {
+            throw RuntimeException("An error occurred while enabling PremiumHelper.", e)
+        }
     }
     fun isOrAbove12005(): Boolean{
         return versionId >= 12005

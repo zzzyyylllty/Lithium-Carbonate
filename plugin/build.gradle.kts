@@ -1,15 +1,14 @@
 taboolib {
     description {
         name("LithiumCarbon")
-        desc("ChoTen backrooms plugin.")
+        desc("ChoTen Loot Chest Management plugin.")
         contributors {
             // 作者名称
             name("AkaCandyKAngel")
         }
         dependencies {
-            name("MythicMobs").optional(true)
-            name("Chemdah").optional(true)
             name("WorldGuard").optional(true)
+            name("PlaceHolderAPI").optional(true)
             // name("ProtocolLib").optional(true)
             // 可选依赖.
             // name("XXX").optional(true)
@@ -40,8 +39,32 @@ taboolib {
 }
 
 tasks {
+
+    val taboolibMainTask = named("taboolibMainTask")
+
+    val baseJarFile = layout.buildDirectory.file("libs/${rootProject.name}-${rootProject.version}-Premium.jar")
+
+    val freeJar by registering(Jar::class) {
+        group = "build"
+        description = "Generate FREE version jar by filtering premium classes"
+
+        dependsOn(taboolibMainTask)
+
+        archiveFileName.set("${rootProject.name}-${version}-Free.jar")
+
+        // 从taboolibMainTask产物复制并过滤premium包
+        from(zipTree(baseJarFile)) {
+            exclude("io/github/zzzyyylllty/lithiumcarbon/premium/*")
+        }
+    }
+
+    named("build") {
+        dependsOn(freeJar)
+    }
+
+
     jar {
-        archiveFileName.set("${rootProject.name}-${archiveFileName.get().substringAfter('-')}")
+        archiveFileName.set("${rootProject.name}-${rootProject.version}-Premium.jar")
         rootProject.subprojects.forEach { from(it.sourceSets["main"].output) }
     }
 }
