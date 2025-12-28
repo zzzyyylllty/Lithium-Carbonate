@@ -17,7 +17,11 @@ import taboolib.module.nms.NMSItemTag.Companion.asNMSCopy
 data class LootTemplate (
     val id: String,
     val name: String,
+    val title: String,
+    val rows: Int,
+    val layout: List<String>?,
     val lootTable: LootTable,
     val elements: LinkedHashMap<String, LootItem>,
+    val staticItem: LinkedHashMap<String, LootItem>
 ) {
 }

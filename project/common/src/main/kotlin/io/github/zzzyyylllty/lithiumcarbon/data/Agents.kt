@@ -18,6 +18,7 @@ import org.bukkit.Bukkit
 import org.bukkit.entity.Player
 import taboolib.common.LifeCycle
 import taboolib.common.platform.Awake
+import taboolib.common.platform.function.submit
 import taboolib.common.platform.function.submitAsync
 import javax.script.CompiledScript
 import javax.script.SimpleBindings
@@ -65,10 +66,16 @@ data class Agent(
 ){
     fun runAgent(extraVariables: Map<String, Any>, player: Player) {
         val data = defaultData + extraVariables + mapOf("player" to player, "trigger" to trigger)
-        js?.eval(SimpleBindings(data))
+        js?.let {
+            submit {
+                it.eval(SimpleBindings(data))
+            }
+        }
         kether?.evalKether(player, data)
-        submitAsync {
-            asyncJs?.eval(SimpleBindings(data))
+        asyncJs?.let {
+            submitAsync {
+                it.eval(SimpleBindings(data))
+            }
         }
     }
 }

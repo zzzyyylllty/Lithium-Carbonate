@@ -41,7 +41,7 @@ data class LootItem(
                         SertralineHelper.buildItem(item, player, amount)
                     }
 
-                    else -> throw IllegalArgumentException("Unsupported Special LootItem format: $source")
+                    else -> throw IllegalArgumentException("Unsupported Special LootItem format: $source-$item")
                 }
 
             } else {

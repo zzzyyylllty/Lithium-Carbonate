@@ -13,6 +13,9 @@ data class LootElement(
     val kether: List<List<String>>? = null,
     val javaScript: List<CompiledScript>? = null,
 ) {
+    fun getDisplayItem(isSearched: Boolean) {
+        if (isSearched) // TODO 使用定义的搜索中物品
+    }
 //    fun isSearchEnd(): Boolean {
 //        return (searchEnd ?: 0) <= System.currentTimeMillis()
 //    }

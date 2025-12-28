@@ -41,6 +41,7 @@ allprojects {
             enableIsolatedClassloader = false
             install(Basic, Bukkit, BukkitHook, BukkitNMSUtil, Database, Kether, CommandHelper, BukkitNMSItemTag, JavaScript, BukkitUI, BukkitUtil, Jexl, Metrics, PtcObject)
             install(BukkitNMS)
+            install(BukkitUI)
             install(BukkitNMSDataSerializer)
             // install("bukkit-nms-tag-component")
         }

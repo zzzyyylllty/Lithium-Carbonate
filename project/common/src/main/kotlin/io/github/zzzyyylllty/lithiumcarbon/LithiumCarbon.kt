@@ -2,6 +2,7 @@ package io.github.zzzyyylllty.lithiumcarbon
 
 import io.github.zzzyyylllty.lithiumcarbon.data.LootInstance
 import io.github.zzzyyylllty.lithiumcarbon.data.LootLocation
+import io.github.zzzyyylllty.lithiumcarbon.data.LootTemplate
 import io.github.zzzyyylllty.lithiumcarbon.data.PlayerData
 import io.github.zzzyyylllty.lithiumcarbon.event.LithiumCarbonReloadEvent
 import io.github.zzzyyylllty.sertraline.Sertraline
@@ -32,6 +33,7 @@ object LithiumCarbon : Plugin() {
     val dataSource by lazy { host.createDataSource() }
     val playerDataMap = mutableMapOf<String, PlayerData>()
     val lootMap = mutableMapOf<LootLocation, LootInstance>()
+    val lootTemplates = mutableMapOf<String, LootTemplate>()
 
     var devMode = true
 

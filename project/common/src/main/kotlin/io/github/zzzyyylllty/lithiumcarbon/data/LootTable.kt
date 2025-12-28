@@ -22,6 +22,7 @@ data class LootPool(
     val rolls: String,
     val conditions: Condition?,
     val loots: List<Loots>,
+    val agent: Agents?,
 ) {
     fun roll(bypassConditions: Boolean = false, extraVariables: Map<String, Any>, player: Player): LootReturn? {
 
