@@ -20,10 +20,10 @@ object SertralineHelper {
             val item = Sertraline.api().buildItem(sItem, player, amount = amount)
             return item
         } catch (e: ClassNotFoundException) {
-            severeL("WorldGuardNotFoundException")
+            severeL("SertralineNotFoundException")
             return null
         } catch (e: NoClassDefFoundError) {
-            severeL("WorldGuardNotFoundException")
+            severeL("SertralineNotFoundException")
             return null
         }
     }

@@ -8,6 +8,7 @@ import io.github.zzzyyylllty.lithiumcarbon.function.kether.evalKetherValue
 import io.github.zzzyyylllty.lithiumcarbon.function.kether.parseKether
 import io.github.zzzyyylllty.lithiumcarbon.util.SertralineHelper
 import io.github.zzzyyylllty.lithiumcarbon.util.VersionHelper
+import io.github.zzzyyylllty.lithiumcarbon.util.asNumberFormat
 import io.github.zzzyyylllty.lithiumcarbon.util.componentUtil
 import io.github.zzzyyylllty.lithiumcarbon.util.devLog
 import io.github.zzzyyylllty.lithiumcarbon.util.minimessage.toComponent
@@ -33,17 +34,7 @@ data class LootItem(
 ) {
     fun build(player: Player?, overrideAmount: Int? = null): ItemStack {
 
-        val amount =
-            if (overrideAmount != null) {
-                overrideAmount
-            }
-            else {
-                val oAmount = amount ?: "1"
-                val full = if (oAmount.contains("{")) oAmount.parseKether(player) else oAmount
-                devLog("Full数量 $full")
-                val split = full.split("~")
-                if (split.size >= 2) random(split.first().toDouble().roundToInt(), split.last().toDouble().roundToInt()) else full.toDouble().roundToInt()
-            }
+        val amount = overrideAmount ?: amount.asNumberFormat(player).roundToInt()
 
         val source = source?.lowercase() ?: "mc"
         var itemStack: ItemStack = ItemStack(Material.GRASS_BLOCK)
