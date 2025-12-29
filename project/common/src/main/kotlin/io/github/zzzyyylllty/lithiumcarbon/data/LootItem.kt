@@ -3,16 +3,22 @@ package io.github.zzzyyylllty.lithiumcarbon.data
 import io.github.projectunified.uniitem.all.AllItemProvider
 import io.github.projectunified.uniitem.api.ItemKey
 import io.github.zzzyyylllty.embiancomponent.EmbianComponent
+import io.github.zzzyyylllty.lithiumcarbon.function.kether.evalKether
+import io.github.zzzyyylllty.lithiumcarbon.function.kether.evalKetherValue
+import io.github.zzzyyylllty.lithiumcarbon.function.kether.parseKether
 import io.github.zzzyyylllty.lithiumcarbon.util.SertralineHelper
 import io.github.zzzyyylllty.lithiumcarbon.util.VersionHelper
 import io.github.zzzyyylllty.lithiumcarbon.util.componentUtil
+import io.github.zzzyyylllty.lithiumcarbon.util.devLog
 import io.github.zzzyyylllty.lithiumcarbon.util.minimessage.toComponent
 import org.bukkit.Material
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 import taboolib.common.platform.function.severe
+import taboolib.common.util.random
 import taboolib.library.xseries.XItemStack
 import taboolib.module.nms.NMSItemTag.Companion.asNMSCopy
+import kotlin.math.roundToInt
 
 private val specialItemNamespace = listOf("minecraft", "mc")
 val provider: AllItemProvider by lazy { AllItemProvider() }
@@ -23,8 +29,21 @@ data class LootItem(
     val item: String,
     val parameters: LinkedHashMap<String, Any?>,
     val components: LinkedHashMap<String, Any?>? = null,
+    val amount: String? = "1",
 ) {
-    fun build(player: Player?, amount: Int): ItemStack {
+    fun build(player: Player?, overrideAmount: Int? = null): ItemStack {
+
+        val amount =
+            if (overrideAmount != null) {
+                overrideAmount
+            }
+            else {
+                val oAmount = amount ?: "1"
+                val full = if (oAmount.contains("{")) oAmount.parseKether(player) else oAmount
+                devLog("Full数量 $full")
+                val split = full.split("~")
+                if (split.size >= 2) random(split.first().toDouble().roundToInt(), split.last().toDouble().roundToInt()) else full.toDouble().roundToInt()
+            }
 
         val source = source?.lowercase() ?: "mc"
         var itemStack: ItemStack = ItemStack(Material.GRASS_BLOCK)

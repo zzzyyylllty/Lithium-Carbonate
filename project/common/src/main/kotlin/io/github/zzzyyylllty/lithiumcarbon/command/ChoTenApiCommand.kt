@@ -1,7 +1,7 @@
 package io.github.zzzyyylllty.lithiumcarbon.command
 
 import io.github.zzzyyylllty.lithiumcarbon.function.player.sendComponent
-import io.github.zzzyyylllty.sertraline.function.kether.runKether
+import io.github.zzzyyylllty.lithiumcarbon.function.kether.runKether
 import net.kyori.adventure.text.minimessage.MiniMessage
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player

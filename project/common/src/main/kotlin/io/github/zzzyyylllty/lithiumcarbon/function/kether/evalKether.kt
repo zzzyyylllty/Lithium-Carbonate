@@ -1,4 +1,4 @@
-package io.github.zzzyyylllty.sertraline.function.kether
+package io.github.zzzyyylllty.lithiumcarbon.function.kether
 
 import io.github.zzzyyylllty.sertraline.Sertraline.console
 import io.github.zzzyyylllty.sertraline.Sertraline.ketherScriptCache

@@ -9,12 +9,7 @@ data class LootTable(
     val pools: List<LootPool>,
     val agent: Agents?,
 ) {
-    fun apply(bypassConditions: Boolean = false, extraVariables: Map<String, Any>,player: Player): List<LootReturn> {
-        val returns = mutableListOf<LootReturn>()
-        pools.forEach { pool ->
-            pool.roll(bypassConditions, extraVariables, player)?.let { returns.add(it) }
-        }
-        return returns
+    fun apply(bypassConditions: Boolean = false, extraVariables: Map<String, Any>,player: Player) {
     }
 }
 
@@ -24,11 +19,11 @@ data class LootPool(
     val loots: List<Loots>,
     val agent: Agents?,
 ) {
-    fun roll(bypassConditions: Boolean = false, extraVariables: Map<String, Any>, player: Player): LootReturn? {
+    fun roll(bypassConditions: Boolean = false, extraVariables: Map<String, Any>, player: Player) {
 
         // 不满足条件直接返回
         if (!bypassConditions) if (conditions?.validate(extraVariables, player) == false) {
-            devLog("Loot Pool condition is not valid. return null.")
+            devLog("Loot Pool condition not met, return.")
             return null
         }
 

@@ -60,8 +60,8 @@ test_loot:
           # https://github.com/ProjectUnified/UniItem
           # Note: UniItem dependency may not be latest. If you have issues with external items,
           # Please contact me at discord / qq or open an issue.
-          item:
-            item: minecraft:glass
+          items:
+            - item: minecraft:glass
           # component: {}
 
           exp: 3~5 # exp: "ke: random 1 to 10"
@@ -74,7 +74,7 @@ test_loot:
             lore: |
               An visual line here
               If you look missing texture here, it's normal.
-              Just remove components in your loot config to fix.
+              Just remove components & tooltip_style in your loot config to fix.
             component: # Supported 1.20.5+ DataComponent
               tooltip_style: default:topaz
 

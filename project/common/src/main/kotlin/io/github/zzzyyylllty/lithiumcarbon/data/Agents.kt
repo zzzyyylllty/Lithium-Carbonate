@@ -7,7 +7,7 @@ import io.github.zzzyyylllty.sertraline.function.javascript.EventUtil
 import io.github.zzzyyylllty.sertraline.function.javascript.ItemStackUtil
 import io.github.zzzyyylllty.sertraline.function.javascript.PlayerUtil
 import io.github.zzzyyylllty.sertraline.function.javascript.ThreadUtil
-import io.github.zzzyyylllty.sertraline.function.kether.evalKether
+import io.github.zzzyyylllty.lithiumcarbon.function.kether.evalKether
 import io.github.zzzyyylllty.sertraline.util.data.DataUtil
 import io.github.zzzyyylllty.sertraline.util.jsonUtils
 import io.github.zzzyyylllty.sertraline.util.minimessage.mmJsonUtil
