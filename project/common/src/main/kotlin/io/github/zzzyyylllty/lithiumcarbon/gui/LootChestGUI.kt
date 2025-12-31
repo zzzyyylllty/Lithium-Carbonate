@@ -51,12 +51,12 @@ fun Player.openLootChest(instance: LootInstance) {
 
         fun update(int: Int, inventory: Inventory, instance: LootInstance) {
             val element = instance.getSlotItem(int) ?: return
-            val display = element.getDisplayItem(instance.getSearchStat(player, element, int, instance), player)
+            val display = element?.getDisplayItem(instance.getSearchStat(player, element, int, instance), player)
             devLog("Updating $int")
             inventory.setItem(int, display)
         }
-        fun update(int: Int, element: LootElement, inventory: Inventory, instance: LootInstance) {
-            val display = element.getDisplayItem(instance.getSearchStat(player, element, int, instance), player)
+        fun update(int: Int, element: LootElement?, inventory: Inventory, instance: LootInstance) {
+            val display = element?.getDisplayItem(instance.getSearchStat(player, element, int, instance), player)
             devLog("Updating $int")
             inventory.setItem(int, display)
         }
@@ -113,7 +113,7 @@ fun Player.openLootChest(instance: LootInstance) {
                 }
 
                 // 先移除物品
-                instance.elements.remove(rawSlot)
+                instance.elements[rawSlot] = null
 
                 // 再构建并给予
                 element.applyToPlayer(player)
@@ -122,6 +122,7 @@ fun Player.openLootChest(instance: LootInstance) {
 
             } else {
                 devLog("slot $rawSlot is empty")
+                update(rawSlot, inventory, instance)
             }
 
         }

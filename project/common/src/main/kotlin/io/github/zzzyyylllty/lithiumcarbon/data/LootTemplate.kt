@@ -24,7 +24,7 @@ data class LootTemplate (
             searches = linkedMapOf()
         )
     }
-    fun generateElements(player: Player, bypassCondition: Boolean = false): LinkedHashMap<Int, LootElement> {
+    fun generateElements(player: Player, bypassCondition: Boolean = false): LinkedHashMap<Int, LootElement?> {
         return lootTable.apply(bypassCondition, getExtraVariables(player), player, availableSlots, shuffleLoot = options.shuffleLoot)
     }
     fun getExtraVariables(player: Player): Map<String, Any?> {

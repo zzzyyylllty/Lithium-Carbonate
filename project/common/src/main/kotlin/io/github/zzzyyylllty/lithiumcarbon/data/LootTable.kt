@@ -1,17 +1,19 @@
 package io.github.zzzyyylllty.lithiumcarbon.data
 
 import io.github.zzzyyylllty.lithiumcarbon.logger.severeL
+import io.github.zzzyyylllty.lithiumcarbon.util.WeightHelper
 import io.github.zzzyyylllty.lithiumcarbon.util.asNumberFormat
 import io.github.zzzyyylllty.lithiumcarbon.util.devLog
 import org.bukkit.entity.Player
 import javax.script.CompiledScript
+import kotlin.math.roundToInt
 import kotlin.math.roundToLong
 
 data class LootTable(
     val pools: List<LootPool>,
     val agents: Agents?,
 ) {
-    fun apply(bypassConditions: Boolean = false, extraVariables: Map<String, Any?>, player: Player, availableSlots: Set<Int>, shuffleLoot: Boolean = false): LinkedHashMap<Int, LootElement> {
+    fun apply(bypassConditions: Boolean = false, extraVariables: Map<String, Any?>, player: Player, availableSlots: Set<Int>, shuffleLoot: Boolean = false): LinkedHashMap<Int, LootElement?> {
         val elements = mutableListOf<LootElement>()
         val availableSlots = availableSlots.toMutableSet()
         val availableSlotsCount = availableSlots.size
@@ -28,7 +30,7 @@ data class LootTable(
                 return@forEach
             }
         }
-        val sloted = LinkedHashMap<Int, LootElement>()
+        val sloted = LinkedHashMap<Int, LootElement?>()
         if (shuffleLoot) {
             elements.forEach { loot ->
                 if (availableSlots.isEmpty()) return@forEach
@@ -66,8 +68,11 @@ data class LootPool(
             return null
         }
 
+        val roll = rolls.asNumberFormat(player)
 
-        loots.forEach { loot ->
+        val weightLoots = WeightHelper.parse(loots, roll.roundToInt(), player)
+
+        weightLoots.forEach { loot ->
             devLog("parsing $loot.")
             elements += loot.parseLoot(player)
         }

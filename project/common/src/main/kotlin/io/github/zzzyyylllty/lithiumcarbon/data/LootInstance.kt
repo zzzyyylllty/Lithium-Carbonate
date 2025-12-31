@@ -7,7 +7,7 @@ import org.bukkit.entity.Player
 data class LootInstance(
     var templateID: String,
     var loc: LootLocation,
-    var elements: LinkedHashMap<Int, LootElement>,
+    var elements: LinkedHashMap<Int, LootElement?>,
     var searches: LinkedHashMap<String, SearchStat>,
 ) {
     val template get() = lootTemplates[templateID]

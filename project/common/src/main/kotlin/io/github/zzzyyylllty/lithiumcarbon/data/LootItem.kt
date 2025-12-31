@@ -75,10 +75,10 @@ data class LootItem(
 
         if (parameters?.isNotEmpty() ?: false) {
 
-            parameters["name"] ?.let { itemStack.itemMeta.displayName(it.toString().toComponent()) }
-            parameters["display_name"] ?.let { itemStack.itemMeta.displayName(it.toString().toComponent()) }
-            parameters["custom_name"] ?.let { itemStack.itemMeta.customName(it.toString().toComponent()) }
-            parameters["item_name"] ?.let { itemStack.itemMeta.itemName(it.toString().toComponent()) }
+            parameters["name"] ?.let { itemStack.itemMeta.itemName(it.toString().toComponent()) }
+            parameters["display-name"] ?.let { itemStack.itemMeta.displayName(it.toString().toComponent()) }
+            parameters["custom-name"] ?.let { itemStack.itemMeta.customName(it.toString().toComponent()) }
+            parameters["item-name"] ?.let { itemStack.itemMeta.itemName(it.toString().toComponent()) }
             (parameters["lore"] as List<String>?)?.let { itemStack.lore((it).toComponent()) }
 
         }

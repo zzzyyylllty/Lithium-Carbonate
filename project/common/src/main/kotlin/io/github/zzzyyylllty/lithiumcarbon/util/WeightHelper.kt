@@ -13,12 +13,9 @@ object WeightHelper {
      * @param repeat: 重复获取次数
      * @return 选中对象列表
      */
-    fun parse(weights: List<Loots>, total: Double, repeat: Int, player: Player): List<Loots?> {
+    fun parse(weights: List<Loots>, repeat: Int, player: Player): List<Loots> {
         if (repeat < 1) {
             severeL("ErrorWeightRepeat")
-        }
-        if (total < 0) {
-            severeL("ErrorWeightTotal")
         }
 
         // 构造前缀权重
@@ -32,12 +29,16 @@ object WeightHelper {
             }
             sum += weight
             // 如果 i 是最后一个元素，则用 total
-            prefixSum[i] = if (i == weights.size - 1) total else sum
+            prefixSum[i] = sum
         }
 
-        val result = ArrayList<Loots?>(repeat)
+        if (sum < 0) {
+            severeL("ErrorWeightTotal")
+        }
+
+        val result = ArrayList<Loots>(repeat)
         for (i in 0 until repeat) {
-            val r = Math.random() * total  // 使用传入的 total
+            val r = Math.random() * sum  // 使用传入的 total
             val index = binarySearch(prefixSum, r)
             val obj = weights[index]
             result.add(obj)
