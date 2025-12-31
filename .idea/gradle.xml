@@ -13,6 +13,7 @@
             <option value="$PROJECT_DIR$/project" />
             <option value="$PROJECT_DIR$/project/common" />
             <option value="$PROJECT_DIR$/project/common-files" />
+            <option value="$PROJECT_DIR$/project/premium" />
           </set>
         </option>
       </GradleProjectSettings>

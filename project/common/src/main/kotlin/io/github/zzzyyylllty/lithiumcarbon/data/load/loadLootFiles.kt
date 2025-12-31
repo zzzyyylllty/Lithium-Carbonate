@@ -119,13 +119,13 @@ fun loadLoot(key: String, arg: Map<String, Any?>) {
 
             val displayItem = c.getItem(pool["display"])
 
-            val items = pool["items"] as? List<Any?>?
-
-            if (items != null) for (item in items) {
-                if (item != null) c.getItem(item)?.let { element -> loadedItems.add(element) }
-            }
-
             if (it != null) {
+                val items = it["items"] as? List<Any?>?
+
+                if (items != null) for (item in items) {
+                    if (item != null) c.getItem(item)?.let { element -> loadedItems.add(element) }
+                }
+
                 loadedLoots.add(
                     Loots(
                         displayItem = displayItem,

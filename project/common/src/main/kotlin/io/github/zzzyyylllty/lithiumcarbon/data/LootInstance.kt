@@ -5,10 +5,10 @@ import io.github.zzzyyylllty.lithiumcarbon.LithiumCarbon.lootTemplates
 import org.bukkit.entity.Player
 
 data class LootInstance(
-    val templateID: String,
-    val loc: LootLocation,
-    val elements: LinkedHashMap<Int, LootElement>,
-    val searches: LinkedHashMap<String, SearchStat>,
+    var templateID: String,
+    var loc: LootLocation,
+    var elements: LinkedHashMap<Int, LootElement>,
+    var searches: LinkedHashMap<String, SearchStat>,
 ) {
     val template get() = lootTemplates[templateID]
 
@@ -20,22 +20,22 @@ data class LootInstance(
         return searches[player.uniqueId.toString()]
     }
 
-    fun getSearchStat(player: Player, element: LootElement, slot: Int): LootElementStat {
-        return if (element.skipSearch) LootElementStat.SEARCHED else if (getSearchStatRaw(player, slot)?.isSearchEnded(slot) ?: return LootElementStat.NOT_SEARCHED) LootElementStat.SEARCHING else LootElementStat.NOT_SEARCHED
+    fun getSearchStat(player: Player, element: LootElement, slot: Int, instance: LootInstance): LootElementStat {
+        return if (instance.elements[slot] == null) LootElementStat.NOITEM
+        else if (element.skipSearch) LootElementStat.SEARCHED
+        else if (getSearchStatRaw(player, slot)?.isSearchEnded(slot)
+                ?: return LootElementStat.NOT_SEARCHED) LootElementStat.SEARCHING else LootElementStat.NOT_SEARCHED
     }
 
     fun startSearch(player: Player, location: Int, ms: Long) {
-        searches.getOrPut(player.uniqueId.toString()) {
+        val searches = searches.getOrPut(player.uniqueId.toString()) {
             SearchStat(linkedMapOf())
         }.searches
+        searches[location] = SingleSearchStat(location, System.currentTimeMillis() + ms, false)
     }
 
     fun resetPlayerSearch(player: Player) {
         searches[player.uniqueId.toString()]?.reset()
-    }
-
-    fun refresh(): LootInstance? {
-        return lootMap[loc]
     }
 
 }

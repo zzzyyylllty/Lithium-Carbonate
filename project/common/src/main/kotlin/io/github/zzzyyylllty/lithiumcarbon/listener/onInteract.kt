@@ -28,11 +28,16 @@ fun onInteract(e: PlayerInteractEvent) {
     val player = e.player ?: return // 防止 NPC 搞鬼
     if (config.getBoolean("allowed-all-blocks", false) || config.getList("allowed-blocks")?.contains(block.type.name) ?: false) {
 
-        if (config.getBoolean("allowed-all-worlds", false)) {
+        if (!config.getBoolean("allowed-all-worlds", false)) {
+            val world = block.world.name
+            var passed = false
             for (regex in allowedWorlds) {
-
+                if (world.matches(regex)) {
+                    passed = true
+                    break
+                }
             }
-            return
+            if (!passed) return
         }
 
         val location = LocationHelper.toLootLocation(block.location)

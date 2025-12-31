@@ -3,6 +3,7 @@ package io.github.zzzyyylllty.lithiumcarbon.data.load
 import io.github.zzzyyylllty.lithiumcarbon.data.Agent
 import io.github.zzzyyylllty.lithiumcarbon.data.Agents
 import io.github.zzzyyylllty.lithiumcarbon.data.Condition
+import io.github.zzzyyylllty.lithiumcarbon.data.ConditionMode
 import io.github.zzzyyylllty.lithiumcarbon.data.LootItem
 import io.github.zzzyyylllty.lithiumcarbon.data.defaultData
 import io.github.zzzyyylllty.lithiumcarbon.function.kether.parseKether
@@ -100,7 +101,8 @@ object ConfigUtil {
             val map = conditionsRaw as? Map<*, *>? ?: return null
             Condition(
                 kether = (map["ke"] ?: map["KE"] ?: map["KETHER"]?: map["kether"]).asListEnhanced(),
-                js = (map["js"] ?: map["JS"] ?: map["javascript"] ?: map["JAVASCRIPT"]).asListedStringEnhanced()?.compileJS()
+                js = (map["js"] ?: map["JS"] ?: map["javascript"] ?: map["JAVASCRIPT"]).asListedStringEnhanced()?.compileJS(),
+                mode = ConditionMode.valueOf((map["mode"] ?: "ALL").toString().uppercase())
             )
         }
 

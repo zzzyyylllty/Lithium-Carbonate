@@ -1,7 +1,5 @@
 package io.github.zzzyyylllty.lithiumcarbon.data
 
-import kotlin.compareTo
-
 data class SearchStat(
     val searches: LinkedHashMap<Int, SingleSearchStat>
 ) {
@@ -22,9 +20,9 @@ data class SearchStat(
 data class SingleSearchStat(
     val slot: Int,
     val endTime: Long,
-    val isEnded: Boolean
+    val isSkip: Boolean
 ) {
     fun isSearchEnded(): Boolean {
-        return if (isEnded) true else endTime <= System.currentTimeMillis()
+        return if (isSkip) true else endTime <= System.currentTimeMillis()
     }
 }

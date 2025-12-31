@@ -20,11 +20,12 @@ data class LootElement(
     val searchTime: Long = 0,
     val skipSearch: Boolean = false,
 ) {
-    fun getDisplayItem(stat: LootElementStat, player: Player?): ItemStack {
+    fun getDisplayItem(stat: LootElementStat, player: Player?): ItemStack? {
         return when (stat) {
             LootElementStat.NOT_SEARCHED -> LootGUIHelper.unsearch.build(player, 1)
             LootElementStat.SEARCHING -> LootGUIHelper.searching.build(player, 1)
             LootElementStat.SEARCHED -> (displayItem ?: items?.firstOrNull() ?: LootGUIHelper.undefinedItem).build(player, 1)
+            LootElementStat.NOITEM -> null
         }
     }
 
@@ -41,7 +42,8 @@ data class LootElement(
                     "exps" to exps,
                     "element" to this,
                     "searchTime" to searchTime,
-                    "skipSearch" to skipSearch
+                    "skipSearch" to skipSearch,
+                    "player" to player,
                 )
             )
             kether?.evalKether(player, data)
@@ -54,5 +56,6 @@ data class LootElement(
 enum class LootElementStat {
     NOT_SEARCHED,
     SEARCHING,
-    SEARCHED
+    SEARCHED,
+    NOITEM
 }

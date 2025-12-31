@@ -1,6 +1,5 @@
 package io.github.zzzyyylllty.lithiumcarbon.data
 
-import io.github.zzzyyylllty.lithiumcarbon.function.kether.parseKether
 import io.github.zzzyyylllty.lithiumcarbon.logger.severeL
 import io.github.zzzyyylllty.lithiumcarbon.util.asNumberFormat
 import io.github.zzzyyylllty.lithiumcarbon.util.devLog
@@ -14,15 +13,15 @@ data class LootTable(
 ) {
     fun apply(bypassConditions: Boolean = false, extraVariables: Map<String, Any?>, player: Player, availableSlots: Set<Int>, shuffleLoot: Boolean = false): LinkedHashMap<Int, LootElement> {
         val elements = mutableListOf<LootElement>()
-        val slots = availableSlots.toMutableSet()
-        val availableSlots = availableSlots.size
+        val availableSlots = availableSlots.toMutableSet()
+        val availableSlotsCount = availableSlots.size
 
-        if (availableSlots == 0) {
+        if (availableSlotsCount == 0) {
             severeL("ErrorNoAvailableSlots")
             return linkedMapOf()
         }
         pools.forEach { pool ->
-            if (availableSlots >= elements.size) {
+            if (availableSlotsCount >= elements.size) {
                 pool.roll(bypassConditions, extraVariables, player)?.let { elements += it }
             } else {
                 devLog("No space left to roll. skipping.")
@@ -32,16 +31,18 @@ data class LootTable(
         val sloted = LinkedHashMap<Int, LootElement>()
         if (shuffleLoot) {
             elements.forEach { loot ->
-                if (slots.isEmpty()) return@forEach
-                slots.random().let {
+                if (availableSlots.isEmpty()) return@forEach
+                availableSlots.random().let {
                     sloted[it] = loot
+                    availableSlots.remove(it)
                 }
             }
         } else {
             var slot = 0
             for (element in elements) {
-                if (sloted[slot] == null) break
+                if (!availableSlots.contains(slot)) break
                 sloted[slot] = element
+                availableSlots.remove(slot)
                 slot++
             }
         }
