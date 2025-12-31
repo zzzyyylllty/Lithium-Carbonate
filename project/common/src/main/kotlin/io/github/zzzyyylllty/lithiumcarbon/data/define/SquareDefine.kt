@@ -38,7 +38,7 @@ class SquareDefine(val from: LootLocation, val to: LootLocation, override val bl
 
         condition?.let {
             val extraVariable = mapOf<String, Any?>(
-                "block" to block.type,
+                "block" to block,
                 "type" to block.type.name,
                 "x" to block.x,
                 "u" to block.y,

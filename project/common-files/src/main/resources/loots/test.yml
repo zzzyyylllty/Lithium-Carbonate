@@ -50,9 +50,9 @@ test_loot:
       regex: true
     # conditions:
     #   js: |
-    #     block == "chest"
+    #     type == "chest"
     #   ke:
-    #     check &block == "chest"
+    #     check &type == "chest"
 
     region_c:
       type: world

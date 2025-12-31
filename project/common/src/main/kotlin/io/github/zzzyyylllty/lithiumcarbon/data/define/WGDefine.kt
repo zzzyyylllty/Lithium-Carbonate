@@ -43,7 +43,7 @@ class WGDefine(val regions: List<String>, val regex: Boolean, override val block
 
         condition?.let {
             val extraVariable = mapOf<String, Any?>(
-                "block" to block.type,
+                "block" to block,
                 "type" to block.type.name,
                 "x" to block.x,
                 "u" to block.y,
