@@ -1,13 +1,12 @@
 package io.github.zzzyyylllty.lithiumcarbon.gui
 
+import io.github.zzzyyylllty.lithiumcarbon.LithiumCarbon.console
 import io.github.zzzyyylllty.lithiumcarbon.data.LootElement
 import io.github.zzzyyylllty.lithiumcarbon.data.LootElementStat
 import io.github.zzzyyylllty.lithiumcarbon.data.LootInstance
 import io.github.zzzyyylllty.lithiumcarbon.data.LootItem
 import io.github.zzzyyylllty.lithiumcarbon.logger.warningS
 import io.github.zzzyyylllty.lithiumcarbon.util.devLog
-import io.github.zzzyyylllty.sertraline.Sertraline.console
-import kotlin220.collections.toTypedArray
 import org.bukkit.entity.Player
 import org.bukkit.event.inventory.ClickType.*
 import taboolib.common.platform.function.submit
@@ -47,11 +46,11 @@ fun Player.openLootChest(instance: LootInstance) {
 
         fun update(int: Int) {
             val element = instance.elements[int] ?: return
-            val display = element.getDisplayItem(instance.getSearchStat(player, element), player)
+            val display = element.getDisplayItem(instance.getSearchStat(player, element, int), player)
             inventory.setItem(int, display)
         }
         fun update(int: Int, element: LootElement) {
-            val display = element.getDisplayItem(instance.getSearchStat(player, element), player)
+            val display = element.getDisplayItem(instance.getSearchStat(player, element, int), player)
             inventory.setItem(int, display)
         }
         fun updateAll() {
@@ -91,7 +90,7 @@ fun Player.openLootChest(instance: LootInstance) {
                 if (element != null) {
                     devLog("格子含有物品")
 
-                    if (instance.getSearchStat(player, element) == LootElementStat.NOT_SEARCHED) {
+                    if (instance.getSearchStat(player, element, rawSlot) == LootElementStat.NOT_SEARCHED) {
                         devLog("开始搜索物品")
                         val time = element.searchTime
                         if (time > 0) {

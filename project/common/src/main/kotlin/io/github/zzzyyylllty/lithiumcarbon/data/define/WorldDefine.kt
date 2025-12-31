@@ -8,7 +8,7 @@ import org.bukkit.block.Block
 import org.bukkit.entity.Player
 import kotlin.text.matches
 
-class WorldDefine(val worlds: List<String>, val regex: Boolean, override val blocks: List<String>, override val condition: Condition?): LootDefine {
+class WorldDefine(val worlds: HashSet<String>, val regexWorlds: HashSet<Regex>?, override val blocks: HashSet<String>, override val condition: Condition?): LootDefine {
 
     override val type: String = "world"
 
@@ -16,14 +16,14 @@ class WorldDefine(val worlds: List<String>, val regex: Boolean, override val blo
 
         val blockWorld = block.world.name
 
-        if (regex) worlds?.forEach {
-            if (blockWorld.matches(it.toRegex())) {
-                devLog("World define passed.")
+        if (regexWorlds != null) regexWorlds.forEach {
+            if (blockWorld.matches(it)) {
+                devLog("World define passed: $it.")
 
                 if (blocks.contains(block.type.name)) return validateCondition(location, block, player)
             }
         } else if (worlds.contains(blockWorld)) {
-            devLog("World define passed.")
+            devLog("World define passed: $blockWorld.")
             if (blocks.contains(block.type.name)) return validateCondition(location, block, player)
         }
 

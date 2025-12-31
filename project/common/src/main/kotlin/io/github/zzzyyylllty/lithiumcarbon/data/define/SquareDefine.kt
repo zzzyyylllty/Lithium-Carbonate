@@ -8,7 +8,7 @@ import org.bukkit.block.Block
 import org.bukkit.entity.Player
 import org.bukkit.event.world.WorldLoadEvent
 
-class SquareDefine(val from: LootLocation, val to: LootLocation, override val blocks: List<String>, override val condition: Condition?): LootDefine {
+class SquareDefine(val from: LootLocation, val to: LootLocation, override val blocks: HashSet<String>, override val condition: Condition?): LootDefine {
 
     override val type: String = "square"
 

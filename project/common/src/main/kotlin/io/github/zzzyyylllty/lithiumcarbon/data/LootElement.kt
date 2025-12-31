@@ -9,7 +9,6 @@ import javax.script.CompiledScript
 data class LootElement(
 //    var searchEnd: Long? = null,
 //    var searcherUUID: String, // 当玩家关闭容器时，检测玩家UUID的战利品并重置搜索进度
-    val slot: Int,
     var displayItem: LootItem? = null,
     val exps: Double = 0.0,
     val items: List<LootItem>? = null,
@@ -33,19 +32,6 @@ data class LootElement(
     }
 
 }
-//    fun isSearchEnd(): Boolean {
-//        return (searchEnd ?: 0) <= System.currentTimeMillis()
-//    }
-//    fun getStat(): LootElementStat {
-//        return if (searchEnd == null) {
-//            LootElementStat.NOT_SEARCHED
-//        } else if (!isSearchEnd()) {
-//            LootElementStat.SEARCHING
-//        } else {
-//            LootElementStat.SEARCHED
-//        }
-//    }
-
 
 enum class LootElementStat {
     NOT_SEARCHED,

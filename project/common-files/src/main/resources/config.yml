@@ -29,3 +29,10 @@ logger:
     ErrorItemGenerationFailedNull: false
   ignore-warnings:
     WarningNotSupportDataComponent: false
+
+allowed-blocks:
+  - CHEST
+  - GRAY_SHULKER_BOX
+
+allowed-worlds:
+  - *

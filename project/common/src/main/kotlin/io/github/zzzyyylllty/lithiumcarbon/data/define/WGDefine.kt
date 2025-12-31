@@ -7,7 +7,7 @@ import io.github.zzzyyylllty.lithiumcarbon.util.devLog
 import org.bukkit.block.Block
 import org.bukkit.entity.Player
 
-class WGDefine(val regions: List<String>, val regex: Boolean, override val blocks: List<String>, override val condition: Condition?): LootDefine {
+class WGDefine(val regions: List<String>, val regionsRegex: List<Regex>?, override val blocks: HashSet<String>, override val condition: Condition?): LootDefine {
 
     override val type: String = "worldguard"
 
@@ -17,16 +17,16 @@ class WGDefine(val regions: List<String>, val regex: Boolean, override val block
 
             val required = WorldGuardHelper.checkLocationRegion(location)
 
-            if (regex) required?.forEach {
-                for (r in regions) {
-                    if (it.matches(r.toRegex())) {
-                        devLog("WG define passed.")
+            if (regionsRegex != null) required?.forEach {
+                for (r in regionsRegex) {
+                    if (it.matches(r)) {
+                        devLog("WG define passed: $it")
                         if (blocks.contains(block.type.name)) return validateCondition(location, block, player)
                     }
                 }
             } else required?.forEach {
                 if (regions.contains(it)) {
-                    devLog("WG define passed.")
+                    devLog("WG define passed: $it")
                     if (blocks.contains(block.type.name)) return validateCondition(location, block, player)
                 }
             }

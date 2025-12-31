@@ -4,8 +4,8 @@ import io.github.zzzyyylllty.lithiumcarbon.data.LootInstance
 import io.github.zzzyyylllty.lithiumcarbon.data.LootLocation
 import io.github.zzzyyylllty.lithiumcarbon.data.LootTemplate
 import io.github.zzzyyylllty.lithiumcarbon.data.PlayerData
+import io.github.zzzyyylllty.lithiumcarbon.data.define.LootDefines
 import io.github.zzzyyylllty.lithiumcarbon.event.LithiumCarbonReloadEvent
-import io.github.zzzyyylllty.sertraline.Sertraline
 import org.bukkit.command.CommandSender
 import taboolib.common.platform.Plugin
 import taboolib.common.platform.event.SubscribeEvent
@@ -34,6 +34,8 @@ object LithiumCarbon : Plugin() {
     val playerDataMap = mutableMapOf<String, PlayerData>()
     val lootMap = mutableMapOf<LootLocation, LootInstance>()
     val lootTemplates = mutableMapOf<String, LootTemplate>()
+    val lootDefines = mutableMapOf<String, LootDefines>()
+    val lootCaches = mutableMapOf<LootLocation, LootTemplate>()
 
     var devMode = true
 
@@ -47,12 +49,12 @@ object LithiumCarbon : Plugin() {
 
     @SubscribeEvent
     fun lang(event: PlayerSelectLocaleEvent) {
-        event.locale = Sertraline.config.getString("lang", "en_US")!!
+        event.locale = config.getString("lang", "en_US")!!
     }
 
     @SubscribeEvent
     fun lang(event: SystemSelectLocaleEvent) {
-        event.locale = Sertraline.config.getString("lang", "en_US")!!
+        event.locale = config.getString("lang", "en_US")!!
     }
 
     fun reloadCustomConfig(async: Boolean = true) {

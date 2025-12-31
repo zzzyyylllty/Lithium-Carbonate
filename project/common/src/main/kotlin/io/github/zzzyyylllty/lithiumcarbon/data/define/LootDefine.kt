@@ -7,8 +7,19 @@ import org.bukkit.entity.Player
 
 interface LootDefine {
     val type: String
-    val blocks: List<String>
+    val blocks: HashSet<String>
     val condition: Condition?
     fun isValidLocation(location: LootLocation, block: Block, player: Player): Boolean
     fun validateCondition(location: LootLocation, block: Block, player: Player): Boolean
+}
+
+data class LootDefines(
+    val defines: LinkedHashMap<String, LootDefine> = linkedMapOf()
+) {
+    fun isValidLocation(location: LootLocation, block: Block, player: Player): Boolean {
+        defines.forEach {
+            if (it.value.isValidLocation(location, block, player)) return true
+        }
+        return false
+    }
 }

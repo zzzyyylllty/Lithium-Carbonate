@@ -1,10 +1,5 @@
 package io.github.zzzyyylllty.lithiumcarbon.function.javascript
 
-import io.github.zzzyyylllty.sertraline.item.adapter.transferBooleanToByte
-import io.github.zzzyyylllty.sertraline.item.rebuild
-import io.github.zzzyyylllty.sertraline.item.rebuildLore
-import io.github.zzzyyylllty.sertraline.item.rebuildName
-import io.github.zzzyyylllty.sertraline.item.rebuildUnsafe
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 import taboolib.module.nms.ItemTag
@@ -31,19 +26,18 @@ object ItemStackUtil {
         return transferBooleanToByte(input)
     }
 
-    fun rebuildLore(itemStack: ItemStack,player: Player?) {
-        itemStack.rebuildLore(player)
-    }
+}
 
-    fun rebuildName(itemStack: ItemStack,player: Player?) {
-        itemStack.rebuildName(player)
-    }
+fun transferBooleanToByte(input: Any?): Any? {
+    return when (input) {
+        is Map<*, *> -> input.map { (k, v) ->
+            k.toString() to transferBooleanToByte(v)
+        }.toMap() // 直接使用 map 和 toMap
 
-    fun rebuild(itemStack: ItemStack,player: Player?): ItemStack {
-        return itemStack.rebuild(player)
-    }
+        is List<*> -> input.map { transferBooleanToByte(it) } // 使用 map
 
-    fun rebuildUnsafe(itemStack: ItemStack,player: Player?) {
-        itemStack.rebuildUnsafe(player)
+        is Boolean -> if (input) 1.toByte() else 0.toByte()
+
+        else -> input
     }
 }

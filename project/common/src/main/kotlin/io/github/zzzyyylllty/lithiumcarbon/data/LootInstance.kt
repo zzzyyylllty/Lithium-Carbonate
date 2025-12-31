@@ -20,8 +20,8 @@ data class LootInstance(
         return searches[player.uniqueId.toString()]
     }
 
-    fun getSearchStat(player: Player, element: LootElement): LootElementStat {
-        return if (element.skipSearch) LootElementStat.SEARCHED else if (getSearchStatRaw(player, element.slot)?.isSearchEnded(element.slot) ?: return LootElementStat.NOT_SEARCHED) LootElementStat.SEARCHING else LootElementStat.NOT_SEARCHED
+    fun getSearchStat(player: Player, element: LootElement, slot: Int): LootElementStat {
+        return if (element.skipSearch) LootElementStat.SEARCHED else if (getSearchStatRaw(player, slot)?.isSearchEnded(slot) ?: return LootElementStat.NOT_SEARCHED) LootElementStat.SEARCHING else LootElementStat.NOT_SEARCHED
     }
 
     fun startSearch(player: Player, location: Int, ms: Long) {

@@ -2,21 +2,21 @@ package io.github.zzzyyylllty.lithiumcarbon.data.load
 
 import io.github.zzzyyylllty.lithiumcarbon.LithiumCarbon.config
 import io.github.zzzyyylllty.lithiumcarbon.LithiumCarbon.lootTemplates
+import io.github.zzzyyylllty.lithiumcarbon.data.LootPool
+import io.github.zzzyyylllty.lithiumcarbon.data.LootTable
 import io.github.zzzyyylllty.lithiumcarbon.data.LootTemplate
 import io.github.zzzyyylllty.lithiumcarbon.data.LootTemplateOptions
+import io.github.zzzyyylllty.lithiumcarbon.logger.infoL
+import io.github.zzzyyylllty.lithiumcarbon.logger.severeL
+import io.github.zzzyyylllty.lithiumcarbon.logger.warningL
+import io.github.zzzyyylllty.lithiumcarbon.util.devLog
 
-import io.github.zzzyyylllty.sertraline.debugMode.devLog
-import io.github.zzzyyylllty.sertraline.logger.infoL
-import io.github.zzzyyylllty.sertraline.logger.severeL
-import io.github.zzzyyylllty.sertraline.logger.warningL
 // import org.yaml.snakeyaml.Yaml
 import taboolib.common.platform.function.getDataFolder
 import taboolib.common.platform.function.releaseResourceFile
 import java.io.File
 import kotlin.collections.forEach
 import kotlin.collections.set
-import kotlin.let
-import kotlin.toString
 
 
 fun loadLootFiles() {
@@ -59,8 +59,9 @@ fun loadLoot(key: String, arg: Map<String, Any?>) {
     val c = ConfigUtil
 
     val options = LootTemplateOptions(
-        removeLore = c.getDeep(arg, "options.remove-lore") as? Boolean? ?: false,
+        removeLore = c.getDeep(arg, "options.remove-lore") as? Boolean? ?: config.getBoolean("default-options.remove-lore", false),
         addLore = c.getDeep(arg, "options.add-lore") as? List<String>? ?: config.getStringList("default-options.add-lore"),
+        shuffleLoot = c.getDeep(arg, "options.shuffle-loot") as? Boolean? ?: config.getBoolean("default-options.shuffle-loot", false),
     )
 
     val layoutP = c.getDeep(arg, "display.layout").asListEnhanced() ?: config.getStringList("default-layout")
@@ -88,9 +89,17 @@ fun loadLoot(key: String, arg: Map<String, Any?>) {
         return
     }
 
-    for (pool in rawPools) {
+    val loadedPools = mutableListOf<LootPool>()
 
+    for (pool in rawPools) {
+        if (pool == null) continue
+        val roll = pool["roll"] as? Int? ?: 1
     }
+
+    val lootTable = LootTable(
+        pools = TODO(),
+        agents = c.getAgents(arg)
+    )
 
     val loot = LootTemplate(
         id = key,
@@ -98,9 +107,9 @@ fun loadLoot(key: String, arg: Map<String, Any?>) {
         title = c.getDeep(arg, "display.title") as? String? ?: "Unknown Name",
         rows = c.getDeep(arg, "display.rows") as? Int? ?: layout.size,
         layout = layout,
-        availableSlots = availableSlots,
-        lootTable = TODO(),
-        agents = TODO(),
+        availableSlots = availableSlots.toSet(),
+        lootTable = lootTable,
+        agents = c.getAgents(arg),
         options = options
     )
     lootTemplates[key] = loot

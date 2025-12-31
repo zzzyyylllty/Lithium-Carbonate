@@ -1,6 +1,5 @@
 package io.github.zzzyyylllty.lithiumcarbon.util
 
-import io.github.zzzyyylllty.sertraline.debugMode.devLog
 import taboolib.module.nms.MinecraftVersion
 import taboolib.module.nms.MinecraftVersion.versionId
 
@@ -11,7 +10,7 @@ class VersionHelper {
     val isUniversal: Boolean by lazy {
         MinecraftVersion.isUniversal
     }
-    val isSertralinePremium by lazy {
+    val isLi2CO3Premium by lazy {
         try {
             val classInstance = Class.forName("io.github.zzzyyylllty.lithiumcarbon.premium.PremiumHelper")
             return@lazy (classInstance != null)

@@ -3,17 +3,16 @@ package io.github.zzzyyylllty.lithiumcarbon.data
 import com.google.gson.Gson
 import io.github.zzzyyylllty.lithiumcarbon.api.LithiumCarbonAPI
 import io.github.zzzyyylllty.lithiumcarbon.event.LithiumCarbonCustomScriptDataLoadEvent
-import io.github.zzzyyylllty.sertraline.function.javascript.EventUtil
-import io.github.zzzyyylllty.sertraline.function.javascript.ItemStackUtil
-import io.github.zzzyyylllty.sertraline.function.javascript.PlayerUtil
-import io.github.zzzyyylllty.sertraline.function.javascript.ThreadUtil
+import io.github.zzzyyylllty.lithiumcarbon.function.javascript.EventUtil
+import io.github.zzzyyylllty.lithiumcarbon.function.javascript.ItemStackUtil
+import io.github.zzzyyylllty.lithiumcarbon.function.javascript.PlayerUtil
+import io.github.zzzyyylllty.lithiumcarbon.function.javascript.ThreadUtil
 import io.github.zzzyyylllty.lithiumcarbon.function.kether.evalKether
-import io.github.zzzyyylllty.sertraline.util.data.DataUtil
-import io.github.zzzyyylllty.sertraline.util.jsonUtils
-import io.github.zzzyyylllty.sertraline.util.minimessage.mmJsonUtil
-import io.github.zzzyyylllty.sertraline.util.minimessage.mmLegacyAmpersandUtil
-import io.github.zzzyyylllty.sertraline.util.minimessage.mmLegacySectionUtil
-import io.github.zzzyyylllty.sertraline.util.minimessage.mmUtil
+import io.github.zzzyyylllty.lithiumcarbon.util.jsonUtils
+import io.github.zzzyyylllty.lithiumcarbon.util.minimessage.mmJsonUtil
+import io.github.zzzyyylllty.lithiumcarbon.util.minimessage.mmLegacyAmpersandUtil
+import io.github.zzzyyylllty.lithiumcarbon.util.minimessage.mmLegacySectionUtil
+import io.github.zzzyyylllty.lithiumcarbon.util.minimessage.mmUtil
 import org.bukkit.Bukkit
 import org.bukkit.entity.Player
 import taboolib.common.LifeCycle
@@ -39,7 +38,6 @@ fun registerExternalData() {
             "ThreadUtil" to ThreadUtil,
             "PlayerUtil" to PlayerUtil,
             "LithiumCarbonAPI" to LithiumCarbonAPI::class.java,
-            "DataUtil" to DataUtil,
             "Math" to Math::class.java,
             "System" to System::class.java,
             "Bukkit" to Bukkit::class.java,
