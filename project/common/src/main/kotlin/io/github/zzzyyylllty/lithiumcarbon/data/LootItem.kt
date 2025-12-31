@@ -6,6 +6,8 @@ import io.github.zzzyyylllty.embiancomponent.EmbianComponent
 import io.github.zzzyyylllty.lithiumcarbon.function.kether.evalKether
 import io.github.zzzyyylllty.lithiumcarbon.function.kether.evalKetherValue
 import io.github.zzzyyylllty.lithiumcarbon.function.kether.parseKether
+import io.github.zzzyyylllty.lithiumcarbon.logger.severeL
+import io.github.zzzyyylllty.lithiumcarbon.logger.warningL
 import io.github.zzzyyylllty.lithiumcarbon.util.SertralineHelper
 import io.github.zzzyyylllty.lithiumcarbon.util.VersionHelper
 import io.github.zzzyyylllty.lithiumcarbon.util.asNumberFormat
@@ -26,8 +28,7 @@ val provider: AllItemProvider by lazy { AllItemProvider() }
 val componentHelper by lazy { if (VersionHelper().isOrAbove12005()) EmbianComponent.SafetyComponentSetter else null }
 
 data class LootItem(
-    val source: String?,
-    val item: String,
+    val namespaceID: String,
     val parameters: LinkedHashMap<String, Any?>,
     val components: LinkedHashMap<String, Any?>? = null,
     val amount: String? = "1",
@@ -36,11 +37,13 @@ data class LootItem(
 
         val amount = overrideAmount ?: amount.asNumberFormat(player).roundToInt()
 
-        val source = source?.lowercase() ?: "mc"
-        var itemStack: ItemStack = ItemStack(Material.GRASS_BLOCK)
+        val split = if (namespaceID.contains("{")) namespaceID.parseKether(player, defaultData).split("::".toRegex()) else listOf("mc", "grass_block")
+        val source = if (split.size >= 2) split.first().lowercase() else "mc"
+        val item = split.last()
+        var itemStack: ItemStack? = null
 
         try {
-            itemStack = if (specialItemNamespace.contains(source)) {
+            val providedItem = if (specialItemNamespace.contains(source)) {
 
                 when (source) {
                     "mc", "minecraft", "vanilla" -> {
@@ -56,11 +59,17 @@ data class LootItem(
 
             } else {
                 player?.let { provider.item(ItemKey(source, item), it) } ?: provider.item(ItemKey(source, item))
-            } ?: ItemStack(Material.GRASS_BLOCK)
+            }
+            if (providedItem == null) {
+                severeL("ErrorItemGenerationFailedNull", source, item, namespaceID)
+                return ItemStack(Material.GRASS_BLOCK)
+            }
+            itemStack = providedItem
 
         } catch (e: Exception) {
-            severe("An error occurred while parsing Loot Item: $source:$item. See error below.")
+            severeL("ErrorItemGenerationFailed", source, item, namespaceID)
             e.printStackTrace()
+            return ItemStack(Material.GRASS_BLOCK)
         }
 
         if (parameters.isNotEmpty()) {
@@ -73,16 +82,16 @@ data class LootItem(
 
         }
         if (components != null && components.isNotEmpty()) {
-//            if (componentHelper != null) {
-            var nmsStack = asNMSCopy(itemStack)
-            components.forEach {
-                val value = it.value
-                if (value != null) componentUtil.setComponentNMS(nmsStack, it.key, value)?.let { nmsStack = it }
-                else componentUtil.removeComponentNMS(nmsStack, it.key).let { nmsStack = it }
+            if (VersionHelper().isOrAbove12005()) {
+                var nmsStack = asNMSCopy(itemStack)
+                components.forEach {
+                    val value = it.value
+                    if (value != null) componentUtil.setComponentNMS(nmsStack, it.key, value)?.let { nmsStack = it }
+                    else componentUtil.removeComponentNMS(nmsStack, it.key).let { nmsStack = it }
+                }
+            } else {
+                warningL("WarningNotSupportDataComponent")
             }
-//            } else {
-//                warning("Component helper is null. is version below 1.20.5? if below, remove component section in your loot config to hide this warning.If not below, please open an issue.")
-//            }
         }
         itemStack.amount = amount
         return itemStack

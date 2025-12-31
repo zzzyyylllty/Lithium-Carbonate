@@ -5,17 +5,8 @@ hook:
   worldguard: true
   sertraline: true
 
-items:
-  searching:
-    material: YELLOW_STAINED_GLASS_PANE
-    name: "<yellow>Searching..."
-    lore: |
-      Please wait ...
-  waiting:
-    material: GRAY_STAINED_GLASS_PANE
-    name: "<red>???"
-    lore: |
-      Click to Search!
+file-load:
+  loot: "^(?![#!]).*\\.(?i)(yaml|yml|toml|tml|json|conf)$"
 
 database:
   enable: false  # true: MySQL; false: SQLite
@@ -25,3 +16,16 @@ database:
   password: angelkawaii2
   database: lithiumcarbon
   table: lithiumcarbon_data
+
+default-options:
+  add-lore: null
+  remove-lore: false
+
+logger:
+  ignore-errors:
+    ErrorNoAvailableSlots: false
+    ErrorNoPools: false
+    ErrorItemGenerationFailed: false
+    ErrorItemGenerationFailedNull: false
+  ignore-warnings:
+    WarningNotSupportDataComponent: false

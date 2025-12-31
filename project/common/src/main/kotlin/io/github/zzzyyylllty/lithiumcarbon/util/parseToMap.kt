@@ -1,4 +1,4 @@
-package io.github.zzzyyylllty.lithiumcarbon.util.serialize
+package io.github.zzzyyylllty.lithiumcarbon.util
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory

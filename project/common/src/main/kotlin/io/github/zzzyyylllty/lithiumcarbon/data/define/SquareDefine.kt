@@ -7,30 +7,24 @@ import io.github.zzzyyylllty.lithiumcarbon.util.devLog
 import org.bukkit.block.Block
 import org.bukkit.entity.Player
 
-class WGDefine(val regions: List<String>, val regex: Boolean, override val blocks: List<String>, override val condition: Condition?): LootDefine {
+class SquareDefine(val from: LootLocation, val to: LootLocation, override val blocks: List<String>, override val condition: Condition?): LootDefine {
 
-    override val type: String = "worldguard"
+    override val type: String = "square"
 
     override fun isValidLocation(location: LootLocation, block: Block, player: Player): Boolean {
 
-        if (regions.isNotEmpty()) {
+        if (!block.world.name.contains(from.world.toRegex())) {
+            devLog("World not met,return false.")
+            return false
+        }
 
-            val required = WorldGuardHelper.checkLocationRegion(location)
+        if (block.x in from.x..to.x && block.y in from.y..to.y && block.z in from.z..to.z) {
 
-            if (regex) required?.forEach {
-                for (r in regions) {
-                    if (it.matches(r.toRegex())) {
-                        devLog("WG define passed.")
-                        if (blocks.contains(block.type.name)) return validateCondition(location, block, player)
-                    }
-                }
-            } else required?.forEach {
-                if (regions.contains(it)) {
-                    devLog("WG define passed.")
-                    if (blocks.contains(block.type.name)) return validateCondition(location, block, player)
-                }
+            devLog("Square define passed.")
+
+            if (blocks.contains(block.type.name)) {
+                return validateCondition(location, block, player)
             }
-
             return false
 
         } else {
@@ -58,5 +52,4 @@ class WGDefine(val regions: List<String>, val regex: Boolean, override val block
         }
         return true
     }
-
 }

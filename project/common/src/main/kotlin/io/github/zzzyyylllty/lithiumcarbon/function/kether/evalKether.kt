@@ -54,7 +54,6 @@ fun List<String>.parseKether(
         sets.forEach {
             set(it.first, it.second)
         }
-        if (cacheId != null) ketherScriptCache[cacheId]?.let { cache(it) }
     }.build())
 }
 
@@ -74,7 +73,6 @@ fun String?.parseKether(
         sets.forEach {
             set(it.first, it.second)
         }
-        if (cacheId != null) ketherScriptCache[cacheId]?.let { cache(it) }
     }.build())
 }
 
@@ -98,7 +96,7 @@ fun List<String>.evalKether(
         sets.forEach {
             set(it.first, it.second)
         }
-        if (cacheId != null) ketherScriptCache[cacheId]?.let { cache(it) }
+        
     }.build())
 }
 
@@ -119,7 +117,6 @@ fun String?.evalKether(
         sets.forEach {
             set(it.first, it.second)
         }
-        if (cacheId != null) ketherScriptCache[cacheId]?.let { cache(it) }
     }.build())
 }
 
@@ -141,7 +138,6 @@ fun String?.evalKetherValue(
         sets.forEach {
             set(it.first, it.second)
         }
-        if (cacheId != null) ketherScriptCache[cacheId]?.let { cache(it) }
     }.build()).getNow(def)
 }
 
@@ -163,7 +159,6 @@ fun String?.evalKetherString(
         sets.forEach {
             set(it.first, it.second)
         }
-        if (cacheId != null) ketherScriptCache[cacheId]?.let { cache(it) }
     }.build()).getNow(def).toString()
 }
 
@@ -172,7 +167,6 @@ fun String?.evalKetherBoolean(
     vars: Map<String, Any?> = mapOf(),
     sets: List<Pair<String, Any?>> = emptyList(),
     def: Boolean = true,
-    cacheId: String? = null
 ): Boolean {
     if (this.isNullOrBlank()) {
         return def
@@ -192,7 +186,6 @@ fun String?.evalKetherBoolean(
             sets.forEach {
                 set(it.first, it.second)
             }
-            if (cacheId != null) ketherScriptCache[cacheId]?.let { cache(it) }
         }.build()).thenApply {
             Coerce.toBoolean(it)
         }.get()
@@ -212,8 +205,7 @@ fun List<String>.evalKetherBoolean(
     /**
      * 列表是否所有条件通过
      */
-    all: Boolean = true,
-    cacheId: String? = null
+    all: Boolean = true
 ): Boolean {
     if (this.isEmpty()) {
         return def
@@ -239,7 +231,6 @@ fun List<String>.evalKetherBoolean(
             sets.forEach {
                 set(it.first, it.second)
             }
-            if (cacheId != null) ketherScriptCache[cacheId]?.let { cache(it) }
         }.build()).thenApply {
             Coerce.toBoolean(it)
         }.get()

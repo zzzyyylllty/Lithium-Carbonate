@@ -6,13 +6,15 @@ data class LootTemplate (
     val name: String,
     val title: String,
     val rows: Int,
-    val layout: List<String>?,
+    val layout: List<String>,
     val availableSlots: List<Int>,
     val lootTable: LootTable,
-    val elements: LinkedHashMap<String, LootItem>,
-    val staticItem: LinkedHashMap<String, LootItem>
+    val agents: Agents,
+    val options: LootTemplateOptions,
 ) {
-    fun getLayout(): List<String> {
-        return layout ?: listOf("         ","         ","         ")
-    }
 }
+
+data class LootTemplateOptions(
+    val removeLore: Boolean,
+    val addLore: List<String>?,
+)

@@ -13,10 +13,10 @@ data class LootTable(
     val pools: List<LootPool>,
     val agent: Agents?,
 ) {
-    fun apply(bypassConditions: Boolean = false, extraVariables: Map<String, Any>,player: Player): List<LootElement> {
+    fun apply(bypassConditions: Boolean = false, extraVariables: Map<String, Any>,player: Player, availableSlots: List<Int>): List<LootElement> {
         val elements = mutableListOf<LootElement>()
         pools.forEach { pool ->
-            pool.roll(bypassConditions, extraVariables, player)?.let { elements += it }
+            pool.roll(bypassConditions, extraVariables, player, availableSlots)?.let { elements += it }
         }
         return elements
     }

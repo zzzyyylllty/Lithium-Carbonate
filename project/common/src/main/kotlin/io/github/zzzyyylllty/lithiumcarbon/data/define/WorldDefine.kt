@@ -6,37 +6,28 @@ import io.github.zzzyyylllty.lithiumcarbon.util.WorldGuardHelper
 import io.github.zzzyyylllty.lithiumcarbon.util.devLog
 import org.bukkit.block.Block
 import org.bukkit.entity.Player
+import kotlin.text.matches
 
-class WGDefine(val regions: List<String>, val regex: Boolean, override val blocks: List<String>, override val condition: Condition?): LootDefine {
+class WorldDefine(val worlds: List<String>, val regex: Boolean, override val blocks: List<String>, override val condition: Condition?): LootDefine {
 
-    override val type: String = "worldguard"
+    override val type: String = "world"
 
     override fun isValidLocation(location: LootLocation, block: Block, player: Player): Boolean {
 
-        if (regions.isNotEmpty()) {
+        val blockWorld = block.world.name
 
-            val required = WorldGuardHelper.checkLocationRegion(location)
+        if (regex) worlds?.forEach {
+            if (blockWorld.matches(it.toRegex())) {
+                devLog("World define passed.")
 
-            if (regex) required?.forEach {
-                for (r in regions) {
-                    if (it.matches(r.toRegex())) {
-                        devLog("WG define passed.")
-                        if (blocks.contains(block.type.name)) return validateCondition(location, block, player)
-                    }
-                }
-            } else required?.forEach {
-                if (regions.contains(it)) {
-                    devLog("WG define passed.")
-                    if (blocks.contains(block.type.name)) return validateCondition(location, block, player)
-                }
+                if (blocks.contains(block.type.name)) return validateCondition(location, block, player)
             }
-
-            return false
-
-        } else {
-            return false
+        } else if (worlds.contains(blockWorld)) {
+            devLog("World define passed.")
+            if (blocks.contains(block.type.name)) return validateCondition(location, block, player)
         }
 
+        return false
     }
 
     override fun validateCondition(location: LootLocation, block: Block, player: Player): Boolean {

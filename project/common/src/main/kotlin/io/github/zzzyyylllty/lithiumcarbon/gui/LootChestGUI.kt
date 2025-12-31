@@ -7,13 +7,6 @@ import io.github.zzzyyylllty.lithiumcarbon.data.LootItem
 import io.github.zzzyyylllty.lithiumcarbon.logger.warningS
 import io.github.zzzyyylllty.lithiumcarbon.util.devLog
 import io.github.zzzyyylllty.sertraline.Sertraline.console
-import io.github.zzzyyylllty.sertraline.Sertraline.itemMap
-import io.github.zzzyyylllty.sertraline.config.asListEnhanded
-import io.github.zzzyyylllty.sertraline.data.ModernSItem
-import io.github.zzzyyylllty.sertraline.item.sertralineItemBuilder
-import io.github.zzzyyylllty.sertraline.util.gui.GuiItem
-import io.github.zzzyyylllty.sertraline.util.gui.build
-import io.github.zzzyyylllty.sertraline.util.minimessage.toComponent
 import kotlin220.collections.toTypedArray
 import org.bukkit.entity.Player
 import org.bukkit.event.inventory.ClickType.*
@@ -48,7 +41,7 @@ fun Player.openLootChest(instance: LootInstance) {
 
         rows(6)
 
-        map(*template.getLayout().toTypedArray())
+        map(*template.layout.toTypedArray())
 
         set('-', XMaterial.GRAY_STAINED_GLASS_PANE) { name = " " }
 

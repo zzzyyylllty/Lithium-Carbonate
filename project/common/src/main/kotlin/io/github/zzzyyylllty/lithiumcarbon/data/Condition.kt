@@ -11,7 +11,7 @@ data class Condition(
     val kether: List<String>? = null,
     val mode: ConditionMode = ConditionMode.ALL
 ){
-    fun validate(extraVariables: Map<String, Any>, player: Player): Boolean {
+    fun validate(extraVariables: Map<String, Any?>, player: Player): Boolean {
 
         val data = defaultData + extraVariables + mapOf("player" to player, "mode" to mode.name)
         val jsEnd = js?.eval(SimpleBindings(data))?.toBooleanTolerance()

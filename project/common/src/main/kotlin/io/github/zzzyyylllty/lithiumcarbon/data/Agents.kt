@@ -38,7 +38,7 @@ fun registerExternalData() {
             "EventUtil" to EventUtil,
             "ThreadUtil" to ThreadUtil,
             "PlayerUtil" to PlayerUtil,
-            "SertralineAPI" to LithiumCarbonAPI::class.java,
+            "LithiumCarbonAPI" to LithiumCarbonAPI::class.java,
             "DataUtil" to DataUtil,
             "Math" to Math::class.java,
             "System" to System::class.java,
@@ -62,6 +62,7 @@ data class Agent(
     val trigger: String,
     val js: CompiledScript? = null,
     val asyncJs: CompiledScript? = null,
+    val asyncKe: List<String>? = null,
     val kether: List<String>? = null,
 ){
     fun runAgent(extraVariables: Map<String, Any>, player: Player) {
@@ -75,6 +76,11 @@ data class Agent(
         asyncJs?.let {
             submitAsync {
                 it.eval(SimpleBindings(data))
+            }
+        }
+        asyncKe?.let {
+            submitAsync {
+                it.evalKether(player, data)
             }
         }
     }

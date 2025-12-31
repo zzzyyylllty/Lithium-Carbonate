@@ -133,15 +133,13 @@ allprojects {
 //        taboo("io.github.zzzyyylllty:EmbianComponent:1.0.2")
 //        compileOnly("com.willfp:eco:6.77.2")
         taboo("io.github.zzzyyylllty:EmbianComponent:1.0.2")
-        implementation("com.github.zzzyyylllty:Sertraline-Hydrochloride:3.7.1")
+        implementation("com.github.zzzyyylllty:Sertraline-Hydrochloride:3.8.2")
 
         implementation("com.sk89q.worldguard:worldguard-bukkit:7.0.10-SNAPSHOT")
         implementation("com.sk89q.worldguard:worldguard-core:7.0.10-SNAPSHOT")
         // 服务器 API
         implementation(rootProject.libs.paperapi)
 
-        // Minecraft 相关库 (仅编译时需要)
-        compileOnly(rootProject.libs.mythiclibdist)
         compileOnly(rootProject.libs.placeholderapi)
 //        compileOnly(rootProject.libs.packeteventsspigot)
 //        compileOnly(rootProject.libs.datafixerupper)
@@ -155,9 +153,6 @@ allprojects {
 //        compileOnly(rootProject.libs.caffeine)
         compileOnly(rootProject.libs.gson)
 
-        // 脚本引擎 (GraalVM)
-        compileOnly(rootProject.libs.bundles.graalvm)
-
         // 核心功能库 (运行时需要)
 //        implementation(rootProject.libs.bundles.reflex)
 //        implementation(rootProject.libs.bundles.asm)
@@ -165,7 +160,7 @@ allprojects {
         taboo(rootProject.libs.arim)
 //        taboo(platform(rootProject.libs.kotlincrypto.bom))
 //        taboo(rootProject.libs.kotlincrypto.sha2)
-        compileOnly(rootProject.libs.bundles.jackson)
+        taboo(rootProject.libs.bundles.jackson)
         taboo(rootProject.libs.bundles.uniitem)
         taboo(rootProject.libs.kotlin.stdlib) // 将 kotlin("stdlib") 替换为此格式
     }
