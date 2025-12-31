@@ -8,7 +8,7 @@ import org.bukkit.block.Block
 import org.bukkit.entity.Player
 import kotlin.text.matches
 
-class SpecifyDefine(val locations: List<Loca>, override val blocks: List<String>, override val condition: Condition?): LootDefine {
+class SpecifyDefine(val locations: List<LootLocation>, val regex: Boolean,override val blocks: List<String>, override val condition: Condition?): LootDefine {
 
     override val type: String = "world"
 
@@ -16,7 +16,7 @@ class SpecifyDefine(val locations: List<Loca>, override val blocks: List<String>
 
         val blockWorld = block.world.name
 
-        if (regex) worlds?.forEach {
+        if (regex) locations?.forEach {
             if (blockWorld.matches(it.toRegex())) {
                 devLog("World define passed.")
 

@@ -45,6 +45,9 @@ test_loot:
       to: 'world 100 100 100'
       blocks:
         - chest
+
+      # Only world supports regex.
+      regex: true
     # conditions:
     #   js: |
     #     block == "chest"
@@ -62,8 +65,10 @@ test_loot:
       type: specify
       locations:
         - 'world 114 51 4'
+      # Only world supports regex.
+      regex: true
       regenerate:
-        # If this block is air, regenerate it
+        # If this block is air, regenerate it on reload & WorldLoadEvent.
         # Only works on specify mode!
         enabled: true
         replace: chest

@@ -6,6 +6,7 @@ import io.github.zzzyyylllty.lithiumcarbon.util.WorldGuardHelper
 import io.github.zzzyyylllty.lithiumcarbon.util.devLog
 import org.bukkit.block.Block
 import org.bukkit.entity.Player
+import org.bukkit.event.world.WorldLoadEvent
 
 class SquareDefine(val from: LootLocation, val to: LootLocation, override val blocks: List<String>, override val condition: Condition?): LootDefine {
 
