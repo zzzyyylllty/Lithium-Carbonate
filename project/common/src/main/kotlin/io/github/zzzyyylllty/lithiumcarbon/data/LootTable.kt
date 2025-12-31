@@ -1,5 +1,6 @@
 package io.github.zzzyyylllty.lithiumcarbon.data
 
+import io.github.zzzyyylllty.lithiumcarbon.function.kether.parseKether
 import io.github.zzzyyylllty.lithiumcarbon.logger.severeL
 import io.github.zzzyyylllty.lithiumcarbon.util.asNumberFormat
 import io.github.zzzyyylllty.lithiumcarbon.util.devLog
@@ -65,10 +66,8 @@ data class LootPool(
 
 
         loots.forEach { loot ->
-
             devLog("parsing $loot.")
             elements += loot.parseLoot(player)
-
         }
 
         return elements
@@ -80,15 +79,14 @@ data class Loots(
     var displayItem: LootItem? = null,
     val exps: String,
     val items: List<LootItem>? = null,
-    val kether: List<List<String>>? = null,
-    val javaScript: List<CompiledScript>? = null,
-    val searchTime: Long = 0,
+    val kether: List<String>? = null,
+    val javaScript: CompiledScript? = null,
+    val searchTime: String = "0",
     val skipSearch: Boolean = false,
-    val weight: Double?,
-    val dynamicWeight: String?,
+    val weight: String?,
 ) {
     fun getWeight(player: Player): Double {
-        return weight ?: dynamicWeight.asNumberFormat(player)
+        return weight?.asNumberFormat(player) ?: 1.0
     }
 
     fun parseLoot(player: Player): LootElement {
@@ -98,7 +96,7 @@ data class Loots(
             items = items,
             kether = kether,
             javaScript = javaScript,
-            searchTime = searchTime,
+            searchTime = if (searchTime.contains("{")) searchTime.parseKether(player).toLong() else searchTime.toLong(),
             skipSearch = skipSearch
         )
     }

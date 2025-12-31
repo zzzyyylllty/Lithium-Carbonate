@@ -2,6 +2,10 @@ package io.github.zzzyyylllty.lithiumcarbon.data.load
 
 import io.github.zzzyyylllty.lithiumcarbon.data.Agent
 import io.github.zzzyyylllty.lithiumcarbon.data.Agents
+import io.github.zzzyyylllty.lithiumcarbon.data.LootItem
+import io.github.zzzyyylllty.lithiumcarbon.data.defaultData
+import io.github.zzzyyylllty.lithiumcarbon.function.kether.parseKether
+import org.bukkit.entity.Player
 import taboolib.common5.compileJS
 import taboolib.module.lang.asLangText
 import kotlin.collections.contains
@@ -40,6 +44,22 @@ object ConfigUtil {
             current = current[key]
         }
         return current
+    }
+    fun getItem(input: Any?): LootItem? {
+        val input = input as? LinkedHashMap<String, Any?>? ?: (input as? String?)?.let { linkedMapOf("item" to it) } ?: return null
+
+        val namespaceID = input["item"]?.toString() ?: "grass_block"
+
+        val split = namespaceID.split(":").toMutableList()
+        val source = if (split.size >= 2) split.first().lowercase() else "mc"
+        split.removeFirst()
+        val item = split.joinToString(":")
+
+        val parameters = (input["parameters"] ?: input["parameter"]) as LinkedHashMap<String, Any?>?
+        val components = (input["components"] ?: input["component"]) as LinkedHashMap<String, Any?>?
+
+        return LootItem(source, item, parameters, components)
+
     }
     fun getAgents(input: Any?): Agents? {
 

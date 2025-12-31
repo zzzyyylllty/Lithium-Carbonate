@@ -60,6 +60,7 @@ allprojects {
 
     repositories {
         mavenLocal()
+        maven("https://repo.gtemc.net/releases/")
         maven("https://repo.auxilor.io/repository/maven-public/")
         maven("https://nexus.phoenixdevt.fr/repository/maven-public/")
         maven("https://repo.aeoliancloud.com/release")
@@ -161,7 +162,7 @@ allprojects {
 //        taboo(platform(rootProject.libs.kotlincrypto.bom))
 //        taboo(rootProject.libs.kotlincrypto.sha2)
         taboo(rootProject.libs.bundles.jackson)
-        taboo(rootProject.libs.bundles.uniitem)
+        taboo("cn.gtemc:itembridge:1.0.17")
         taboo(rootProject.libs.kotlin.stdlib) // 将 kotlin("stdlib") 替换为此格式
     }
 

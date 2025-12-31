@@ -4,25 +4,22 @@ import io.github.zzzyyylllty.lithiumcarbon.LithiumCarbon.lootMap
 import io.github.zzzyyylllty.lithiumcarbon.LithiumCarbon.playerDataMap
 import io.github.zzzyyylllty.lithiumcarbon.function.player.sendComponent
 import org.bukkit.command.CommandSender
-import org.bukkit.entity.Player
 import taboolib.common.platform.command.CommandBody
 import taboolib.common.platform.command.CommandHeader
 import taboolib.common.platform.command.PermissionDefault
 import taboolib.common.platform.command.mainCommand
-import taboolib.common.platform.command.player
 import taboolib.common.platform.command.subCommand
-import taboolib.common.platform.function.submitAsync
 
 @CommandHeader(
     name = "lithiumcarbon-debug",
-    aliases = ["cttdebug"],
+    aliases = ["li2co3debug", "lcdebug"],
     permission = "lithiumcarbon.command.debug",
     description = "Debug Command for LithiumCarbon.",
     permissionMessage = "",
     permissionDefault = PermissionDefault.OP,
     newParser = false,
 )
-object ChoTenDebugCommand {
+object LithiumCarbonDebugCommand {
 
     @CommandBody
     val main = mainCommand {

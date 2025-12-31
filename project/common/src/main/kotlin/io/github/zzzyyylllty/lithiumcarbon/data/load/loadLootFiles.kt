@@ -2,28 +2,33 @@ package io.github.zzzyyylllty.lithiumcarbon.data.load
 
 import io.github.zzzyyylllty.lithiumcarbon.LithiumCarbon.config
 import io.github.zzzyyylllty.lithiumcarbon.LithiumCarbon.lootTemplates
+import io.github.zzzyyylllty.lithiumcarbon.data.LootItem
 import io.github.zzzyyylllty.lithiumcarbon.data.LootPool
 import io.github.zzzyyylllty.lithiumcarbon.data.LootTable
 import io.github.zzzyyylllty.lithiumcarbon.data.LootTemplate
 import io.github.zzzyyylllty.lithiumcarbon.data.LootTemplateOptions
+import io.github.zzzyyylllty.lithiumcarbon.data.Loots
 import io.github.zzzyyylllty.lithiumcarbon.logger.infoL
 import io.github.zzzyyylllty.lithiumcarbon.logger.severeL
 import io.github.zzzyyylllty.lithiumcarbon.logger.warningL
 import io.github.zzzyyylllty.lithiumcarbon.util.devLog
+import io.github.zzzyyylllty.lithiumcarbon.util.toBooleanTolerance
+import org.bukkit.entity.Item
 
 // import org.yaml.snakeyaml.Yaml
 import taboolib.common.platform.function.getDataFolder
 import taboolib.common.platform.function.releaseResourceFile
+import taboolib.common5.compileJS
 import java.io.File
 import kotlin.collections.forEach
 import kotlin.collections.set
 
 
 fun loadLootFiles() {
-    infoL("LoreFormat_Load")
-    if (!File(getDataFolder(), "lore-formats").exists()) {
-        warningL("LoreFormat_Load_Regen")
-        releaseResourceFile("lore-formats/loreGenerator.yml")
+    infoL("LootLoad")
+    if (!File(getDataFolder(), "loots").exists()) {
+        warningL("LootRegen")
+        releaseResourceFile("loots/test.yml")
     }
     val files = File(getDataFolder(), "lore-formats").listFiles()
     for (file in files) {
@@ -48,7 +53,7 @@ fun loadLootFile(file: File) {
         if (map != null) for (it in map.entries) {
             val key = it.key
             val value = map[key]
-            loadLoot(key, value as Map<String, Any?>)
+            (value as Map<String, Any?>?)?.let { arg -> loadLoot(key, arg) }
         } else {
             devLog("Map is null, skipping.")
         }
@@ -93,11 +98,44 @@ fun loadLoot(key: String, arg: Map<String, Any?>) {
 
     for (pool in rawPools) {
         if (pool == null) continue
-        val roll = pool["roll"] as? Int? ?: 1
+        val rolls = (pool["rolls"] ?: pool["roll"]) as? Int? ?: 1
+        val loots = (pool["loots"] ?: pool["loot"]) as? List<LinkedHashMap<String, Any?>?>
+        val loadedLoots = mutableListOf<Loots>()
+        devLog("rolls: $rolls")
+        devLog("loots: $loots")
+        loots?.forEach { it ->
+
+            val loadedItems = mutableListOf<LootItem>()
+
+            val displayItem = c.getItem(pool["display"])
+
+            val items = pool["items"] as? List<Any?>?
+
+            if (items != null) for (item in items) {
+                if (item != null) c.getItem(item)?.let { element -> loadedItems.add(element) }
+            }
+
+            if (it != null) {
+                loadedLoots.add(
+                    Loots(
+                        displayItem = displayItem,
+                        exps = (it["exp"] ?: it["exps"]).toString(),
+                        items = loadedItems,
+                        kether = it["javascript"].asListEnhanced(),
+                        javaScript = it["javascript"].asListedStringEnhanced()?.compileJS(),
+                        searchTime = it["search-time"].toString(),
+                        skipSearch = it["skip-search"]?.toBooleanTolerance() ?: false,
+                        weight = it["weight"].toString()
+                    )
+                )
+            } else {
+                devLog("Loot is null, skipping...")
+            }
+        }
     }
 
     val lootTable = LootTable(
-        pools = TODO(),
+        pools = loadedPools,
         agents = c.getAgents(arg)
     )
 

@@ -14,15 +14,15 @@ import taboolib.common.platform.command.subCommand
 import taboolib.common.platform.function.submitAsync
 
 @CommandHeader(
-    name = "chotenapi",
-    aliases = ["itemapi","needyitemapi","depazapi"],
+    name = "li2co3api",
+    aliases = ["li2co3debug", "lcapi"],
     permission = "lithiumcarbon.command.api",
     description = "API Command of DepazItems.",
     permissionMessage = "",
     permissionDefault = PermissionDefault.OP,
     newParser = false,
 )
-object ChoTenApiCommand {
+object LithiumCarbonApiCommand {
 
     @CommandBody
     val main = mainCommand {

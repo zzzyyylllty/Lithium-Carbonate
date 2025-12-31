@@ -26,7 +26,7 @@ import taboolib.module.nms.MinecraftVersion.minecraftVersion
     permissionDefault = PermissionDefault.OP,
     newParser = false,
 )
-object MainCommand {
+object LithiumCarbonMainCommand {
 
     @CommandBody
     val about = subCommand {
@@ -56,7 +56,7 @@ object MainCommand {
         createModernHelper()
     }
     @CommandBody
-    val debug = ChoTenDebugCommand
+    val debug = LithiumCarbonDebugCommand
 //    @CommandBody
 //    val Data = ChoTenDataCommand
 
@@ -89,7 +89,7 @@ fun CommandComponent.createModernHelper(checkPermissions: Boolean = true) {
             when (compound) {
                 is CommandComponentLiteral -> {
                     if (size == 1) {
-                        builder.append(" ").append("<gradient:#66ccff:#ffffff>${compound.aliases[0]}<>")
+                        builder.append(" ").append("<gradient:#ccaaff:#9900ff:#ff0099>${compound.aliases[0]}<>")
                     } else {
                         newline = true
                         builder.appendLine()
@@ -103,7 +103,7 @@ fun CommandComponent.createModernHelper(checkPermissions: Boolean = true) {
                         } else {
                             builder.append("<gradient:#888888:#cccccc>└── </gradient>")
                         }
-                        builder.append("<gradient:#66ccff:#ffffff>${compound.aliases[0]}</gradient>")
+                        builder.append("<gradient:#ccaaff:#9900ff:#ff0099>${compound.aliases[0]}</gradient>")
                     }
                     option = false
                     comment = compound.aliases[0].length

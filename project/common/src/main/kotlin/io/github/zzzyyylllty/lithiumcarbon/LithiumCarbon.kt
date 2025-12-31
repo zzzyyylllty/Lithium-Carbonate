@@ -5,6 +5,7 @@ import io.github.zzzyyylllty.lithiumcarbon.data.LootLocation
 import io.github.zzzyyylllty.lithiumcarbon.data.LootTemplate
 import io.github.zzzyyylllty.lithiumcarbon.data.PlayerData
 import io.github.zzzyyylllty.lithiumcarbon.data.define.LootDefines
+import io.github.zzzyyylllty.lithiumcarbon.data.load.loadLootFiles
 import io.github.zzzyyylllty.lithiumcarbon.event.LithiumCarbonReloadEvent
 import org.bukkit.command.CommandSender
 import taboolib.common.platform.Plugin
@@ -39,13 +40,6 @@ object LithiumCarbon : Plugin() {
 
     var devMode = true
 
-    /*
-    fun compat() {
-        if (Bukkit.getPluginManager().getPlugin("Chemdah") != null) {
-            connectChemdah()
-        }
-    }*/
-
 
     @SubscribeEvent
     fun lang(event: PlayerSelectLocaleEvent) {
@@ -62,6 +56,11 @@ object LithiumCarbon : Plugin() {
 
             config.reload()
             devMode = config.getBoolean("debug",false)
+            lootCaches.clear()
+            lootDefines.clear()
+            lootTemplates.clear()
+            lootMap.clear()
+            loadLootFiles()
             LithiumCarbonReloadEvent().call()
         }
     }

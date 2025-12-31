@@ -60,7 +60,7 @@ test_loot:
       regex: true # Use regex in region validate, ex world: "level_.+"
       blocks:
         - CHEST
-        - hopper
+        - HOPPER
     region_d:
       type: specify
       locations:
@@ -76,8 +76,7 @@ test_loot:
   options:
     add-lore: |
       Click to claim!
-#    overwrite_lore_to_item: |
-#      Click to claim!
+#    remove-lore: true
   pools:
     - rolls: 5
     # conditions: {}
@@ -89,9 +88,9 @@ test_loot:
             ke:
               all [ check player name != "AmeChan" check player name != "ChoTenChan" ]
 
-          # External item like: craftengine::item:topaz, mmoitems::MATERIAL:RARE_DIAMOND
-          # https://github.com/ProjectUnified/UniItem
-          # Note: UniItem dependency may not be latest. If you have issues with external items,
+          # External item like: craftengine:item:topaz, mmoitems:MATERIAL:RARE_DIAMOND
+          # Supported plugins: https://github.com/jhqwqmc/ItemBridge
+          # Note: ItemBridge dependency may not be latest. If you have issues with external items,
           # Please contact me at discord / qq or open an issue.
           items:
             - item: minecraft:glass
@@ -100,7 +99,10 @@ test_loot:
           exp: 3~5 # exp: "{{ random 1 to 10 }}"
 
           weight: 3.14 # Supported decimal
-          # dynamic-weight: "{{ random 1 to 10 }}" for dynamic weight. (do not forget remove weight)
+          # weight: "{{ random 1 to 10 }}" for dynamic weight.
+
+          search-time: 1000 # MS
+          skip-search: false
 
           # Displayed item. This is optional. if leave a blank will use reward item.
           display:
@@ -109,9 +111,13 @@ test_loot:
               An visual line here
               If you look missing texture here, it's normal.
               Just remove components & tooltip_style in your loot config to fix.
-            component: # Supported 1.20.5+ DataComponent
+            components: # Supported 1.20.5+ DataComponent
               tooltip_style: default:topaz
 
+          kether: |
+            minitell "hello!"
+          javascript: |
+            player.sendMessage(mmUtil.deserialize("<rainbow>Hello!"))
 
           agent:
             onClaim:

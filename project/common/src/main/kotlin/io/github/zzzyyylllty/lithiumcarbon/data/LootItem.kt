@@ -1,13 +1,12 @@
 package io.github.zzzyyylllty.lithiumcarbon.data
 
-import io.github.projectunified.uniitem.all.AllItemProvider
-import io.github.projectunified.uniitem.api.ItemKey
 import io.github.zzzyyylllty.embiancomponent.EmbianComponent
 import io.github.zzzyyylllty.lithiumcarbon.function.kether.evalKether
 import io.github.zzzyyylllty.lithiumcarbon.function.kether.evalKetherValue
 import io.github.zzzyyylllty.lithiumcarbon.function.kether.parseKether
 import io.github.zzzyyylllty.lithiumcarbon.logger.severeL
 import io.github.zzzyyylllty.lithiumcarbon.logger.warningL
+import io.github.zzzyyylllty.lithiumcarbon.util.ExternalItemHelper
 import io.github.zzzyyylllty.lithiumcarbon.util.SertralineHelper
 import io.github.zzzyyylllty.lithiumcarbon.util.VersionHelper
 import io.github.zzzyyylllty.lithiumcarbon.util.asNumberFormat
@@ -23,13 +22,13 @@ import taboolib.library.xseries.XItemStack
 import taboolib.module.nms.NMSItemTag.Companion.asNMSCopy
 import kotlin.math.roundToInt
 
-private val specialItemNamespace = listOf("minecraft", "mc")
-val provider: AllItemProvider by lazy { AllItemProvider() }
+private val specialItemNamespace = listOf("minecraft", "mc", "vanilla")
 val componentHelper by lazy { if (VersionHelper().isOrAbove12005()) EmbianComponent.SafetyComponentSetter else null }
 
 data class LootItem(
-    val namespaceID: String,
-    val parameters: LinkedHashMap<String, Any?>,
+    val source: String,
+    val item: String,
+    val parameters: LinkedHashMap<String, Any?>? = null,
     val components: LinkedHashMap<String, Any?>? = null,
     val amount: String? = "1",
 ) {
@@ -37,9 +36,10 @@ data class LootItem(
 
         val amount = overrideAmount ?: amount.asNumberFormat(player).roundToInt()
 
-        val split = if (namespaceID.contains("{")) namespaceID.parseKether(player, defaultData).split("::".toRegex()) else listOf("mc", "grass_block")
-        val source = if (split.size >= 2) split.first().lowercase() else "mc"
-        val item = split.last()
+//        val split = (if (namespaceID.contains("{")) namespaceID.parseKether(player, defaultData).split(":") else listOf("mc", "grass_block")).toMutableList()
+//        val source = if (split.size >= 2) split.first().lowercase() else "mc"
+//        split.removeFirst()
+//        val item = split.joinToString(":")
         var itemStack: ItemStack? = null
 
         try {
@@ -47,32 +47,34 @@ data class LootItem(
 
                 when (source) {
                     "mc", "minecraft", "vanilla" -> {
+                        val parameters = (parameters ?: mapOf<String, Any?>()).toMutableMap()
+                        parameters["material"] = item
                         XItemStack.deserialize(parameters)
                     }
 
-                    "sertraline", "sql" -> {
-                        SertralineHelper.buildItem(item, player, amount)
-                    }
-
-                    else -> throw IllegalArgumentException("Unsupported Special LootItem format: $source-$item")
+                    else -> null
                 }
 
             } else {
-                player?.let { provider.item(ItemKey(source, item), it) } ?: provider.item(ItemKey(source, item))
+                if (player != null) {
+                    ExternalItemHelper.itemBridge?.build(source, player, item)?.get()
+                } else {
+                    ExternalItemHelper.itemBridge?.build(source, item)?.get()
+                }
             }
             if (providedItem == null) {
-                severeL("ErrorItemGenerationFailedNull", source, item, namespaceID)
+                severeL("ErrorItemGenerationFailedNull", source, item)
                 return ItemStack(Material.GRASS_BLOCK)
             }
             itemStack = providedItem
 
         } catch (e: Exception) {
-            severeL("ErrorItemGenerationFailed", source, item, namespaceID)
+            severeL("ErrorItemGenerationFailed", source, item)
             e.printStackTrace()
             return ItemStack(Material.GRASS_BLOCK)
         }
 
-        if (parameters.isNotEmpty()) {
+        if (parameters?.isNotEmpty() ?: false) {
 
             parameters["name"] ?.let { itemStack.itemMeta.displayName(it.toString().toComponent()) }
             parameters["display_name"] ?.let { itemStack.itemMeta.displayName(it.toString().toComponent()) }
