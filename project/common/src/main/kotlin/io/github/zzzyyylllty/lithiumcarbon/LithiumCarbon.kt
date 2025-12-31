@@ -1,5 +1,6 @@
 package io.github.zzzyyylllty.lithiumcarbon
 
+import io.github.zzzyyylllty.lithiumcarbon.LithiumCarbon.reloadCustomConfig
 import io.github.zzzyyylllty.lithiumcarbon.data.LootInstance
 import io.github.zzzyyylllty.lithiumcarbon.data.LootLocation
 import io.github.zzzyyylllty.lithiumcarbon.data.LootTemplate
@@ -7,6 +8,9 @@ import io.github.zzzyyylllty.lithiumcarbon.data.define.LootDefines
 import io.github.zzzyyylllty.lithiumcarbon.data.load.loadLootFiles
 import io.github.zzzyyylllty.lithiumcarbon.event.LithiumCarbonReloadEvent
 import org.bukkit.command.CommandSender
+import taboolib.common.LifeCycle
+import taboolib.common.env.RuntimeDependency
+import taboolib.common.platform.Awake
 import taboolib.common.platform.Plugin
 import taboolib.common.platform.event.SubscribeEvent
 import taboolib.common.platform.function.console
@@ -20,7 +24,10 @@ import taboolib.module.lang.event.PlayerSelectLocaleEvent
 import taboolib.module.lang.event.SystemSelectLocaleEvent
 import java.time.format.DateTimeFormatter
 
-
+//@RuntimeDependency(
+//    value = "!com.google.code.gson:gson:2.10.1",
+//    relocate = ["!com.google.gson", "!io.github.zzzyyylllty.lithiumcarbon.library.google.gson"]
+//)
 object LithiumCarbon : Plugin() {
 
 
@@ -70,4 +77,9 @@ object LithiumCarbon : Plugin() {
     }
 
 
+}
+
+@Awake(LifeCycle.ENABLE)
+fun onEnable() {
+    reloadCustomConfig(false)
 }

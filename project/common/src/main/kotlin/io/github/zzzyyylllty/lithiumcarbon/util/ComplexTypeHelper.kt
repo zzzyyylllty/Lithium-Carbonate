@@ -1,7 +1,6 @@
 package io.github.zzzyyylllty.lithiumcarbon.util
 
 import com.google.common.base.Strings
-import io.github.zzzyyylllty.sertraline.data.Action
 import org.bukkit.Color
 import taboolib.library.xseries.XItemStack
 import java.util.*
@@ -15,7 +14,6 @@ import kotlin.text.substring
 import kotlin.text.toBooleanStrictOrNull
 import kotlin.text.toInt
 import kotlin.toString
-
 
 fun Any.toBooleanTolerance(): Boolean {
     return when (this) {

@@ -66,11 +66,11 @@ object ConfigUtil {
 
         if (input == null) return null
 
-        val agentsRaw = if (input !is Map<*, *>) return null else input["agents"] ?: input["agent"]
+        val agentsRaw = (if (input !is Map<*, *>) return null else input["agents"] ?: input["agent"])  as LinkedHashMap<String, LinkedHashMap<String, Any?>>? ?: return null
 
         val agents = LinkedHashMap<String, Agent>()
 
-        for (agentPart in agentsRaw as LinkedHashMap<String, LinkedHashMap<String, Any?>>) {
+        for (agentPart in agentsRaw) {
             val agentName = agentPart.key
             val agentsPartRaw = agentPart.value
 

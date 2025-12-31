@@ -3,8 +3,8 @@ package io.github.zzzyyylllty.lithiumcarbon.util
 import cn.gtemc.itembridge.api.ItemBridge
 import cn.gtemc.itembridge.api.context.BuildContext
 import cn.gtemc.itembridge.core.BukkitItemBridge
-import io.github.zzzyyylllty.sertraline.logger.infoS
-import io.github.zzzyyylllty.sertraline.logger.severeS
+import io.github.zzzyyylllty.lithiumcarbon.logger.infoS
+import io.github.zzzyyylllty.lithiumcarbon.logger.severeS
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 

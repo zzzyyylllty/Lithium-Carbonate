@@ -1,7 +1,7 @@
 package io.github.zzzyyylllty.lithiumcarbon.data
 
 import io.github.zzzyyylllty.lithiumcarbon.function.kether.evalKether
-import io.github.zzzyyylllty.sertraline.util.toBooleanTolerance
+import io.github.zzzyyylllty.lithiumcarbon.util.toBooleanTolerance
 import org.bukkit.entity.Player
 import javax.script.CompiledScript
 import javax.script.SimpleBindings

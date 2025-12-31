@@ -8,7 +8,7 @@ import io.github.zzzyyylllty.lithiumcarbon.function.javascript.ItemStackUtil
 import io.github.zzzyyylllty.lithiumcarbon.function.javascript.PlayerUtil
 import io.github.zzzyyylllty.lithiumcarbon.function.javascript.ThreadUtil
 import io.github.zzzyyylllty.lithiumcarbon.function.kether.evalKether
-import io.github.zzzyyylllty.lithiumcarbon.util.jsonUtils
+//import io.github.zzzyyylllty.lithiumcarbon.util.jsonUtils
 import io.github.zzzyyylllty.lithiumcarbon.util.minimessage.mmJsonUtil
 import io.github.zzzyyylllty.lithiumcarbon.util.minimessage.mmLegacyAmpersandUtil
 import io.github.zzzyyylllty.lithiumcarbon.util.minimessage.mmLegacySectionUtil
@@ -32,7 +32,7 @@ fun registerExternalData() {
             "mmJsonUtil" to mmJsonUtil,
             "mmLegacySectionUtil" to mmLegacySectionUtil,
             "mmLegacyAmpersandUtil" to mmLegacyAmpersandUtil,
-            "jsonUtils" to jsonUtils,
+//            "jsonUtils" to jsonUtils,
             "ItemStackUtil" to ItemStackUtil,
             "EventUtil" to EventUtil,
             "ThreadUtil" to ThreadUtil,

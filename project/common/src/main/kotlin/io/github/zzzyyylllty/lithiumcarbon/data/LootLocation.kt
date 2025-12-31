@@ -1,7 +1,7 @@
 package io.github.zzzyyylllty.lithiumcarbon.data
 
 import com.sk89q.worldedit.bukkit.BukkitAdapter
-import io.github.zzzyyylllty.sertraline.logger.severeL
+import io.github.zzzyyylllty.lithiumcarbon.logger.severeL
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.util.Vector

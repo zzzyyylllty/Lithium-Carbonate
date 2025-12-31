@@ -1,0 +1,57 @@
+package io.github.zzzyyylllty.lithiumcarbon.function
+
+import io.github.zzzyyylllty.lithiumcarbon.LithiumCarbon.console
+import io.github.zzzyyylllty.lithiumcarbon.LithiumCarbon.consoleSender
+import io.github.zzzyyylllty.lithiumcarbon.logger.sendStringAsComponent
+import io.github.zzzyyylllty.lithiumcarbon.util.VersionHelper
+import org.bukkit.command.CommandSender
+import taboolib.common.LifeCycle
+import taboolib.common.platform.Awake
+import taboolib.common.platform.function.pluginVersion
+import taboolib.common.platform.function.runningPlatform
+import taboolib.module.lang.asLangText
+import taboolib.module.nms.MinecraftVersion.versionId
+import taboolib.platform.util.asLangText
+import kotlin.collections.joinToString
+
+@Awake(LifeCycle.ENABLE)
+fun launchText() {
+
+    val premiumDisplayName = if (VersionHelper().isLi2CO3Premium) {
+        "<gradient:yellow:gold>" + console.asLangText("PremiumVersion")
+    } else {
+        "<gradient:green:aqua>" + console.asLangText("FreeVersion")
+    }
+
+    val specialThanks =
+        listOf("MAORI", "NK_XingChen", "Jesuzi", "Blue_ruins(BlueIce)", "Zero", "TheAchu", "CedricHunsen")
+
+    consoleSender.sendStringAsComponent(" ")
+    consoleSender.sendStringAsComponent("""<gradient:#ffffff:#ffaaff> ___         __       _______      ______       ______      _______   """)
+    consoleSender.sendStringAsComponent("""<gradient:#ffffff:#ffaaff> |"  |       |" \     /"     "\    /" _  "\     /    " \    /" __   ) """)
+    consoleSender.sendStringAsComponent("""<gradient:#ffffff:#ffaaff> ||  |       ||  |   (__/\    :)  (: ( \___)   // ____  \  (__/ _) ./ """)
+    consoleSender.sendStringAsComponent("""<gradient:#ffffff:#ffaaff> |:  |       |:  |       / ___/    \/ \       /  /    ) :)     /  //  """)
+    consoleSender.sendStringAsComponent("""<gradient:#ffffff:#ffaaff> \  |___    |.  |      // \___    //  \ _   (: (____/ //   __ \_ \\   """)
+    consoleSender.sendStringAsComponent("""<gradient:#ffffff:#ffaaff> ( \_|:  \   /\  |\    (:  /  "\  (:   _) \   \        /   (: \__) :\ """)
+    consoleSender.sendStringAsComponent("""<gradient:#ffffff:#ffaaff> \_______) (__\_|_)    \_______)  \_______)   \"_____/     \_______)  """)
+    consoleSender.sendStringAsComponent(" ")
+    consoleSender.sendStringWithPrefix("<dark_aqua>",consoleSender.asLangText("WelcomeSeries"))
+    consoleSender.sendStringWithPrefix("<dark_aqua>",consoleSender.asLangText("DesignBy", "<#ff66cc>AkaCandyKAngel</#ff66cc>"))
+    consoleSender.sendStringWithPrefix("<dark_aqua>",consoleSender.asLangText("SpecialThanks","<aqua>[<dark_aqua>${specialThanks.joinToString("<dark_gray>, </dark_gray>")}<aqua>]"))
+    consoleSender.sendStringWithPrefix("<dark_aqua>",consoleSender.asLangText("PoweredBy", "<#66ccff>TabooLib <gold>6.2"))
+    consoleSender.sendStringAsComponent(" ")
+    consoleSender.sendStringWithPrefix("<#88ccff>", console.asLangText("Welcome1"))
+    consoleSender.sendStringWithPrefix("<#88ccff>", console.asLangText("Welcome2", premiumDisplayName, "${pluginVersion}<reset>", "${runningPlatform.name} - ${versionId}"))
+    consoleSender.sendStringAsComponent(" ")
+    consoleSender.sendStringWithPrefix("<#66bbff>", console.asLangText("Welcome3", "https://github.com/zzzyyylllty"))
+    consoleSender.sendStringWithPrefix("<#66bbff>", console.asLangText("Welcome4", "https://github.com/zzzyyylllty/Lithium-Carbonate"))
+    consoleSender.sendStringWithPrefix("<#66bbff>", console.asLangText("Welcome5", "https://chotengroup.gitbook.io/li2co3"))
+    consoleSender.sendStringAsComponent(" ")
+    if (VersionHelper().isLi2CO3Premium) consoleSender.sendStringWithPrefix("<gradient:red:yellow:green:aqua:light_purple>", console.asLangText("PremiumVersionWelcome", premiumDisplayName))
+    consoleSender.sendStringAsComponent(" ")
+
+}
+
+private fun CommandSender.sendStringWithPrefix(prefix: String, message: String) {
+    this.sendStringAsComponent(prefix + message)
+}

@@ -34,7 +34,7 @@ allowed-all-blocks: false
 # Allowed loot worlds
 # Supported regex
 allowed-worlds:
-  - *
+  - "world.+"
 
 # Bypass allowed-worlds check
 allowed-all-worlds: true

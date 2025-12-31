@@ -34,7 +34,6 @@ import java.io.File
 import kotlin.collections.forEach
 import kotlin.collections.set
 
-
 fun loadLootFiles() {
     infoL("LootLoad")
     if (!File(getDataFolder(), "loots").exists()) {
@@ -63,7 +62,7 @@ fun loadLootFile(file: File) {
         val map = multiExtensionLoader(file)
         if (map != null) for (it in map.entries) {
             val key = it.key
-            val value = map[key]
+            val value = map[key] ?: continue
             (value as Map<String, Any?>?)?.let { arg -> loadLoot(key, arg) }
         } else {
             devLog("Map is null, skipping.")
@@ -83,7 +82,7 @@ fun loadLoot(key: String, arg: Map<String, Any?>) {
     val layoutP = c.getDeep(arg, "display.layout").asListEnhanced() ?: config.getStringList("default-layout")
     val layout = layoutP.ifEmpty { listOf("         ", "         ", "         ") }
 
-    val availableSlots = (c.getDeep(arg, "display.layout") as List<Int>?)?.toMutableList() ?: mutableListOf()
+    val availableSlots = (c.getDeep(arg, "display.available-slots") as List<Int>?)?.toMutableList() ?: mutableListOf()
 
     var currentLine = 0
     if (availableSlots.isEmpty()) {
@@ -172,6 +171,9 @@ fun loadLoot(key: String, arg: Map<String, Any?>) {
     )
 
     val defines = LootDefines(parseDefines(arg))
+
+    devLog("template: $key = $loot")
+    devLog("defines: $key = $defines")
 
     lootTemplates[key] = loot
     lootDefines[key] = defines

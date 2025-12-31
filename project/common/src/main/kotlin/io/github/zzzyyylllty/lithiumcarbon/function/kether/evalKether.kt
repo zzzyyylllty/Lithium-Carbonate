@@ -1,7 +1,6 @@
 package io.github.zzzyyylllty.lithiumcarbon.function.kether
 
-import io.github.zzzyyylllty.sertraline.Sertraline.console
-import io.github.zzzyyylllty.sertraline.Sertraline.ketherScriptCache
+import io.github.zzzyyylllty.lithiumcarbon.LithiumCarbon.console
 import org.bukkit.Bukkit
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player

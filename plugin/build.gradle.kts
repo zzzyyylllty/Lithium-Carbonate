@@ -20,7 +20,7 @@ taboolib {
     // 同时，还需要修改io.github.zzzyyylllty.lithiumcarbon.util.lithiumcarbonLocalDependencyHelper.replaceTestTexts
     relocate("top.maplex.arim","io.github.zzzyyylllty.lithiumcarbon.library.arim")
     relocate("ink.ptms.um","io.github.zzzyyylllty.lithiumcarbon.library.um")
-     relocate("com.google", "io.github.zzzyyylllty.lithiumcarbon.library.google")
+     relocate("!com.google.gson", "!io.github.zzzyyylllty.lithiumcarbon.library.google.gson")
     relocate("com.alibaba", "io.github.zzzyyylllty.lithiumcarbon.library.alibaba")
     relocate("kotlinx.serialization", "kotlinx.serialization170")
     // relocate("de.tr7zw.changeme.nbtapi","io.github.zzzyyylllty.lithiumcarbon.library.nbtapi")

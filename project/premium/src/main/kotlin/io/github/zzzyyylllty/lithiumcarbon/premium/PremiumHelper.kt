@@ -1,4 +1,4 @@
-package io.github.zzzyyylllty.quetiapine.premium
+package io.github.zzzyyylllty.lithiumcarbon.premium
 
 /**
  * It seems you found this.
