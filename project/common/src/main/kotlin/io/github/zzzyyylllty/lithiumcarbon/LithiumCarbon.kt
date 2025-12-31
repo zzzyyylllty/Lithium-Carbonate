@@ -3,7 +3,6 @@ package io.github.zzzyyylllty.lithiumcarbon
 import io.github.zzzyyylllty.lithiumcarbon.data.LootInstance
 import io.github.zzzyyylllty.lithiumcarbon.data.LootLocation
 import io.github.zzzyyylllty.lithiumcarbon.data.LootTemplate
-import io.github.zzzyyylllty.lithiumcarbon.data.PlayerData
 import io.github.zzzyyylllty.lithiumcarbon.data.define.LootDefines
 import io.github.zzzyyylllty.lithiumcarbon.data.load.loadLootFiles
 import io.github.zzzyyylllty.lithiumcarbon.event.LithiumCarbonReloadEvent
@@ -30,13 +29,14 @@ object LithiumCarbon : Plugin() {
 
     val console by lazy { console() }
     val consoleSender by lazy { console.castSafely<CommandSender>()!! }
-    val host by lazy { config.getHost("database") }
-    val dataSource by lazy { host.createDataSource() }
-    val playerDataMap = mutableMapOf<String, PlayerData>()
+//    val host by lazy { config.getHost("database") }
+//    val dataSource by lazy { host.createDataSource() }
+//    val playerDataMap = mutableMapOf<String, PlayerData>()
     val lootMap = mutableMapOf<LootLocation, LootInstance>()
     val lootTemplates = mutableMapOf<String, LootTemplate>()
     val lootDefines = mutableMapOf<String, LootDefines>()
     val lootCaches = mutableMapOf<LootLocation, LootTemplate>()
+    val allowedWorlds = mutableListOf<Regex>()
 
     var devMode = true
 
@@ -60,7 +60,11 @@ object LithiumCarbon : Plugin() {
             lootDefines.clear()
             lootTemplates.clear()
             lootMap.clear()
+            allowedWorlds.clear()
             loadLootFiles()
+            for (world in config.getList("allowed-worlds") ?: listOf("*")) {
+                allowedWorlds.add(world.toString().toRegex())
+            }
             LithiumCarbonReloadEvent().call()
         }
     }

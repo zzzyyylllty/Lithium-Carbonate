@@ -6,6 +6,7 @@ import io.github.zzzyyylllty.lithiumcarbon.util.asNumberFormat
 import io.github.zzzyyylllty.lithiumcarbon.util.devLog
 import org.bukkit.entity.Player
 import javax.script.CompiledScript
+import kotlin.math.roundToLong
 
 data class LootTable(
     val pools: List<LootPool>,
@@ -96,7 +97,7 @@ data class Loots(
             items = items,
             kether = kether,
             javaScript = javaScript,
-            searchTime = if (searchTime.contains("{")) searchTime.parseKether(player).toLong() else searchTime.toLong(),
+            searchTime = searchTime.asNumberFormat(player).roundToLong(),
             skipSearch = skipSearch
         )
     }

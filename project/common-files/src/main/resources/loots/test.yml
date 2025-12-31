@@ -19,7 +19,7 @@ test_loot:
     # Leave a null for automatic find spaces in layout.
     # available-slots: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26]
 
-  define:
+  defines:
 #    region_a:
 #      type: worldguard
 #      region: sample_region
@@ -63,9 +63,11 @@ test_loot:
         - HOPPER
     region_d:
       type: specify
+      # For performance reasons, only vector definitions are supported here.
       locations:
-        - 'world 114 51 4'
+        - '114 51 4'
       # Only world supports regex.
+      world: world
       regex: true
       regenerate:
         # If this block is air, regenerate it on reload & WorldLoadEvent.
@@ -94,7 +96,7 @@ test_loot:
           # Please contact me at discord / qq or open an issue.
           items:
             - item: minecraft:glass
-          # component: {}
+            # component: {}
 
           exp: 3~5 # exp: "{{ random 1 to 10 }}"
 

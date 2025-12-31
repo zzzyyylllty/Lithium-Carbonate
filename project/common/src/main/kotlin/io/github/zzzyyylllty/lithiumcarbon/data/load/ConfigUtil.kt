@@ -2,6 +2,7 @@ package io.github.zzzyyylllty.lithiumcarbon.data.load
 
 import io.github.zzzyyylllty.lithiumcarbon.data.Agent
 import io.github.zzzyyylllty.lithiumcarbon.data.Agents
+import io.github.zzzyyylllty.lithiumcarbon.data.Condition
 import io.github.zzzyyylllty.lithiumcarbon.data.LootItem
 import io.github.zzzyyylllty.lithiumcarbon.data.defaultData
 import io.github.zzzyyylllty.lithiumcarbon.function.kether.parseKether
@@ -80,10 +81,29 @@ object ConfigUtil {
                 asyncJs = (agentsPartRaw["async_js"] ?: agentsPartRaw["ASYNC_JS"] ?: agentsPartRaw["asyncjs"] ?: agentsPartRaw["ASYNCJS"] ?: agentsPartRaw["js_async"] ?: agentsPartRaw["JS_ASYNC"] ?: agentsPartRaw["jsasync"] ?: agentsPartRaw["JSASYNC"]).asListedStringEnhanced()?.compileJS(),
                 kether = (agentsPartRaw["ke"] ?: agentsPartRaw["KE"] ?: agentsPartRaw["KETHER"]?: agentsPartRaw["kether"]).asListEnhanced(),
                 asyncKe = (agentsPartRaw["ke"] ?: agentsPartRaw["KE"] ?: agentsPartRaw["KETHER"]?: agentsPartRaw["kether"]).asListEnhanced(),
-                )
+            )
         }
 
         return Agents(agents)
+    }
+    fun getConditions(input: Any?): Condition? {
+
+        if (input == null) return null
+
+        val conditionsRaw = if (input !is Map<*, *>) return null else input["conditions"] ?: input["condition"]
+
+        return if (conditionsRaw is String || conditionsRaw is List<*>) {
+            Condition(
+                kether = conditionsRaw.asListEnhanced()
+            )
+        } else {
+            val map = conditionsRaw as? Map<*, *>? ?: return null
+            Condition(
+                kether = (map["ke"] ?: map["KE"] ?: map["KETHER"]?: map["kether"]).asListEnhanced(),
+                js = (map["js"] ?: map["JS"] ?: map["javascript"] ?: map["JAVASCRIPT"]).asListedStringEnhanced()?.compileJS()
+            )
+        }
+
     }
     fun existDeep(input: Any?, location: String): Boolean {
         if (input == null || location.isEmpty()) return false

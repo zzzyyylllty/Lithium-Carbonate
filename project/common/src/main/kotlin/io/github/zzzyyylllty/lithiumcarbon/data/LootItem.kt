@@ -7,7 +7,6 @@ import io.github.zzzyyylllty.lithiumcarbon.function.kether.parseKether
 import io.github.zzzyyylllty.lithiumcarbon.logger.severeL
 import io.github.zzzyyylllty.lithiumcarbon.logger.warningL
 import io.github.zzzyyylllty.lithiumcarbon.util.ExternalItemHelper
-import io.github.zzzyyylllty.lithiumcarbon.util.SertralineHelper
 import io.github.zzzyyylllty.lithiumcarbon.util.VersionHelper
 import io.github.zzzyyylllty.lithiumcarbon.util.asNumberFormat
 import io.github.zzzyyylllty.lithiumcarbon.util.componentUtil
@@ -40,7 +39,7 @@ data class LootItem(
 //        val source = if (split.size >= 2) split.first().lowercase() else "mc"
 //        split.removeFirst()
 //        val item = split.joinToString(":")
-        var itemStack: ItemStack? = null
+        var itemStack: ItemStack?
 
         try {
             val providedItem = if (specialItemNamespace.contains(source)) {
@@ -80,7 +79,7 @@ data class LootItem(
             parameters["display_name"] ?.let { itemStack.itemMeta.displayName(it.toString().toComponent()) }
             parameters["custom_name"] ?.let { itemStack.itemMeta.customName(it.toString().toComponent()) }
             parameters["item_name"] ?.let { itemStack.itemMeta.itemName(it.toString().toComponent()) }
-            parameters["lore"] ?.let { itemStack.lore((it as List<String>).toComponent()) }
+            (parameters["lore"] as List<String>?)?.let { itemStack.lore((it).toComponent()) }
 
         }
         if (components != null && components.isNotEmpty()) {

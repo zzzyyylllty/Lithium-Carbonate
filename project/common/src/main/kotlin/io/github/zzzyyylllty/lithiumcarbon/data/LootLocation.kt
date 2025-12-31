@@ -1,6 +1,7 @@
 package io.github.zzzyyylllty.lithiumcarbon.data
 
 import com.sk89q.worldedit.bukkit.BukkitAdapter
+import io.github.zzzyyylllty.sertraline.logger.severeL
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.util.Vector
@@ -36,6 +37,27 @@ data class LootVector(
 object LocationHelper {
     fun toLocation(world: String,x: Int,y: Int,z: Int): LootLocation {
         return LootLocation(world, LootVector(x,y,z))
+    }
+
+    fun toLocationByString(string: String): LootLocation {
+        val split = string.split(" ")
+        if (split.size <= 3) {
+            severeL("ErrorInvalidLocation")
+            return LootLocation("world", LootVector(0,0,0))
+        }
+        return LootLocation(split[0], LootVector(split[1].toInt(),split[2].toInt(),split[3].toInt()))
+    }
+    fun toVectorByString(string: String): LootVector {
+        val split = string.split(" ")
+        if (split.size <= 2) {
+            severeL("ErrorInvalidVector")
+            return LootVector(0,0,0)
+        }
+        return if (split.size == 3) {
+            LootVector(split[0].toInt(),split[1].toInt(),split[2].toInt())
+        } else {
+            LootVector(split[1].toInt(),split[2].toInt(),split[3].toInt())
+        }
     }
 
     fun toLootLocation(l: Location): LootLocation {

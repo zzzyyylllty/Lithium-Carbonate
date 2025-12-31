@@ -13,13 +13,13 @@ val prefix = "[<gradient:#ccaaff:#9900ff:#ff0099>LithiumCarbon</gradient>]"
 
 
 fun infoL(node: String,vararg args: Any) {
-    LithiumCarbon.consoleSender.infoS(LithiumCarbon.console.asLangText(node,args))
+    LithiumCarbon.consoleSender.infoS(LithiumCarbon.console.asLangText(node,*args))
 }
 fun severeL(node: String,vararg args: Any) {
-    LithiumCarbon.consoleSender.severeS(LithiumCarbon.console.asLangText(node,args))
+    LithiumCarbon.consoleSender.severeS(LithiumCarbon.console.asLangText(node,*args))
 }
 fun warningL(node: String,vararg args: Any) {
-    LithiumCarbon.consoleSender.warningS(LithiumCarbon.console.asLangText(node,args))
+    LithiumCarbon.consoleSender.warningS(LithiumCarbon.console.asLangText(node,*args))
 }
 
 fun CommandSender?.fineS(message: String, bothSendConsole: Boolean = false) {

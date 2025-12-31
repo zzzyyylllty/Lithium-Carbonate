@@ -1,13 +1,24 @@
 package io.github.zzzyyylllty.lithiumcarbon.data.load
 
 import io.github.zzzyyylllty.lithiumcarbon.LithiumCarbon.config
+import io.github.zzzyyylllty.lithiumcarbon.LithiumCarbon.lootDefines
 import io.github.zzzyyylllty.lithiumcarbon.LithiumCarbon.lootTemplates
+import io.github.zzzyyylllty.lithiumcarbon.data.LocationHelper
 import io.github.zzzyyylllty.lithiumcarbon.data.LootItem
+import io.github.zzzyyylllty.lithiumcarbon.data.LootLocation
 import io.github.zzzyyylllty.lithiumcarbon.data.LootPool
 import io.github.zzzyyylllty.lithiumcarbon.data.LootTable
 import io.github.zzzyyylllty.lithiumcarbon.data.LootTemplate
 import io.github.zzzyyylllty.lithiumcarbon.data.LootTemplateOptions
+import io.github.zzzyyylllty.lithiumcarbon.data.LootVector
 import io.github.zzzyyylllty.lithiumcarbon.data.Loots
+import io.github.zzzyyylllty.lithiumcarbon.data.define.LootDefine
+import io.github.zzzyyylllty.lithiumcarbon.data.define.LootDefines
+import io.github.zzzyyylllty.lithiumcarbon.data.define.SpecifyDefine
+import io.github.zzzyyylllty.lithiumcarbon.data.define.SquareDefine
+import io.github.zzzyyylllty.lithiumcarbon.data.define.WGDefine
+import io.github.zzzyyylllty.lithiumcarbon.data.define.WorldDefine
+import io.github.zzzyyylllty.lithiumcarbon.data.load.ConfigUtil.getConditions
 import io.github.zzzyyylllty.lithiumcarbon.logger.infoL
 import io.github.zzzyyylllty.lithiumcarbon.logger.severeL
 import io.github.zzzyyylllty.lithiumcarbon.logger.warningL
@@ -30,7 +41,7 @@ fun loadLootFiles() {
         warningL("LootRegen")
         releaseResourceFile("loots/test.yml")
     }
-    val files = File(getDataFolder(), "lore-formats").listFiles()
+    val files = File(getDataFolder(), "loots").listFiles()
     for (file in files) {
         // If directory load file in it...
         if (file.isDirectory) file.listFiles()?.forEach {
@@ -45,7 +56,7 @@ fun loadLootFile(file: File) {
     if (file.isDirectory) file.listFiles()?.forEach {
         loadLootFile(it)
     } else {
-        if (!checkRegexMatch(file.name, (config["file-load.lore-format"] ?: ".*").toString())) {
+        if (!checkRegexMatch(file.name, (config["file-load.loots"] ?: ".*").toString())) {
             devLog("${file.name} not match regex, skipping...")
             return
         }
@@ -98,7 +109,7 @@ fun loadLoot(key: String, arg: Map<String, Any?>) {
 
     for (pool in rawPools) {
         if (pool == null) continue
-        val rolls = (pool["rolls"] ?: pool["roll"]) as? Int? ?: 1
+        val rolls = (pool["rolls"] ?: pool["roll"] ?: "1").toString()
         val loots = (pool["loots"] ?: pool["loot"]) as? List<LinkedHashMap<String, Any?>?>
         val loadedLoots = mutableListOf<Loots>()
         devLog("rolls: $rolls")
@@ -132,6 +143,15 @@ fun loadLoot(key: String, arg: Map<String, Any?>) {
                 devLog("Loot is null, skipping...")
             }
         }
+
+        loadedPools.add(
+            LootPool(
+                rolls = rolls,
+                conditions = c.getConditions(pool),
+                loots = loadedLoots,
+                agent = c.getAgents(pool)
+            )
+        )
     }
 
     val lootTable = LootTable(
@@ -150,5 +170,142 @@ fun loadLoot(key: String, arg: Map<String, Any?>) {
         agents = c.getAgents(arg),
         options = options
     )
+
+    val defines = LootDefines(parseDefines(arg))
+
     lootTemplates[key] = loot
+    lootDefines[key] = defines
+}
+
+@Suppress("UNCHECKED_CAST")
+fun parseDefines(arg: Map<String, Any?>): LinkedHashMap<String, LootDefine> {
+    val definesRaw = (arg["defines"] ?: arg["define"])
+    val definesMap = linkedMapOf<String, Any?>()
+    when (definesRaw) {
+        is List<*> -> {
+            var int = 0
+            definesRaw.forEach { def ->
+                int++
+                definesMap[int.toString()] = (def as LinkedHashMap<String, Any?>)
+            }
+        }
+        is LinkedHashMap<*, *> -> {
+            definesRaw.forEach { def ->
+                definesMap[def.key.toString()] = def.value
+            }
+        }
+        else -> return linkedMapOf()
+    }
+
+    val result = linkedMapOf<String, LootDefine>()
+
+    // 辅助扩展方法，将Any?转成List<String>
+    fun Any?.asListEnhanced(): List<String> {
+        return when (this) {
+            is List<*> -> this.filterIsInstance<String>()
+            is String -> listOf(this)
+            else -> emptyList()
+        }
+    }
+
+    // 辅助把字符串列表转成Regex列表
+    fun List<String>.toRegexList(): List<Regex> = map { Regex(it) }
+
+    // 假设你有 parseLootLocation 和 parseLootVector 的方法
+    fun parseLootLocation(str: String): LootLocation {
+        return LocationHelper.toLocationByString(str)
+    }
+
+    fun parseLootVector(str: String): LootVector {
+        return LocationHelper.toVectorByString(str)
+    }
+
+    for ((id, define) in definesMap) {
+        val define = define as LinkedHashMap<String, Any?>? ?: continue
+        val type = define["type"]?.toString()?.lowercase() ?: continue
+        val condition = getConditions(define)
+
+        val blocks = (define["blocks"]?.asListEnhanced() ?: emptyList()).toHashSet()
+
+        // 读取regex标志
+        val regexFlag = (define["regex"] as? Boolean) ?: false
+
+        when (type) {
+            "specify" -> {
+                val locsAny = define["locations"]
+                val locationsMap = LinkedHashMap<String, HashSet<LootVector>>()
+                if (locsAny is LinkedHashMap<*, *>) {
+                    for ((k, v) in locsAny) {
+                        val keyStr = k.toString()
+                        val vecList = when (v) {
+                            is List<*> -> v.filterIsInstance<String>().map { parseLootVector(it) }
+                            is String -> listOf(parseLootVector(v))
+                            else -> emptyList()
+                        }
+                        locationsMap[keyStr] = vecList.toHashSet()
+                    }
+                }
+
+                val world = define["world"].toString().toRegex()
+
+                result[id] = SpecifyDefine(
+                    locations = locationsMap,
+                    worldRegex = world,
+                    blocks = blocks,
+                    condition = condition
+                )
+            }
+
+            "square" -> {
+                val fromStr = define["from"]?.toString() ?: continue
+                val toStr = define["to"]?.toString() ?: continue
+
+                val fromLoc = parseLootLocation(fromStr)
+                val toLoc = parseLootLocation(toStr)
+
+                result[id] = SquareDefine(
+                    from = fromLoc,
+                    to = toLoc,
+                    blocks = blocks,
+                    condition = condition
+                )
+            }
+
+            "worldguard" -> {
+                // regions & regionsRegex
+                val regionsList = (define["regions"] ?: define["region"])?.asListEnhanced() ?: emptyList()
+                val regionsRegex = if (regexFlag) {
+                    (define["regions"]?.asListEnhanced() ?: define["region"]?.asListEnhanced() ?: emptyList()).map { Regex(it) }
+                } else null
+
+                result[id] = WGDefine(
+                    regions = regionsList,
+                    regionsRegex = regionsRegex,
+                    blocks = blocks,
+                    condition = condition
+                )
+            }
+
+            "world" -> {
+                // worlds & regexWorlds
+                val worldsList = ((define["worlds"] ?: define["world"])?.asListEnhanced() ?: emptyList()).toHashSet()
+                val regexWorlds = if (regexFlag) {
+                    ((define["worlds"] ?: define["world"])?.asListEnhanced() ?: emptyList()).map { Regex(it) }.toHashSet()
+                } else null
+
+                result[id] = WorldDefine(
+                    worlds = worldsList,
+                    regexWorlds = regexWorlds,
+                    blocks = blocks,
+                    condition = condition
+                )
+            }
+
+            else -> {
+                warningL("WarningUnknownDefineType", type)
+            }
+        }
+    }
+
+    return result
 }

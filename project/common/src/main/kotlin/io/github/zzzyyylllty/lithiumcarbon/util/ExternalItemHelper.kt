@@ -15,7 +15,6 @@ object ExternalItemHelper {
             .onHookSuccess({ p -> infoS("Hooked External item source: $p") })
             .onHookFailure({ p, e -> severeS("Failed to hook External item " + p + ", because " + e.message) })
             .detectSupportedPlugins()
-            .removeById("sertraline")
             .build()
 
 }

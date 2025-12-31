@@ -1,7 +1,8 @@
 package io.github.zzzyyylllty.lithiumcarbon.command
 
+import io.github.zzzyyylllty.lithiumcarbon.LithiumCarbon.lootCaches
+import io.github.zzzyyylllty.lithiumcarbon.LithiumCarbon.lootDefines
 import io.github.zzzyyylllty.lithiumcarbon.LithiumCarbon.lootMap
-import io.github.zzzyyylllty.lithiumcarbon.LithiumCarbon.playerDataMap
 import io.github.zzzyyylllty.lithiumcarbon.function.player.sendComponent
 import org.bukkit.command.CommandSender
 import taboolib.common.platform.command.CommandBody
@@ -26,17 +27,31 @@ object LithiumCarbonDebugCommand {
         createModernHelper()
     }
 
-    @CommandBody
-    val getDataMap = subCommand {
-        execute<CommandSender> { sender, context, argument ->
-            sender.sendComponent(playerDataMap.entries.toString())
-        }
-    }
+//    @CommandBody
+//    val getDataMap = subCommand {
+//        execute<CommandSender> { sender, context, argument ->
+//            sender.sendComponent(playerDataMap.entries.toString())
+//        }
+//    }
 
     @CommandBody
     val getAllLoots = subCommand {
         execute<CommandSender> { sender, context, argument ->
             sender.sendComponent(lootMap.entries.toString())
+        }
+    }
+
+    @CommandBody
+    val getDefines = subCommand {
+        execute<CommandSender> { sender, context, argument ->
+            sender.sendComponent(lootDefines.entries.toString())
+        }
+    }
+
+    @CommandBody
+    val getCaches = subCommand {
+        execute<CommandSender> { sender, context, argument ->
+            sender.sendComponent(lootCaches.entries.toString())
         }
     }
 

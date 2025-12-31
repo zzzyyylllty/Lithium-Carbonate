@@ -1,6 +1,7 @@
 package io.github.zzzyyylllty.lithiumcarbon.listener
 
 import io.github.zzzyyylllty.lithiumcarbon.LithiumCarbon
+import io.github.zzzyyylllty.lithiumcarbon.LithiumCarbon.allowedWorlds
 import io.github.zzzyyylllty.lithiumcarbon.LithiumCarbon.config
 import io.github.zzzyyylllty.lithiumcarbon.LithiumCarbon.lootCaches
 import io.github.zzzyyylllty.lithiumcarbon.LithiumCarbon.lootDefines
@@ -25,7 +26,15 @@ fun onInteract(e: PlayerInteractEvent) {
     val block = e.clickedBlock ?: return
     if (block.type.isAir) return
     val player = e.player ?: return // 防止 NPC 搞鬼
-    if (config.getList("allowed-blocks")?.contains(block.type.name) ?: false) {
+    if (config.getBoolean("allowed-all-blocks", false) || config.getList("allowed-blocks")?.contains(block.type.name) ?: false) {
+
+        if (config.getBoolean("allowed-all-worlds", false)) {
+            for (regex in allowedWorlds) {
+
+            }
+            return
+        }
+
         val location = LocationHelper.toLootLocation(block.location)
         val define = getDefines(location, block, player) ?: run {
             devLog("Define is null, return.")

@@ -3,24 +3,16 @@ debug: false
 
 hook:
   worldguard: true
-  sertraline: true
+  # sertraline: true - Deprecated.
 
 file-load:
-  loot: "^(?![#!]).*\\.(?i)(yaml|yml|toml|tml|json|conf)$"
-
-database:
-  enable: false  # true: MySQL; false: SQLite
-  host: localhost
-  port: 3306
-  user: x_angelkawaii_x
-  password: angelkawaii2
-  database: lithiumcarbon
-  table: lithiumcarbon_data
+  loots: "^(?![#!]).*\\.(?i)(yaml|yml|toml|tml|json|conf)$"
 
 default-options:
   add-lore: null
   remove-lore: false
 
+# Ignore warnings and errors
 logger:
   ignore-errors:
     ErrorNoAvailableSlots: false
@@ -30,9 +22,24 @@ logger:
   ignore-warnings:
     WarningNotSupportDataComponent: false
 
+# Allowed loot blocks
+# Not support regex - if you want to support all blocks using allowed-all-blocks
 allowed-blocks:
   - CHEST
   - GRAY_SHULKER_BOX
 
+# Bypass allowed-blocks check
+allowed-all-blocks: false
+
+# Allowed loot worlds
+# Supported regex
 allowed-worlds:
   - *
+
+# Bypass allowed-worlds check
+allowed-all-worlds: true
+
+default-layout:
+  - '         '
+  - '         '
+  - '         '

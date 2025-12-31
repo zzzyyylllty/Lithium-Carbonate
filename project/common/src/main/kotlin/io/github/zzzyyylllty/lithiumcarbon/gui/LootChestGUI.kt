@@ -45,7 +45,7 @@ fun Player.openLootChest(instance: LootInstance) {
         set('-', XMaterial.GRAY_STAINED_GLASS_PANE) { name = " " }
 
         fun update(int: Int) {
-            val element = instance.elements[int] ?: return
+            val element = instance.getSlotItem(int) ?: return
             val display = element.getDisplayItem(instance.getSearchStat(player, element, int), player)
             inventory.setItem(int, display)
         }
@@ -121,6 +121,9 @@ fun Player.openLootChest(instance: LootInstance) {
             closed = true
         }
 
+        onClose { event ->
+            instance.resetPlayerSearch(event.player as Player)
+        }
 
     }
 }
