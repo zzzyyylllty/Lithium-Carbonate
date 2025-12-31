@@ -16,15 +16,12 @@ class SpecifyDefine(val locations: List<LootLocation>, val regex: Boolean,overri
 
         val blockWorld = block.world.name
 
-        if (regex) locations?.forEach {
-            if (blockWorld.matches(it.toRegex())) {
+        locations.forEach {
+            if (if (regex) blockWorld.matches(it.world.toRegex()) else blockWorld == it.world) {
                 devLog("World define passed.")
 
                 if (blocks.contains(block.type.name)) return validateCondition(location, block, player)
             }
-        } else if (worlds.contains(blockWorld)) {
-            devLog("World define passed.")
-            if (blocks.contains(block.type.name)) return validateCondition(location, block, player)
         }
 
         return false
