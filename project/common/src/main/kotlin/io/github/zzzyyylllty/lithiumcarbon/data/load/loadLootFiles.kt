@@ -78,7 +78,7 @@ fun loadLoot(key: String, arg: Map<String, Any?>) {
         removeLore = c.getDeep(arg, "options.remove-lore") as? Boolean? ?: config.getBoolean("default-options.remove-lore", false),
         addLore = c.getDeep(arg, "options.add-lore") as? List<String>? ?: config.getStringList("default-options.add-lore"),
         shuffleLoot = c.getDeep(arg, "options.shuffle-loot") as? Boolean? ?: config.getBoolean("default-options.shuffle-loot", false),
-        searchLimit = c.getDeep(arg, "options.search-limit") as? String?,
+        searchLimit = c.getDeep(arg, "options.search-limit")?.toString(),
     )
 
     val layoutP = c.getDeep(arg, "display.layout").asListEnhanced() ?: config.getStringList("default-layout")
@@ -177,7 +177,7 @@ fun loadLoot(key: String, arg: Map<String, Any?>) {
     val update = if (loops.isEmpty()) {
         LootUpdate(null, refresh?.get("expire").toString())
     } else {
-        LootUpdate(loops, arg["refresh.expire"].toString())
+        LootUpdate(loops, refresh?.get("expire").toString())
     }
 
     val loot = LootTemplate(

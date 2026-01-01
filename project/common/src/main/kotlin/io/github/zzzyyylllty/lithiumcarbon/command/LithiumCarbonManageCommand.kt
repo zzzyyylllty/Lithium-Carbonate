@@ -21,10 +21,10 @@ import taboolib.platform.util.asLangText
 import taboolib.platform.util.toBukkitLocation
 
 @CommandHeader(
-    name = "lithiumcarbon-debug",
-    aliases = ["li2co3debug", "lcdebug"],
-    permission = "lithiumcarbon.command.debug",
-    description = "Debug Command for LithiumCarbon.",
+    name = "lithiumcarbon-manage",
+    aliases = ["li2co3manage", "lcmanage"],
+    permission = "lithiumcarbon.command.manage",
+    description = "manage Command for LithiumCarbon.",
     permissionMessage = "",
     permissionDefault = PermissionDefault.OP,
     newParser = false,

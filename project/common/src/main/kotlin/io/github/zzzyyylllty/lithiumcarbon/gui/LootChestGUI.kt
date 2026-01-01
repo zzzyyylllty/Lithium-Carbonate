@@ -48,15 +48,13 @@ fun Player.openLootChest(instance: LootInstance) {
             set(i.key, i.value.build(player))
         }
 
-        fun update(int: Int, inventory: Inventory, instance: LootInstance) {
+        fun update(int: Int, inventory: Inventory, instance: LootInstance, elements: MutableMap<Int, LootElement?>) {
             val element = instance.getSlotItem(int) ?: return
             val stat = instance.getSearchStat(player, element, int, instance)
             val display = element.getDisplayItem(stat, player)
 
             if (display == null) {
-                val newElement = instance.elements
-                newElement.remove(int)
-                instance.elements = newElement
+                elements.remove(int)
             }
 
             if (stat == LootElementStat.SEARCHED && searchingSlots.contains(int)) {
@@ -66,14 +64,12 @@ fun Player.openLootChest(instance: LootInstance) {
 //            devLog("Updating $int")
             inventory.setItem(int, display)
         }
-        fun update(int: Int, element: LootElement?, inventory: Inventory, instance: LootInstance) {
+        fun update(int: Int, element: LootElement?, inventory: Inventory, instance: LootInstance, elements: MutableMap<Int, LootElement?>) {
             val stat = element?.let { instance.getSearchStat(player, it, int, instance) }
             val display = stat?.let { element.getDisplayItem(it, player) }
 
             if (display == null) {
-                val newElement = instance.elements
-                newElement.remove(int)
-                instance.elements = newElement
+                elements.remove(int)
             }
 
             if (stat == LootElementStat.SEARCHED && searchingSlots.contains(int)) {
@@ -84,18 +80,28 @@ fun Player.openLootChest(instance: LootInstance) {
             inventory.setItem(int, display)
         }
         fun updateAll(inventory: Inventory) {
-//            devLog("Updating ALL")
+            // 1. 创建一份 instance.elements 的 *可变副本*。
+            // `update` 方法将对这个副本进行修改（例如删除元素）。
+            val elementsBeingProcessed = instance.elements.toMutableMap()
 
-            val iterator = instance.elements.iterator()
-            while (iterator.hasNext()) {
-                val element = iterator.next()
-                update(element.key, element.value, inventory, instance)
+            // 2. 创建一个 *不可变的键列表* 作为迭代的依据。
+            // 这样，即使 `elementsBeingProcessed` 在循环内部被修改，
+            // 迭代器也不会受到影响，因为它是在一个稳定的列表上迭代。
+            val keysToUpdate = elementsBeingProcessed.keys.toList() // 获取一个稳定的键列表
+
+            for (key in keysToUpdate) { // 迭代这个稳定的键列表
+                // 从正在处理的 Map 中获取元素。
+                // 注意：这里需要再次获取，因为在 `update` 内部，元素可能已经被移除了。
+                val element = elementsBeingProcessed[key]
+
+                // 调用 `update` 方法，传入我们创建的可变副本 `elementsBeingProcessed`。
+                // `update` 方法内的 `elements.remove(int)` 将作用于这个副本。
+                update(key, element, inventory, instance, elementsBeingProcessed)
             }
-//            for (element in instance.elements) {
-//                update(element.key, element.value, inventory, instance)
-//            }
-        }
 
+            // 3. 循环结束后，将修改后的副本赋值回 `instance.elements`。
+            instance.elements = elementsBeingProcessed
+        }
         onBuild(async = true) { player, inventory ->
             openedLootLocation[player.uniqueId.toString()] = instance.loc
             devLog("refreshing")
@@ -124,9 +130,12 @@ fun Player.openLootChest(instance: LootInstance) {
             }
 
             val rawSlot = event.rawSlot
+
+            if (rawSlot == -999) return@onClick
+
             val inventory = event.inventory
 
-            val element = instance.elements[rawSlot]
+            val element = instance.elements.getOrDefault(rawSlot, null)
 
             if (element != null) {
                 devLog("slot $rawSlot have item")
@@ -169,7 +178,9 @@ fun Player.openLootChest(instance: LootInstance) {
 
                             instance.startSearch(player, rawSlot, time, true)
                         }
-                        update(rawSlot, element, inventory, instance)
+                        val newElements = instance.elements
+                        update(rawSlot, element, inventory, instance, newElements)
+                        instance.elements = newElements
                         return@onClick
                     }
                     LootElementStat.SEARCHING -> {
@@ -195,7 +206,9 @@ fun Player.openLootChest(instance: LootInstance) {
                         )
                         playConfiguredSound(player, "claim")
 
-                        update(rawSlot, inventory, instance)
+                        val newElements = instance.elements
+                        update(rawSlot, element, inventory, instance, newElements)
+                        instance.elements = newElements
                         return@onClick
                     }
                     LootElementStat.NOITEM -> {
@@ -205,7 +218,9 @@ fun Player.openLootChest(instance: LootInstance) {
 
             } else {
                 devLog("slot $rawSlot is empty")
-                update(rawSlot, inventory, instance)
+                val newElements = instance.elements
+                update(rawSlot, element, inventory, instance, newElements)
+                instance.elements = newElements
             }
 
         }

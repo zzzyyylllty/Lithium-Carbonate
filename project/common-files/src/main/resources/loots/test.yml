@@ -6,10 +6,10 @@ test_loot:
         agent:
           onRefresh:
             js:
-              Bukkit.broadcast(mmUtil.deserialize("Loot " + name + " refreshed."))
+              org.bukkit.Bukkit.broadcast(mmUtil.deserialize("<#dcaaff>[Li2CO3Loot] <gray>Loot <yellow>" + name + "</yellow> refreshed."))
           onCancel:
             js:
-              Bukkit.broadcast(mmUtil.deserialize("Loot " + name + " looping cancelled."))
+              org.bukkit.Bukkit.broadcast(mmUtil.deserialize("<#dcaaff>[Li2CO3Loot] <gray>Loot <yellow>" + name + "</yellow> cancelled."))
     # When loot opened, expired when 300 second passed.
     expire: 300
 

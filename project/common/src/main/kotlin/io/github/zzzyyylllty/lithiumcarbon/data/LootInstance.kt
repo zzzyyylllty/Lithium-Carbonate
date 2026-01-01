@@ -11,8 +11,8 @@ import kotlin.math.roundToLong
 data class LootInstance(
     var templateID: String,
     var loc: LootLocation,
-    var elements: LinkedHashMap<Int, LootElement?>,
-    var searches: LinkedHashMap<String, SearchStat>,
+    var elements: MutableMap<Int, LootElement?>,
+    var searches: MutableMap<String, SearchStat>,
     var nextRefresh: Long?,
 ) {
     val template get() = lootTemplates[templateID]

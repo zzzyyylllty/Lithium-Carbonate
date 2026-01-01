@@ -60,6 +60,8 @@ object LithiumCarbonMainCommand {
     }
     @CommandBody
     val debug = LithiumCarbonDebugCommand
+    @CommandBody
+    val manage = LithiumCarbonManageCommand
 //    @CommandBody
 //    val Data = ChoTenDataCommand
 
