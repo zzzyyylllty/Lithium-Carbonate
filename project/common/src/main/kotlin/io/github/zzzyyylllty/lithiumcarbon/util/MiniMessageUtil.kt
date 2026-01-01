@@ -1,4 +1,4 @@
-package io.github.zzzyyylllty.lithiumcarbon.util.minimessage
+package io.github.zzzyyylllty.lithiumcarbon.util
 
 import net.kyori.adventure.text.minimessage.MiniMessage
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer

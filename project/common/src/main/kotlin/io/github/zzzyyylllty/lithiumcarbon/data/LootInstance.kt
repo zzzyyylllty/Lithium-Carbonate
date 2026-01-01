@@ -23,15 +23,15 @@ data class LootInstance(
     fun getSearchStat(player: Player, element: LootElement, slot: Int, instance: LootInstance): LootElementStat {
         return if (instance.elements[slot] == null) LootElementStat.NOITEM
         else if (element.skipSearch) LootElementStat.SEARCHED
-        else if (getSearchStatRaw(player, slot)?.isSearchEnded(slot)
-                ?: return LootElementStat.NOT_SEARCHED) LootElementStat.SEARCHING else LootElementStat.NOT_SEARCHED
+        else if (getSearchStatRaw(player, slot)?.isSearchEnded(slot) ?: return LootElementStat.NOT_SEARCHED)
+            LootElementStat.SEARCHED else LootElementStat.SEARCHING
     }
 
-    fun startSearch(player: Player, location: Int, ms: Long) {
+    fun startSearch(player: Player, location: Int, ms: Long, skip: Boolean = false) {
         val searches = searches.getOrPut(player.uniqueId.toString()) {
             SearchStat(linkedMapOf())
         }.searches
-        searches[location] = SingleSearchStat(location, System.currentTimeMillis() + ms, false)
+        searches[location] = SingleSearchStat(location, System.currentTimeMillis() + ms, skip)
     }
 
     fun resetPlayerSearch(player: Player) {

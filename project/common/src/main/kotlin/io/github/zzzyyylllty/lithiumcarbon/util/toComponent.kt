@@ -1,4 +1,4 @@
-package io.github.zzzyyylllty.lithiumcarbon.util.minimessage
+package io.github.zzzyyylllty.lithiumcarbon.util
 
 import io.github.zzzyyylllty.lithiumcarbon.LithiumCarbon.config
 import net.kyori.adventure.text.Component
@@ -17,8 +17,7 @@ fun List<String>.toComponent(): List<Component> {
 }
 
 fun Any?.serializeComponent(): Any? {
-    val input = this
-    return when (input) {
+    return when (val input = this) {
         is Map<*, *> -> input.map { (k, v) ->
             k.toString() to v.serializeComponent()
         }.toMap() // 直接使用 map 和 toMap

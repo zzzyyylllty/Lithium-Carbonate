@@ -2,7 +2,7 @@ package io.github.zzzyyylllty.lithiumcarbon.logger
 
 import io.github.zzzyyylllty.lithiumcarbon.LithiumCarbon
 import io.github.zzzyyylllty.lithiumcarbon.util.minimessage.legacyToMiniMessage
-import io.github.zzzyyylllty.lithiumcarbon.util.minimessage.mmUtil
+import io.github.zzzyyylllty.lithiumcarbon.util.mmUtil
 import net.kyori.adventure.audience.Audience
 import org.bukkit.command.CommandSender
 import taboolib.common.platform.function.submitAsync

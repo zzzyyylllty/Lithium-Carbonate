@@ -1,22 +1,17 @@
 package io.github.zzzyyylllty.lithiumcarbon.data
 
 import io.github.zzzyyylllty.embiancomponent.EmbianComponent
-import io.github.zzzyyylllty.lithiumcarbon.function.kether.evalKether
-import io.github.zzzyyylllty.lithiumcarbon.function.kether.evalKetherValue
-import io.github.zzzyyylllty.lithiumcarbon.function.kether.parseKether
+import io.github.zzzyyylllty.lithiumcarbon.data.load.asListEnhanced
 import io.github.zzzyyylllty.lithiumcarbon.logger.severeL
 import io.github.zzzyyylllty.lithiumcarbon.logger.warningL
 import io.github.zzzyyylllty.lithiumcarbon.util.ExternalItemHelper
 import io.github.zzzyyylllty.lithiumcarbon.util.VersionHelper
 import io.github.zzzyyylllty.lithiumcarbon.util.asNumberFormat
 import io.github.zzzyyylllty.lithiumcarbon.util.componentUtil
-import io.github.zzzyyylllty.lithiumcarbon.util.devLog
-import io.github.zzzyyylllty.lithiumcarbon.util.minimessage.toComponent
+import io.github.zzzyyylllty.lithiumcarbon.util.toComponent
 import org.bukkit.Material
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
-import taboolib.common.platform.function.severe
-import taboolib.common.util.random
 import taboolib.library.xseries.XItemStack
 import taboolib.module.nms.NMSItemTag.Companion.asNMSCopy
 import kotlin.math.roundToInt
@@ -75,11 +70,11 @@ data class LootItem(
 
         if (parameters?.isNotEmpty() ?: false) {
 
-            parameters["name"] ?.let { itemStack.itemMeta.itemName(it.toString().toComponent()) }
-            parameters["display-name"] ?.let { itemStack.itemMeta.displayName(it.toString().toComponent()) }
-            parameters["custom-name"] ?.let { itemStack.itemMeta.customName(it.toString().toComponent()) }
-            parameters["item-name"] ?.let { itemStack.itemMeta.itemName(it.toString().toComponent()) }
-            (parameters["lore"] as List<String>?)?.let { itemStack.lore((it).toComponent()) }
+            parameters["name"]?.let { itemStack.itemMeta.customName(it.toString().toComponent()) }
+            parameters["display-name"]?.let { itemStack.itemMeta.displayName(it.toString().toComponent()) }
+            parameters["custom-name"]?.let { itemStack.itemMeta.customName(it.toString().toComponent()) }
+            parameters["item-name"]?.let { itemStack.itemMeta.itemName(it.toString().toComponent()) }
+            (parameters["lore"].asListEnhanced())?.let { itemStack.lore((it).toComponent()) }
 
         }
         if (components != null && components.isNotEmpty()) {

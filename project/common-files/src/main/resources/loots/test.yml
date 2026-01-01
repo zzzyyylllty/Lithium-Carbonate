@@ -104,7 +104,7 @@ test_loot:
           # weight: "{{ random 1 to 10 }}" for dynamic weight.
 
           search-time: 1000 # MS
-          skip-search: false
+          skip-search: false # Skip search? (skip will not play sound and agent)
 
           # Displayed item. This is optional. if leave a blank will use reward item.
           display:
@@ -120,11 +120,6 @@ test_loot:
             minitell "hello!"
           javascript: |
             player.sendMessage(mmUtil.deserialize("<rainbow>Hello!"))
-
-          agent:
-            onClaim:
-              ke: |
-                tell "Claimed item."
 
   agents:
     onOpen:

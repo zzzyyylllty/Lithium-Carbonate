@@ -5,7 +5,9 @@ import io.github.zzzyyylllty.lithiumcarbon.data.LootElement
 import io.github.zzzyyylllty.lithiumcarbon.data.LootElementStat
 import io.github.zzzyyylllty.lithiumcarbon.data.LootInstance
 import io.github.zzzyyylllty.lithiumcarbon.data.LootItem
+import io.github.zzzyyylllty.lithiumcarbon.data.SearchStat
 import io.github.zzzyyylllty.lithiumcarbon.logger.warningS
+import io.github.zzzyyylllty.lithiumcarbon.util.SoundUtil.playConfiguredSound
 import io.github.zzzyyylllty.lithiumcarbon.util.devLog
 import org.bukkit.entity.Player
 import org.bukkit.event.inventory.ClickType.*
@@ -39,6 +41,8 @@ fun Player.openLootChest(instance: LootInstance) {
 
     var closed = false
 
+    val searchingSlots = mutableSetOf<Int>()
+
     player.openMenu<Chest>(template.title) {
 
         rows(template.rows)
@@ -51,12 +55,28 @@ fun Player.openLootChest(instance: LootInstance) {
 
         fun update(int: Int, inventory: Inventory, instance: LootInstance) {
             val element = instance.getSlotItem(int) ?: return
-            val display = element?.getDisplayItem(instance.getSearchStat(player, element, int, instance), player)
+            val stat = instance.getSearchStat(player, element, int, instance)
+            val display = element.getDisplayItem(stat, player)
+            if (display == null) {
+                instance.elements.remove(int)
+            }
+            if (stat == LootElementStat.SEARCHED && searchingSlots.contains(int)) {
+                playConfiguredSound(player, "search-end")
+                searchingSlots.remove(int)
+            }
             devLog("Updating $int")
             inventory.setItem(int, display)
         }
         fun update(int: Int, element: LootElement?, inventory: Inventory, instance: LootInstance) {
-            val display = element?.getDisplayItem(instance.getSearchStat(player, element, int, instance), player)
+            val stat = element?.let { instance.getSearchStat(player, it, int, instance) }
+            val display = stat?.let { element.getDisplayItem(it, player) }
+            if (display == null) {
+                instance.elements.remove(int)
+            }
+            if (stat == LootElementStat.SEARCHED && searchingSlots.contains(int)) {
+                playConfiguredSound(player, "search-end")
+                searchingSlots.remove(int)
+            }
             devLog("Updating $int")
             inventory.setItem(int, display)
         }
@@ -69,12 +89,15 @@ fun Player.openLootChest(instance: LootInstance) {
 
         onBuild(async = true) { player, inventory ->
             devLog("refreshing")
+            playConfiguredSound(player, "open")
             updateAll(inventory)
+            template.agents?.runAgent("onOpen", linkedMapOf("inventory" to inventory), player)
             submitAsync(period = 5) {
                 if (closed) {
                     cancel()
                 } else {
                     updateAll(inventory)
+                    template.agents?.runAgent("onUpdate", linkedMapOf("inventory" to inventory), player)
                 }
             }
         }
@@ -101,12 +124,21 @@ fun Player.openLootChest(instance: LootInstance) {
                 if (instance.getSearchStat(player, element, rawSlot, instance) == LootElementStat.NOT_SEARCHED) {
                     devLog("Starting to search $rawSlot item")
                     val time = element.searchTime
-                    if (time > 0) {
-                        devLog("Start search.")
-                        instance.startSearch(player, rawSlot, time)
+                    if (!element.skipSearch) {
+                        if (time > 0) {
+                            devLog("Start search.")
+                            instance.startSearch(player, rawSlot, time)
+                            playConfiguredSound(player, "search")
+                            searchingSlots.add(rawSlot)
+                        } else {
+                            devLog("Search time is 0, skip search.")
+                            playConfiguredSound(player, "search")
+                            instance.startSearch(player, rawSlot, time, true)
+                            searchingSlots.add(rawSlot)
+                        }
                     } else {
-                        devLog("Search time is 0, skip search.")
-                        instance.startSearch(player, rawSlot, time)
+
+                        instance.startSearch(player, rawSlot, time, true)
                     }
                     update(rawSlot, element, inventory, instance)
                     return@onClick
@@ -117,6 +149,8 @@ fun Player.openLootChest(instance: LootInstance) {
 
                 // 再构建并给予
                 element.applyToPlayer(player)
+                template.agents?.runAgent("onClaim", linkedMapOf("event" to event, "element" to element, "inventory" to inventory), player)
+                playConfiguredSound(player, "claim")
 
                 update(rawSlot, inventory, instance)
 
@@ -130,6 +164,7 @@ fun Player.openLootChest(instance: LootInstance) {
         onClose { event ->
             closed = true
             instance.resetPlayerSearch(event.player as Player)
+            template.agents?.runAgent("onClose", linkedMapOf("event" to event, "inventory" to inventory), player)
         }
 
     }

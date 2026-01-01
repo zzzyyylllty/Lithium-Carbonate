@@ -9,10 +9,10 @@ import io.github.zzzyyylllty.lithiumcarbon.function.javascript.PlayerUtil
 import io.github.zzzyyylllty.lithiumcarbon.function.javascript.ThreadUtil
 import io.github.zzzyyylllty.lithiumcarbon.function.kether.evalKether
 //import io.github.zzzyyylllty.lithiumcarbon.util.jsonUtils
-import io.github.zzzyyylllty.lithiumcarbon.util.minimessage.mmJsonUtil
-import io.github.zzzyyylllty.lithiumcarbon.util.minimessage.mmLegacyAmpersandUtil
-import io.github.zzzyyylllty.lithiumcarbon.util.minimessage.mmLegacySectionUtil
-import io.github.zzzyyylllty.lithiumcarbon.util.minimessage.mmUtil
+import io.github.zzzyyylllty.lithiumcarbon.util.mmJsonUtil
+import io.github.zzzyyylllty.lithiumcarbon.util.mmLegacyAmpersandUtil
+import io.github.zzzyyylllty.lithiumcarbon.util.mmLegacySectionUtil
+import io.github.zzzyyylllty.lithiumcarbon.util.mmUtil
 import org.bukkit.Bukkit
 import org.bukkit.entity.Player
 import taboolib.common.LifeCycle
