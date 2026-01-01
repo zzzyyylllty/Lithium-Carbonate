@@ -4,5 +4,5 @@ import io.github.zzzyyylllty.lithiumcarbon.util.toComponent
 import org.bukkit.command.CommandSender
 
 fun CommandSender.sendComponent(message: String) {
-    sendMessage(message.toComponent())
+    if (message.isNotEmpty()) sendMessage(message.toComponent())
 }

@@ -8,6 +8,8 @@ hook:
 file-load:
   loots: "^(?![#!]).*\\.(?i)(yaml|yml|toml|tml|json|conf)$"
 
+lang: en_US
+
 default-options:
   add-lore: null
   remove-lore: false

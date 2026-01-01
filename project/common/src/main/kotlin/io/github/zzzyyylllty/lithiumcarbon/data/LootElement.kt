@@ -1,9 +1,12 @@
 package io.github.zzzyyylllty.lithiumcarbon.data
 
 import io.github.zzzyyylllty.lithiumcarbon.function.kether.evalKether
+import io.github.zzzyyylllty.lithiumcarbon.function.player.sendComponent
 import io.github.zzzyyylllty.lithiumcarbon.util.LootGUIHelper
+import io.github.zzzyyylllty.lithiumcarbon.util.mmUtil
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
+import taboolib.platform.util.asLangText
 import taboolib.platform.util.giveItem
 import javax.script.CompiledScript
 import javax.script.SimpleBindings
@@ -18,20 +21,37 @@ data class LootElement(
     val searchTime: Double = 0.0,
     val skipSearch: Boolean = false,
 ) {
-    fun getDisplayItem(stat: LootElementStat, player: Player?): ItemStack? {
+    fun getDisplayItem(stat: LootElementStat, player: Player?, options: LootTemplateOptions): ItemStack? {
         return when (stat) {
             LootElementStat.NOT_SEARCHED -> LootGUIHelper.unsearch.build(player, 1)
             LootElementStat.SEARCHING -> LootGUIHelper.searching.build(player, 1)
-            LootElementStat.SEARCHED -> (displayItem ?: items?.firstOrNull() ?: LootGUIHelper.undefinedItem).build(player, 1)
+            LootElementStat.SEARCHED -> {
+                val item = (displayItem ?: items?.firstOrNull() ?: LootGUIHelper.undefinedItem)
+                val lore = item.parameters?.let { (it["lore"] as List<String>?)?.toMutableList() }
+                if (options.removeLore) {
+                    lore?.clear()
+                }
+                if (options.addLore != null && options.addLore.isNotEmpty()) {
+                    lore?.addAll(options.addLore)
+                }
+                item.parameters?.let { it["lore"] = lore }
+                item.build(player, 1)
+            }
             LootElementStat.NOITEM -> null
         }
     }
 
-    fun applyToPlayer(player: Player) {
-        items?.forEach { item ->
-            player.giveItem(item.build(player))
+    fun applyToPlayer(player: Player,template: LootTemplate) {
+        items?.forEach { lItem ->
+            val item = lItem.build(player)
+            player.giveItem(item)
+            player.sendComponent(player.asLangText("Claim", template.name, mmUtil.serialize(item.displayName())))
         }
-        player.giveExp(exps.roundToInt())
+        val exp = exps.roundToInt()
+        if (exp != 0) {
+            player.giveExp(exp)
+            player.sendComponent(player.asLangText("ClaimExp", template.name, exp))
+        }
         if (kether != null || javaScript != null) {
             val data = defaultData.toMutableMap()
             data.putAll(
