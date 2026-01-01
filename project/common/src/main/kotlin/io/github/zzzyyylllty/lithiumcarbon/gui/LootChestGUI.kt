@@ -9,13 +9,11 @@ import io.github.zzzyyylllty.lithiumcarbon.function.player.sendComponent
 import io.github.zzzyyylllty.lithiumcarbon.util.SoundUtil.playConfiguredSound
 import io.github.zzzyyylllty.lithiumcarbon.util.asNumberFormatNullable
 import io.github.zzzyyylllty.lithiumcarbon.util.devLog
-import io.github.zzzyyylllty.lithiumcarbon.util.mmLegacyAmpersandUtil
 import io.github.zzzyyylllty.lithiumcarbon.util.mmUtil
 import org.bukkit.entity.Player
 import org.bukkit.event.player.PlayerQuitEvent
 import org.bukkit.inventory.Inventory
 import taboolib.common.platform.event.SubscribeEvent
-import taboolib.common.platform.function.submit
 import taboolib.common.platform.function.submitAsync
 import taboolib.module.ui.openMenu
 import taboolib.module.ui.type.Chest
@@ -38,8 +36,6 @@ fun Player.openLootChest(instance: LootInstance) {
     var closed = false
     val searchLimit: Int? = template.options.searchLimit.asNumberFormatNullable(player)?.roundToInt()
 
-    val searchingSlots = mutableSetOf<Int>()
-
     player.openMenu<Chest>(template.title) {
 
         rows(template.rows)
@@ -52,23 +48,6 @@ fun Player.openLootChest(instance: LootInstance) {
             set(i.key, i.value.build(player))
         }
 
-        fun update(int: Int, inventory: Inventory, instance: LootInstance, elements: MutableMap<Int, LootElement?>) {
-            val element = instance.getSlotItem(int) ?: return
-            val stat = instance.getSearchStat(player, element, int, instance)
-            val display = element.getDisplayItem(stat, player, template.options)
-
-            if (display == null) {
-                elements.remove(int)
-            }
-
-            if (stat == LootElementStat.SEARCHED && searchingSlots.contains(int)) {
-                playConfiguredSound(player, "search-end")
-                player.sendComponent(player.asLangText("Searched", template.name, display?.displayName()?.let { mmUtil.serialize(it) } ?: ""))
-                searchingSlots.remove(int)
-            }
-//            devLog("Updating $int")
-            inventory.setItem(int, display)
-        }
         fun update(int: Int, element: LootElement?, inventory: Inventory, instance: LootInstance, elements: MutableMap<Int, LootElement?>) {
             val stat = element?.let { instance.getSearchStat(player, it, int, instance) }
             val display = stat?.let { element.getDisplayItem(it, player, template.options) }
@@ -77,11 +56,11 @@ fun Player.openLootChest(instance: LootInstance) {
                 elements.remove(int)
             }
 
-            if (stat == LootElementStat.SEARCHED && searchingSlots.contains(int)) {
+            if (stat == LootElementStat.SEARCHED && instance.getSearchingSlots(player)?.contains(int) == true) {
                 playConfiguredSound(player, "search-end")
 
                 player.sendComponent(player.asLangText("Searched", template.name, display?.displayName()?.let { mmUtil.serialize(it) } ?: ""))
-                searchingSlots.remove(int)
+                instance.removeSearchingSlots(player, int)
             }
 //            devLog("Updating $int")
             inventory.setItem(int, display)
@@ -153,7 +132,7 @@ fun Player.openLootChest(instance: LootInstance) {
                     LootElementStat.NOT_SEARCHED -> {
                         devLog("Starting to search $rawSlot item")
                         searchLimit?.let {
-                            if (it <= searchingSlots.size) {
+                            if (it <= (instance.getSearchingSlots(player)?.size ?: 0)) {
                                 playConfiguredSound(player, "search-limit")
                                 template.agents?.runAgent(
                                     "onSearchLimit",
@@ -177,13 +156,11 @@ fun Player.openLootChest(instance: LootInstance) {
                                 instance.startSearch(player, rawSlot, time)
                                 player.sendComponent(player.asLangText("SearchStart", template.name))
                                 playConfiguredSound(player, "search")
-                                searchingSlots.add(rawSlot)
                             } else {
                                 devLog("Search time is 0, skip search.")
                                 playConfiguredSound(player, "search")
                                 player.sendComponent(player.asLangText("SearchStart", template.name))
                                 instance.startSearch(player, rawSlot, time, true)
-                                searchingSlots.add(rawSlot)
                             }
                         } else {
                             instance.startSearch(player, rawSlot, time, true)

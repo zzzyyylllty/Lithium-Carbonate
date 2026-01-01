@@ -39,6 +39,12 @@ data class LootInstance(
         searches[location] = SingleSearchStat(location, System.currentTimeMillis() + (time * 1000).roundToLong(), skip)
     }
 
+    fun getSearchingSlots(player: Player): Set<Int>? {
+        return searches[player.uniqueId.toString()]?.searches?.filter { !it.value.isSearchEnded() }?.keys
+    }
+    fun removeSearchingSlots(player: Player, slot: Int) {
+        searches[player.uniqueId.toString()]?.searches?.remove(slot)
+    }
     fun resetPlayerSearch(player: Player) {
         searches[player.uniqueId.toString()]?.reset()
     }

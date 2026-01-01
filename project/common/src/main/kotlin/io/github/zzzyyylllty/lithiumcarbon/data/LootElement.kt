@@ -27,12 +27,12 @@ data class LootElement(
             LootElementStat.SEARCHING -> LootGUIHelper.searching.build(player, 1)
             LootElementStat.SEARCHED -> {
                 val item = (displayItem ?: items?.firstOrNull() ?: LootGUIHelper.undefinedItem)
-                val lore = item.parameters?.let { (it["lore"] as List<String>?)?.toMutableList() }
+                var lore = item.parameters?.let { (it["lore"] as List<String>?)?.toMutableList() }
                 if (options.removeLore) {
-                    lore?.clear()
+                    lore = null
                 }
                 if (options.addLore != null && options.addLore.isNotEmpty()) {
-                    lore?.addAll(options.addLore)
+                    lore = ((lore ?: listOf()) + (options.addLore)).toMutableList()
                 }
                 item.parameters?.let { it["lore"] = lore }
                 item.build(player, 1)
