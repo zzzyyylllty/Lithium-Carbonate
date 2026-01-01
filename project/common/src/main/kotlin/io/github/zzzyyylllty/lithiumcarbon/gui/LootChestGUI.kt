@@ -8,6 +8,8 @@ import io.github.zzzyyylllty.lithiumcarbon.data.LootItem
 import io.github.zzzyyylllty.lithiumcarbon.data.SearchStat
 import io.github.zzzyyylllty.lithiumcarbon.logger.warningS
 import io.github.zzzyyylllty.lithiumcarbon.util.SoundUtil.playConfiguredSound
+import io.github.zzzyyylllty.lithiumcarbon.util.asNumberFormat
+import io.github.zzzyyylllty.lithiumcarbon.util.asNumberFormatNullable
 import io.github.zzzyyylllty.lithiumcarbon.util.devLog
 import org.bukkit.entity.Player
 import org.bukkit.event.inventory.ClickType.*
@@ -28,6 +30,7 @@ import taboolib.platform.util.giveItem
 import taboolib.platform.util.inventoryCenterSlots
 import kotlin.collections.toList
 import kotlin.collections.toMutableList
+import kotlin.math.roundToInt
 
 fun Player.openLootChest(instance: LootInstance) {
 
@@ -40,6 +43,7 @@ fun Player.openLootChest(instance: LootInstance) {
     }
 
     var closed = false
+    val searchLimit: Int? = template.options.searchLimit.asNumberFormatNullable(player)?.roundToInt()
 
     val searchingSlots = mutableSetOf<Int>()
 
@@ -125,6 +129,12 @@ fun Player.openLootChest(instance: LootInstance) {
 
                 if (stat == LootElementStat.NOT_SEARCHED) {
                     devLog("Starting to search $rawSlot item")
+                    searchLimit?.let {
+                        if (it <= (instance.getSearchStatRaw(player)?.searches?.size ?: 0)) {
+                            playConfiguredSound(player, "search-limit")
+                            template.agents?.runAgent("onSearchLimit", linkedMapOf("limit" to it, "event" to event, "element" to element, "displayItem" to element.displayItem, "inventory" to inventory), player)
+                        }
+                    }
                     val time = element.searchTime
                     if (!element.skipSearch) {
                         if (time > 0) {

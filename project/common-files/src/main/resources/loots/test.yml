@@ -76,6 +76,10 @@ test_loot:
         replace: CHEST
 
   options:
+    # Can only search for one item at a time
+    # Support inline kether / numeric format (refresh on GUI Open)
+    # This option will not apply default value in config, leave null for unlimited.
+    search-limit: 1
     add-lore: |
       Click to claim!
 #    remove-lore: true
@@ -122,6 +126,8 @@ test_loot:
             player.sendMessage(mmUtil.deserialize("<rainbow>Hello!"))
 
   agents:
+    onSearchLimit: |
+
     onOpen:
       js_async: |
         player.sendMessage(mmUtil.deserialize("Hello world, " + player.name + "!"))

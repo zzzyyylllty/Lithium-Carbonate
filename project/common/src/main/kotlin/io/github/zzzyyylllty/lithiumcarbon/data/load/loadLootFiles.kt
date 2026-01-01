@@ -24,7 +24,6 @@ import io.github.zzzyyylllty.lithiumcarbon.logger.severeL
 import io.github.zzzyyylllty.lithiumcarbon.logger.warningL
 import io.github.zzzyyylllty.lithiumcarbon.util.devLog
 import io.github.zzzyyylllty.lithiumcarbon.util.toBooleanTolerance
-import org.bukkit.entity.Item
 
 // import org.yaml.snakeyaml.Yaml
 import taboolib.common.platform.function.getDataFolder
@@ -77,6 +76,7 @@ fun loadLoot(key: String, arg: Map<String, Any?>) {
         removeLore = c.getDeep(arg, "options.remove-lore") as? Boolean? ?: config.getBoolean("default-options.remove-lore", false),
         addLore = c.getDeep(arg, "options.add-lore") as? List<String>? ?: config.getStringList("default-options.add-lore"),
         shuffleLoot = c.getDeep(arg, "options.shuffle-loot") as? Boolean? ?: config.getBoolean("default-options.shuffle-loot", false),
+        searchLimit = c.getDeep(arg, "options.search-limit") as? String?,
     )
 
     val layoutP = c.getDeep(arg, "display.layout").asListEnhanced() ?: config.getStringList("default-layout")

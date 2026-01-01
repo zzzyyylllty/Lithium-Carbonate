@@ -49,4 +49,5 @@ sounds:
   search: "minecraft:item.armor.equip_chain 1 1 block"
   searching: "minecraft:block.stone_pressure_plate.click_on 1 0.5 block"
   search-end: "minecraft:block.dispenser.dispense 1 1 block"
+  search-limit: "minecraft:entity.villager.no 1 1 block"
   claim: "minecraft:block.stone_pressure_plate.click_on 1 1 block"

@@ -1,6 +1,5 @@
 package io.github.zzzyyylllty.lithiumcarbon.data
 
-import io.github.zzzyyylllty.lithiumcarbon.LithiumCarbon
 import org.bukkit.block.Block
 import org.bukkit.entity.Player
 
@@ -42,4 +41,5 @@ data class LootTemplateOptions(
     val removeLore: Boolean,
     val addLore: List<String>?,
     val shuffleLoot: Boolean,
+    val searchLimit: String?,
 )
