@@ -15,7 +15,9 @@ data class SearchStat(
     fun addSearch(id: Int, ms: Long) {
         searches[id] = SingleSearchStat(id, System.currentTimeMillis() + ms, false)
     }
-    fun reset() {}
+    fun reset() {
+        searches.clear()
+    }
 }
 data class SingleSearchStat(
     val slot: Int,

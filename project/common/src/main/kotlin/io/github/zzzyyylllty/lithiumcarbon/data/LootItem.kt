@@ -8,6 +8,7 @@ import io.github.zzzyyylllty.lithiumcarbon.util.ExternalItemHelper
 import io.github.zzzyyylllty.lithiumcarbon.util.VersionHelper
 import io.github.zzzyyylllty.lithiumcarbon.util.asNumberFormat
 import io.github.zzzyyylllty.lithiumcarbon.util.componentUtil
+import io.github.zzzyyylllty.lithiumcarbon.util.devLog
 import io.github.zzzyyylllty.lithiumcarbon.util.toComponent
 import org.bukkit.Material
 import org.bukkit.entity.Player
@@ -70,11 +71,13 @@ data class LootItem(
 
         if (parameters?.isNotEmpty() ?: false) {
 
-            parameters["name"]?.let { itemStack.itemMeta.customName(it.toString().toComponent()) }
-            parameters["display-name"]?.let { itemStack.itemMeta.displayName(it.toString().toComponent()) }
-            parameters["custom-name"]?.let { itemStack.itemMeta.customName(it.toString().toComponent()) }
-            parameters["item-name"]?.let { itemStack.itemMeta.itemName(it.toString().toComponent()) }
-            (parameters["lore"].asListEnhanced())?.let { itemStack.lore((it).toComponent()) }
+            val meta = itemStack.itemMeta
+            parameters["name"]?.toString()?.toComponent()?.let { meta.displayName(it) }
+            parameters["display-name"]?.toString()?.toComponent()?.let { meta.displayName(it) }
+            parameters["custom-name"]?.toString()?.toComponent()?.let { meta.customName(it) }
+            parameters["item-name"]?.toString()?.toComponent()?.let { meta.itemName(it) }
+            itemStack.setItemMeta(meta)
+            parameters["lore"].asListEnhanced()?.toComponent()?.let { itemStack.lore(it) }
 
         }
         if (components != null && components.isNotEmpty()) {

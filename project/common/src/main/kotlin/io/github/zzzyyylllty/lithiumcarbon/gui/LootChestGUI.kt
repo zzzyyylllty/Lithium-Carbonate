@@ -64,7 +64,7 @@ fun Player.openLootChest(instance: LootInstance) {
                 playConfiguredSound(player, "search-end")
                 searchingSlots.remove(int)
             }
-            devLog("Updating $int")
+//            devLog("Updating $int")
             inventory.setItem(int, display)
         }
         fun update(int: Int, element: LootElement?, inventory: Inventory, instance: LootInstance) {
@@ -77,11 +77,11 @@ fun Player.openLootChest(instance: LootInstance) {
                 playConfiguredSound(player, "search-end")
                 searchingSlots.remove(int)
             }
-            devLog("Updating $int")
+//            devLog("Updating $int")
             inventory.setItem(int, display)
         }
         fun updateAll(inventory: Inventory) {
-            devLog("Updating ALL")
+//            devLog("Updating ALL")
             for (element in instance.elements) {
                 update(element.key, element.value, inventory, instance)
             }
@@ -121,7 +121,9 @@ fun Player.openLootChest(instance: LootInstance) {
             if (element != null) {
                 devLog("slot $rawSlot have item")
 
-                if (instance.getSearchStat(player, element, rawSlot, instance) == LootElementStat.NOT_SEARCHED) {
+                val stat = instance.getSearchStat(player, element, rawSlot, instance)
+
+                if (stat == LootElementStat.NOT_SEARCHED) {
                     devLog("Starting to search $rawSlot item")
                     val time = element.searchTime
                     if (!element.skipSearch) {
@@ -142,17 +144,24 @@ fun Player.openLootChest(instance: LootInstance) {
                     }
                     update(rawSlot, element, inventory, instance)
                     return@onClick
+                } else if (stat == LootElementStat.SEARCHING) {
+                    playConfiguredSound(player, "searching")
+                    return@onClick
+                } else if (stat == LootElementStat.SEARCHED) {
+
+                    // 先移除物品
+                    instance.elements[rawSlot] = null
+
+                    // 再构建并给予
+                    element.applyToPlayer(player)
+                    template.agents?.runAgent("onClaim", linkedMapOf("event" to event, "element" to element, "displayItem" to element.displayItem, "inventory" to inventory), player)
+                    playConfiguredSound(player, "claim")
+
+                    update(rawSlot, inventory, instance)
+                    return@onClick
+                } else if (stat == LootElementStat.NOITEM) {
+                    return@onClick
                 }
-
-                // 先移除物品
-                instance.elements[rawSlot] = null
-
-                // 再构建并给予
-                element.applyToPlayer(player)
-                template.agents?.runAgent("onClaim", linkedMapOf("event" to event, "element" to element, "inventory" to inventory), player)
-                playConfiguredSound(player, "claim")
-
-                update(rawSlot, inventory, instance)
 
             } else {
                 devLog("slot $rawSlot is empty")
