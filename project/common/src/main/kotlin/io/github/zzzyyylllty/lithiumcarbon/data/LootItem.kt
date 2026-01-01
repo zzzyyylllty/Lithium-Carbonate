@@ -11,6 +11,7 @@ import io.github.zzzyyylllty.lithiumcarbon.util.componentUtil
 import io.github.zzzyyylllty.lithiumcarbon.util.devLog
 import io.github.zzzyyylllty.lithiumcarbon.util.toComponent
 import org.bukkit.Material
+import org.bukkit.NamespacedKey
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 import taboolib.library.xseries.XItemStack
@@ -76,6 +77,7 @@ data class LootItem(
             parameters["display-name"]?.toString()?.toComponent()?.let { meta.displayName(it) }
             parameters["custom-name"]?.toString()?.toComponent()?.let { meta.customName(it) }
             parameters["item-name"]?.toString()?.toComponent()?.let { meta.itemName(it) }
+            (parameters["item-model"] ?: parameters["model"])?.toString()?.let { meta.itemModel = NamespacedKey.fromString(it) }
             itemStack.setItemMeta(meta)
             parameters["lore"].asListEnhanced()?.toComponent()?.let { itemStack.lore(it) }
 

@@ -1,0 +1,16 @@
+unsearch:
+  item: GRAY_STAINED_GLASS_PANE
+  parameters:
+    name: "<!i><red><bold>Click to Search..."
+searching:
+  item: GRAY_STAINED_GLASS_PANE
+  parameters:
+    name: "<!i><red><bold>Searching ..."
+undefinedItem:
+  item: GOLD_INGOT
+  parameters:
+    name: "<!i><gold><bold>Loot"
+A:
+  item: TINTED_GLASS
+  parameters:
+    name: "<!i><gold><bold>Test fixed item"

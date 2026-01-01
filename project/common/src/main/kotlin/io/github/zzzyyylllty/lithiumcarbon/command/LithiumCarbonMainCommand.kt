@@ -2,6 +2,9 @@ package io.github.zzzyyylllty.lithiumcarbon.command
 
 import io.github.zzzyyylllty.lithiumcarbon.LithiumCarbon.reloadCustomConfig
 import io.github.zzzyyylllty.lithiumcarbon.function.player.sendComponent
+import io.github.zzzyyylllty.lithiumcarbon.logger.fineS
+import io.github.zzzyyylllty.lithiumcarbon.logger.infoS
+import io.github.zzzyyylllty.lithiumcarbon.logger.severeS
 import org.bukkit.command.CommandSender
 import taboolib.common.platform.ProxyCommandSender
 import taboolib.common.platform.command.CommandBody
@@ -40,13 +43,13 @@ object LithiumCarbonMainCommand {
     @CommandBody
     val reload = subCommand {
         execute<CommandSender> { sender, context, argument ->
-            sender.sendComponent("<gradient:aqua:yellow>reloading...")
+            sender.infoS("Reloading...")
             try {
                 reloadCustomConfig()
-                sender.sendComponent("<gradient:aqua:yellow>reloading... Complete.")
+                sender.fineS("Reloaded.")
             } catch (e: Exception) {
-                sender.sendComponent("<red>Error thrown. check console for info.</red>")
-                sender.sendComponent("<red>$e</red>")
+                sender.severeS("<red>Error thrown. check console for info.</red>")
+                e.printStackTrace()
             }
         }
     }

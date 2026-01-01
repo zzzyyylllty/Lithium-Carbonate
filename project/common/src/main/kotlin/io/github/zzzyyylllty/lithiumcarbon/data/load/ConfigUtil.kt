@@ -54,8 +54,7 @@ object ConfigUtil {
 
         val split = namespaceID.split(":").toMutableList()
         val source = if (split.size >= 2) split.first().lowercase() else "mc"
-        split.removeFirst()
-        val item = split.joinToString(":")
+        val item = split.joinToString(":").removePrefix("$source:")
 
         val parameters = (input["parameters"] ?: input["parameter"]) as LinkedHashMap<String, Any?>?
         val components = (input["components"] ?: input["component"]) as LinkedHashMap<String, Any?>?

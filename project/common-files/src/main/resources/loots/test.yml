@@ -11,9 +11,9 @@ test_loot:
     rows: 3
 
     layout:
-      - '         '
-      - '         '
-      - '         '
+      - 'A       A'
+      - 'A       A'
+      - 'A       A'
 
     # Manually set available slots.
     # Leave a null for automatic find spaces in layout.

@@ -44,6 +44,7 @@ default-layout:
   - '         '
   - '         '
 
+
 sounds:
   open: "minecraft:block.chest.locked 1 0.6 block"
   search: "minecraft:item.armor.equip_chain 1 1 block"

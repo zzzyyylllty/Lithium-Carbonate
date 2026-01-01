@@ -2,9 +2,11 @@ package io.github.zzzyyylllty.lithiumcarbon
 
 import io.github.zzzyyylllty.lithiumcarbon.LithiumCarbon.reloadCustomConfig
 import io.github.zzzyyylllty.lithiumcarbon.data.LootInstance
+import io.github.zzzyyylllty.lithiumcarbon.data.LootItem
 import io.github.zzzyyylllty.lithiumcarbon.data.LootLocation
 import io.github.zzzyyylllty.lithiumcarbon.data.LootTemplate
 import io.github.zzzyyylllty.lithiumcarbon.data.define.LootDefines
+import io.github.zzzyyylllty.lithiumcarbon.data.load.loadItemFiles
 import io.github.zzzyyylllty.lithiumcarbon.data.load.loadLootFiles
 import io.github.zzzyyylllty.lithiumcarbon.event.LithiumCarbonReloadEvent
 import org.bukkit.command.CommandSender
@@ -43,6 +45,8 @@ object LithiumCarbon : Plugin() {
     val lootTemplates = mutableMapOf<String, LootTemplate>()
     val lootDefines = mutableMapOf<String, LootDefines>()
     val lootCaches = mutableMapOf<LootLocation, LootTemplate>()
+    val lootItems = mutableMapOf<Char, LootItem>()
+    val lootItemsDef = mutableMapOf<String, LootItem>()
     val allowedWorlds = mutableListOf<Regex>()
 
     var devMode = true
@@ -68,6 +72,9 @@ object LithiumCarbon : Plugin() {
             lootTemplates.clear()
             lootMap.clear()
             allowedWorlds.clear()
+            lootItems.clear()
+            lootItemsDef.clear()
+            loadItemFiles()
             loadLootFiles()
             for (world in config.getList("allowed-worlds") ?: listOf("*")) {
                 allowedWorlds.add(world.toString().toRegex())

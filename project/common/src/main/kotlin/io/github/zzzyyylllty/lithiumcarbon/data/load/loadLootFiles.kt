@@ -91,6 +91,7 @@ fun loadLoot(key: String, arg: Map<String, Any?>) {
             var currentChar = 0
             for (char in line) {
                 currentChar++
+                if (char != ' ') continue
                 val location = ((currentLine - 1) * 9 + currentChar) - 1
                 availableSlots.add(location)
                 // devLog("($currentLine,$currentChar) = '$char' OF $line")

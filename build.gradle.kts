@@ -162,7 +162,7 @@ allprojects {
 //        taboo(platform(rootProject.libs.kotlincrypto.bom))
 //        taboo(rootProject.libs.kotlincrypto.sha2)
         taboo(rootProject.libs.bundles.jackson)
-        taboo("cn.gtemc:itembridge:1.0.17")
+        taboo("cn.gtemc:itembridge:1.0.18")
         taboo(rootProject.libs.kotlin.stdlib) // 将 kotlin("stdlib") 替换为此格式
     }
 
