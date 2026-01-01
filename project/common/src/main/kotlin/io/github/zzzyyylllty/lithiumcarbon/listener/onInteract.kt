@@ -8,6 +8,7 @@ import io.github.zzzyyylllty.lithiumcarbon.LithiumCarbon.lootDefines
 import io.github.zzzyyylllty.lithiumcarbon.LithiumCarbon.lootMap
 import io.github.zzzyyylllty.lithiumcarbon.LithiumCarbon.lootTemplates
 import io.github.zzzyyylllty.lithiumcarbon.data.LocationHelper
+import io.github.zzzyyylllty.lithiumcarbon.data.LootInstance
 import io.github.zzzyyylllty.lithiumcarbon.data.LootLocation
 import io.github.zzzyyylllty.lithiumcarbon.data.LootTemplate
 import io.github.zzzyyylllty.lithiumcarbon.gui.openLootChest
@@ -47,8 +48,24 @@ fun onInteract(e: PlayerInteractEvent) {
         }
         e.isCancelled = true
         submitAsync {
-            val instance = lootMap.getOrPut(location) {
-                define.createInstance(block, player)
+
+            // 当前战利品
+            val current = lootMap[location]
+
+            // 更新后的战利品
+            lateinit var instance: LootInstance
+            if (current == null) {
+                devLog("CURRENT LootInstance is null, regenerating.")
+                instance = lootMap.getOrPut(location) {
+                    define.createInstance(block, player)
+                }
+            } else {
+                val pendingInstance = current.checkUpdate()
+                instance = pendingInstance ?: run {
+                    lootMap.getOrPut(location) {
+                        define.createInstance(block, player)
+                    }
+                }
             }
             player.openLootChest(instance)
         }

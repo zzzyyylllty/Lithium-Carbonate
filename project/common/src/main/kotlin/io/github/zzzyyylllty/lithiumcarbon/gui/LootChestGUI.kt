@@ -4,26 +4,32 @@ import io.github.zzzyyylllty.lithiumcarbon.LithiumCarbon.lootItems
 import io.github.zzzyyylllty.lithiumcarbon.data.LootElement
 import io.github.zzzyyylllty.lithiumcarbon.data.LootElementStat
 import io.github.zzzyyylllty.lithiumcarbon.data.LootInstance
-import io.github.zzzyyylllty.lithiumcarbon.logger.warningS
+import io.github.zzzyyylllty.lithiumcarbon.data.LootLocation
 import io.github.zzzyyylllty.lithiumcarbon.util.SoundUtil.playConfiguredSound
 import io.github.zzzyyylllty.lithiumcarbon.util.asNumberFormatNullable
 import io.github.zzzyyylllty.lithiumcarbon.util.devLog
 import org.bukkit.entity.Player
+import org.bukkit.event.player.PlayerQuitEvent
 import org.bukkit.inventory.Inventory
+import taboolib.common.platform.event.SubscribeEvent
+import taboolib.common.platform.function.submit
 import taboolib.common.platform.function.submitAsync
 import taboolib.module.ui.openMenu
 import taboolib.module.ui.type.Chest
 import kotlin.math.roundToInt
 
+val openedLootLocation = LinkedHashMap<String, LootLocation>()
+
+@SubscribeEvent
+fun onPlayerLeaveUnloadLocation(e: PlayerQuitEvent) {
+    openedLootLocation.remove(e.player.uniqueId.toString())
+}
+
 fun Player.openLootChest(instance: LootInstance) {
 
     val player = this
 
-    val template = instance.template ?: run {
-        warningS("An error occurred: Opening LootTable is not exist. Is you deleted LootTable Configuration in runtime?")
-        warningS("Location: ${instance.loc.toFormat()}")
-        return
-    }
+    val template = instance.template ?: return
 
     var closed = false
     val searchLimit: Int? = template.options.searchLimit.asNumberFormatNullable(player)?.roundToInt()
@@ -46,9 +52,13 @@ fun Player.openLootChest(instance: LootInstance) {
             val element = instance.getSlotItem(int) ?: return
             val stat = instance.getSearchStat(player, element, int, instance)
             val display = element.getDisplayItem(stat, player)
+
             if (display == null) {
-                instance.elements.remove(int)
+                val newElement = instance.elements
+                newElement.remove(int)
+                instance.elements = newElement
             }
+
             if (stat == LootElementStat.SEARCHED && searchingSlots.contains(int)) {
                 playConfiguredSound(player, "search-end")
                 searchingSlots.remove(int)
@@ -59,9 +69,13 @@ fun Player.openLootChest(instance: LootInstance) {
         fun update(int: Int, element: LootElement?, inventory: Inventory, instance: LootInstance) {
             val stat = element?.let { instance.getSearchStat(player, it, int, instance) }
             val display = stat?.let { element.getDisplayItem(it, player) }
+
             if (display == null) {
-                instance.elements.remove(int)
+                val newElement = instance.elements
+                newElement.remove(int)
+                instance.elements = newElement
             }
+
             if (stat == LootElementStat.SEARCHED && searchingSlots.contains(int)) {
                 playConfiguredSound(player, "search-end")
                 searchingSlots.remove(int)
@@ -71,12 +85,19 @@ fun Player.openLootChest(instance: LootInstance) {
         }
         fun updateAll(inventory: Inventory) {
 //            devLog("Updating ALL")
-            for (element in instance.elements) {
+
+            val iterator = instance.elements.iterator()
+            while (iterator.hasNext()) {
+                val element = iterator.next()
                 update(element.key, element.value, inventory, instance)
             }
+//            for (element in instance.elements) {
+//                update(element.key, element.value, inventory, instance)
+//            }
         }
 
         onBuild(async = true) { player, inventory ->
+            openedLootLocation[player.uniqueId.toString()] = instance.loc
             devLog("refreshing")
             playConfiguredSound(player, "open")
             updateAll(inventory)
@@ -192,6 +213,7 @@ fun Player.openLootChest(instance: LootInstance) {
         onClose { event ->
             closed = true
             instance.resetPlayerSearch(event.player as Player)
+            openedLootLocation.remove(event.player.uniqueId.toString())
             template.agents?.runAgent("onClose", linkedMapOf("event" to event, "inventory" to inventory), player)
         }
 

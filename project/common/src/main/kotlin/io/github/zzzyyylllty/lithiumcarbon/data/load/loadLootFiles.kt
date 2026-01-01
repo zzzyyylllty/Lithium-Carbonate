@@ -10,6 +10,8 @@ import io.github.zzzyyylllty.lithiumcarbon.data.LootPool
 import io.github.zzzyyylllty.lithiumcarbon.data.LootTable
 import io.github.zzzyyylllty.lithiumcarbon.data.LootTemplate
 import io.github.zzzyyylllty.lithiumcarbon.data.LootTemplateOptions
+import io.github.zzzyyylllty.lithiumcarbon.data.LootUpdate
+import io.github.zzzyyylllty.lithiumcarbon.data.LootUpdateLoop
 import io.github.zzzyyylllty.lithiumcarbon.data.LootVector
 import io.github.zzzyyylllty.lithiumcarbon.data.Loots
 import io.github.zzzyyylllty.lithiumcarbon.data.define.LootDefine
@@ -159,6 +161,25 @@ fun loadLoot(key: String, arg: Map<String, Any?>) {
         agents = c.getAgents(arg)
     )
 
+    val loops = mutableListOf<LootUpdateLoop>()
+
+    val refresh = arg["refresh"] as? LinkedHashMap<String, Any?>?
+
+    val rawLoops = (refresh?.get("loops") ?: refresh?.get("loop")) as? List<LinkedHashMap<String, Any?>?>?
+
+    if (rawLoops != null) {
+        for (loop in rawLoops) {
+            if (loop == null) continue
+            loops.add(LootUpdateLoop(loop["period"].toString().toDoubleOrNull() ?: 100.0, c.getAgents(loop)))
+        }
+    }
+
+    val update = if (loops.isEmpty()) {
+        LootUpdate(null, refresh?.get("expire").toString())
+    } else {
+        LootUpdate(loops, arg["refresh.expire"].toString())
+    }
+
     val loot = LootTemplate(
         id = key,
         name = c.getDeep(arg, "display.name") as? String? ?: "Unknown Name",
@@ -168,7 +189,8 @@ fun loadLoot(key: String, arg: Map<String, Any?>) {
         availableSlots = availableSlots.toSet(),
         lootTable = lootTable,
         agents = c.getAgents(arg),
-        options = options
+        options = options,
+        update = update
     )
 
     val defines = LootDefines(parseDefines(arg))

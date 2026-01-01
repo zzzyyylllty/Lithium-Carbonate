@@ -1,4 +1,18 @@
 test_loot:
+  refresh:
+    loops:
+      # Every 600 Seconds refresh all loots
+      - period: 600
+        agent:
+          onRefresh:
+            js:
+              Bukkit.broadcast(mmUtil.deserialize("Loot " + name + " refreshed."))
+          onCancel:
+            js:
+              Bukkit.broadcast(mmUtil.deserialize("Loot " + name + " looping cancelled."))
+    # When loot opened, expired when 300 second passed.
+    expire: 300
+
   display:
 
     # Loot Name
@@ -107,7 +121,7 @@ test_loot:
           weight: 3.14 # Supported decimal
           # weight: "{{ random 1 to 10 }}" for dynamic weight.
 
-          search-time: 1000 # MS
+          search-time: 1.5 # Seconds
           skip-search: false # Skip search? (skip will not play sound and agent)
 
           # Displayed item. This is optional. if leave a blank will use reward item.

@@ -103,7 +103,7 @@ data class Loots(
             items = items,
             kether = kether,
             javaScript = javaScript,
-            searchTime = searchTime.asNumberFormat(player).roundToLong(),
+            searchTime = searchTime.asNumberFormat(player),
             skipSearch = skipSearch
         )
     }

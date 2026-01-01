@@ -10,14 +10,12 @@ import javax.script.SimpleBindings
 import kotlin.math.roundToInt
 
 data class LootElement(
-//    var searchEnd: Long? = null,
-//    var searcherUUID: String, // 当玩家关闭容器时，检测玩家UUID的战利品并重置搜索进度
     var displayItem: LootItem? = null,
     val exps: Double = 0.0,
     val items: List<LootItem>? = null,
     val kether: List<String>? = null,
     val javaScript: CompiledScript? = null,
-    val searchTime: Long = 0,
+    val searchTime: Double = 0.0,
     val skipSearch: Boolean = false,
 ) {
     fun getDisplayItem(stat: LootElementStat, player: Player?): ItemStack? {

@@ -9,6 +9,9 @@ import io.github.zzzyyylllty.lithiumcarbon.data.define.LootDefines
 import io.github.zzzyyylllty.lithiumcarbon.data.load.loadItemFiles
 import io.github.zzzyyylllty.lithiumcarbon.data.load.loadLootFiles
 import io.github.zzzyyylllty.lithiumcarbon.event.LithiumCarbonReloadEvent
+import io.github.zzzyyylllty.lithiumcarbon.gui.openedLootLocation
+import io.github.zzzyyylllty.lithiumcarbon.util.serialize.toUUID
+import org.bukkit.Bukkit
 import org.bukkit.command.CommandSender
 import taboolib.common.LifeCycle
 import taboolib.common.env.RuntimeDependency
@@ -48,6 +51,7 @@ object LithiumCarbon : Plugin() {
     val lootItems = mutableMapOf<Char, LootItem>()
     val lootItemsDef = mutableMapOf<String, LootItem>()
     val allowedWorlds = mutableListOf<Regex>()
+    var reloadTimes: Int = 0
 
     var devMode = true
 
@@ -65,6 +69,7 @@ object LithiumCarbon : Plugin() {
     fun reloadCustomConfig(async: Boolean = true) {
         submit(async) {
 
+            reloadTimes++
             config.reload()
             devMode = config.getBoolean("debug",false)
             lootCaches.clear()
@@ -74,10 +79,17 @@ object LithiumCarbon : Plugin() {
             allowedWorlds.clear()
             lootItems.clear()
             lootItemsDef.clear()
+            openedLootLocation.forEach {
+                Bukkit.getPlayer(it.key.toUUID())?.closeInventory()
+            }
+            openedLootLocation.clear()
             loadItemFiles()
             loadLootFiles()
             for (world in config.getList("allowed-worlds") ?: listOf("*")) {
                 allowedWorlds.add(world.toString().toRegex())
+            }
+            for (loot in lootTemplates.values) {
+                loot.update.runUpdate(loot)
             }
             LithiumCarbonReloadEvent().call()
         }

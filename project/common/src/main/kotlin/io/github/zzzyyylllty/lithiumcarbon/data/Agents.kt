@@ -51,7 +51,7 @@ fun registerExternalData() {
 data class Agents(
     val agents: LinkedHashMap<String, Agent>
 ) {
-    fun runAgent(agent: String, extraVariables: Map<String, Any?>, player: Player) {
+    fun runAgent(agent: String, extraVariables: Map<String, Any?>, player: Player?) {
         agents[agent]?.runAgent(extraVariables, player)
     }
 }
@@ -63,7 +63,7 @@ data class Agent(
     val asyncKe: List<String>? = null,
     val kether: List<String>? = null,
 ){
-    fun runAgent(extraVariables: Map<String, Any?>, player: Player) {
+    fun runAgent(extraVariables: Map<String, Any?>, player: Player?) {
         val data = defaultData + extraVariables + mapOf("player" to player, "trigger" to trigger)
         js?.let {
             submit {
