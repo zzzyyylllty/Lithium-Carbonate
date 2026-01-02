@@ -14,7 +14,7 @@ import kotlin.math.roundToInt
 
 data class LootElement(
     var displayItem: LootItem? = null,
-    val exps: Double = 0.0,
+    val exps: Double? = 0.0,
     val items: List<LootItem>? = null,
     val kether: List<String>? = null,
     val javaScript: CompiledScript? = null,
@@ -47,8 +47,8 @@ data class LootElement(
             player.giveItem(item)
             player.sendComponent(player.asLangText("Claim", template.name, mmUtil.serialize(item.displayName())))
         }
-        val exp = exps.roundToInt()
-        if (exp != 0) {
+        val exp = exps?.roundToInt()
+        if (exp != null && exp != 0) {
             player.giveExp(exp)
             player.sendComponent(player.asLangText("ClaimExp", template.name, exp))
         }

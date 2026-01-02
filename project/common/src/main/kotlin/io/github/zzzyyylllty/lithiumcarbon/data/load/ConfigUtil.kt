@@ -48,7 +48,15 @@ object ConfigUtil {
         return current
     }
     fun getItem(input: Any?): LootItem? {
-        val input = input as? LinkedHashMap<String, Any?>? ?: (input as? String?)?.let { linkedMapOf("item" to it) } ?: return null
+        val input = input as? LinkedHashMap<String, Any?>? ?: (input as? String?)?.let {
+            val namespaceID = it
+
+            val split = namespaceID.split(":").toMutableList()
+            val source = if (split.size >= 2) split.first().lowercase() else "mc"
+            val item = split.joinToString(":").removePrefix("$source:")
+
+            return LootItem(source, item)
+        } ?: return null
 
         val namespaceID = input["item"]?.toString() ?: "grass_block"
 

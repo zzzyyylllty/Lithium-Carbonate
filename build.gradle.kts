@@ -47,7 +47,7 @@ allprojects {
         }
         version {
             taboolib = rootProject.libs.versions.taboolib.get()
-            coroutines = "1.7.3"
+            coroutines = "1.8.1"
             // 跳过 Kotlin 加载
             skipKotlin = false
             // 跳过 Kotlin 重定向
@@ -136,6 +136,7 @@ allprojects {
         taboo("io.github.zzzyyylllty:EmbianComponent:1.0.2")
         implementation("com.github.zzzyyylllty:Sertraline-Hydrochloride:3.8.2")
 
+        taboo("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
         implementation("com.sk89q.worldguard:worldguard-bukkit:7.0.10-SNAPSHOT")
         implementation("com.sk89q.worldguard:worldguard-core:7.0.10-SNAPSHOT")
         // 服务器 API

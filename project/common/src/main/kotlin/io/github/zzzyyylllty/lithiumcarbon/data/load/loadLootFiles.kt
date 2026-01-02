@@ -123,10 +123,14 @@ fun loadLoot(key: String, arg: Map<String, Any?>) {
             val displayItem = c.getItem(pool["display"])
 
             if (it != null) {
-                val items = it["items"] as? List<Any?>?
+                val items = it["items"]
 
-                if (items != null) for (item in items) {
-                    if (item != null) c.getItem(item)?.let { element -> loadedItems.add(element) }
+                (items as? List<Any?>?)?.let {
+                    for (item in items) {
+                        if (item != null) c.getItem(item)?.let { element -> loadedItems.add(element) }
+                    }
+                } ?: (items as? String?)?.let {
+                    c.getItem(items)?.let { element -> loadedItems.add(element) }
                 }
 
                 loadedLoots.add(

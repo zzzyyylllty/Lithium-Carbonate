@@ -60,16 +60,17 @@ data class LootUpdate(
     fun runUpdate(template : LootTemplate) {
         val currentLoop = reloadTimes
         loops?.forEach { loop ->
-            devLog("Starting loop $loop")
+            val id = template.id
+            devLog("Starting loop $id")
             submitAsync(period = (loop.period*20).roundToLong()) {
-                devLog("Acting loop $loop")
+                devLog("Acting loop $id")
                 if (currentLoop != reloadTimes) {
                     loop.agents?.runAgent("onCancel", linkedMapOf("loop" to loop, "timestart" to currentLoop, "template" to template, "name" to template.name), null)
                     cancel()
                 }
                 loop.agents?.runAgent("onRefresh", linkedMapOf("loop" to loop, "timestart" to currentLoop, "name" to template.name), null)
                 lootMap.forEach {
-                    it.value.update()
+                    if (it.value.templateID == id) it.value.update()
                 }
             }
         }

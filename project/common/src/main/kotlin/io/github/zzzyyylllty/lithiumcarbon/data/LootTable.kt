@@ -3,6 +3,7 @@ package io.github.zzzyyylllty.lithiumcarbon.data
 import io.github.zzzyyylllty.lithiumcarbon.logger.severeL
 import io.github.zzzyyylllty.lithiumcarbon.util.WeightHelper
 import io.github.zzzyyylllty.lithiumcarbon.util.asNumberFormat
+import io.github.zzzyyylllty.lithiumcarbon.util.asNumberFormatNullable
 import io.github.zzzyyylllty.lithiumcarbon.util.devLog
 import org.bukkit.entity.Player
 import javax.script.CompiledScript
@@ -84,7 +85,7 @@ data class LootPool(
 
 data class Loots(
     var displayItem: LootItem? = null,
-    val exps: String,
+    val exps: String?,
     val items: List<LootItem>? = null,
     val kether: List<String>? = null,
     val javaScript: CompiledScript? = null,
@@ -99,7 +100,7 @@ data class Loots(
     fun parseLoot(player: Player): LootElement {
         return LootElement(
             displayItem = displayItem,
-            exps = exps.asNumberFormat(player),
+            exps = exps.asNumberFormatNullable(player),
             items = items,
             kether = kether,
             javaScript = javaScript,

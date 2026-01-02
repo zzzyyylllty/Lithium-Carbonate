@@ -26,6 +26,7 @@ taboolib {
     // relocate("de.tr7zw.changeme.nbtapi","io.github.zzzyyylllty.lithiumcarbon.library.nbtapi")
     relocate("io.github.projectunified.uniitem","io.github.zzzyyylllty.lithiumcarbon.library.uniitem")
     relocate("com.fasterxml.jackson","io.github.zzzyyylllty.lithiumcarbon.library.jackson")
+    relocate("cn.gtemc.itembridge","io.github.zzzyyylllty.escitalopram.library.itembridge")
     relocate("com.mojang.datafixers","io.github.zzzyyylllty.lithiumcarbon.library.datafixers")
     relocate("io.netty.handler.codec.http", "io.github.zzzyyylllty.lithiumcarbon.library.http")
     relocate("io.netty.handler.codec.rtsp", "io.github.zzzyyylllty.lithiumcarbon.library.rtsp")
