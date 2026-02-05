@@ -2,12 +2,14 @@ package io.github.zzzyyylllty.lithiumcarbon.data.define
 
 import io.github.zzzyyylllty.lithiumcarbon.data.Condition
 import io.github.zzzyyylllty.lithiumcarbon.data.LootLocation
+import io.github.zzzyyylllty.lithiumcarbon.util.MultiBlock
 import io.github.zzzyyylllty.lithiumcarbon.util.WorldGuardHelper
 import io.github.zzzyyylllty.lithiumcarbon.util.devLog
+import io.github.zzzyyylllty.lithiumcarbon.util.validate
 import org.bukkit.block.Block
 import org.bukkit.entity.Player
 
-class WGDefine(val regions: List<String>, val regionsRegex: List<Regex>?, override val blocks: HashSet<String>, override val condition: Condition?): LootDefine {
+class WGDefine(val regions: List<String>, val regionsRegex: List<Regex>?, override val blocks: HashSet<MultiBlock>, override val condition: Condition?): LootDefine {
 
     override val type: String = "worldguard"
 
@@ -21,13 +23,13 @@ class WGDefine(val regions: List<String>, val regionsRegex: List<Regex>?, overri
                 for (r in regionsRegex) {
                     if (it.matches(r)) {
                         devLog("WG define passed: $it")
-                        if (blocks.contains(block.type.name)) return validateCondition(location, block, player)
+                        if (blocks.validate(block)) return validateCondition(location, block, player)
                     }
                 }
             } else required?.forEach {
                 if (regions.contains(it)) {
                     devLog("WG define passed: $it")
-                    if (blocks.contains(block.type.name)) return validateCondition(location, block, player)
+                    if (blocks.validate(block)) return validateCondition(location, block, player)
                 }
             }
 

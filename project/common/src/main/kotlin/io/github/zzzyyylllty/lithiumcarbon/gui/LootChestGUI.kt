@@ -21,13 +21,15 @@ import taboolib.module.ui.openMenu
 import taboolib.module.ui.type.Chest
 import taboolib.platform.util.asLangText
 import taboolib.platform.util.submit
+import java.util.UUID
+import java.util.concurrent.ConcurrentHashMap
 import kotlin.math.roundToInt
 
-val openedLootLocation = LinkedHashMap<String, LootLocation>()
+val openedLootLocation = ConcurrentHashMap<UUID, LootLocation>()
 
 @SubscribeEvent
 fun onPlayerLeaveUnloadLocation(e: PlayerQuitEvent) {
-    openedLootLocation.remove(e.player.uniqueId.toString())
+    openedLootLocation.remove(e.player.uniqueId)
 }
 
 
@@ -108,7 +110,7 @@ fun Player.openLootChest(initialInstance: LootInstance) { // 将参数名改为 
             // 使用 submitChain 来调度主线程操作
             submitChain {
                 sync { // 切换到主线程
-                    openedLootLocation[player.uniqueId.toString()] = initialInstance.loc // 操作 LootInstance
+                    openedLootLocation[player.uniqueId] = initialInstance.loc // 操作 LootInstance
                     devLog("refreshing")
                     playConfiguredSound(player, "open") // Bukkit API
 
@@ -251,7 +253,7 @@ fun Player.openLootChest(initialInstance: LootInstance) { // 将参数名改为 
                 sync { // 切换到主线程
                     closed = true // 修改局部变量是安全的
                     initialInstance.resetPlayerSearch(event.player as Player) // 操作 LootInstance
-                    openedLootLocation.remove(event.player.uniqueId.toString()) // 假设 openedLootLocation 是线程安全的
+                    openedLootLocation.remove(event.player.uniqueId) // 假设 openedLootLocation 是线程安全的
                     template.agents?.runAgent("onClose", linkedMapOf("event" to event, "inventory" to inventory), player) // 假设 agent 也可能需要主线程
                 }
             }

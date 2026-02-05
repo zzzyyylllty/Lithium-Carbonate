@@ -2,13 +2,14 @@ package io.github.zzzyyylllty.lithiumcarbon.data.define
 
 import io.github.zzzyyylllty.lithiumcarbon.data.Condition
 import io.github.zzzyyylllty.lithiumcarbon.data.LootLocation
-import io.github.zzzyyylllty.lithiumcarbon.util.WorldGuardHelper
+import io.github.zzzyyylllty.lithiumcarbon.util.MultiBlock
 import io.github.zzzyyylllty.lithiumcarbon.util.devLog
+import io.github.zzzyyylllty.lithiumcarbon.util.validate
 import org.bukkit.block.Block
 import org.bukkit.entity.Player
 import kotlin.text.matches
 
-class WorldDefine(val worlds: HashSet<String>, val regexWorlds: HashSet<Regex>?, override val blocks: HashSet<String>, override val condition: Condition?): LootDefine {
+class WorldDefine(val worlds: HashSet<String>, val regexWorlds: HashSet<Regex>?, override val blocks: HashSet<MultiBlock>, override val condition: Condition?): LootDefine {
 
     override val type: String = "world"
 
@@ -20,11 +21,11 @@ class WorldDefine(val worlds: HashSet<String>, val regexWorlds: HashSet<Regex>?,
             if (blockWorld.matches(it)) {
                 devLog("World define passed: $it.")
 
-                if (blocks.contains(block.type.name)) return validateCondition(location, block, player)
+                if (blocks.validate(block)) return validateCondition(location, block, player)
             }
         } else if (worlds.contains(blockWorld)) {
             devLog("World define passed: $blockWorld.")
-            if (blocks.contains(block.type.name)) return validateCondition(location, block, player)
+            if (blocks.validate(block)) return validateCondition(location, block, player)
         }
 
         return false

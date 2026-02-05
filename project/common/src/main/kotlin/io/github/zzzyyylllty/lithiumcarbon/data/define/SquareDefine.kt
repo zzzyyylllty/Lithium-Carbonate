@@ -2,13 +2,13 @@ package io.github.zzzyyylllty.lithiumcarbon.data.define
 
 import io.github.zzzyyylllty.lithiumcarbon.data.Condition
 import io.github.zzzyyylllty.lithiumcarbon.data.LootLocation
-import io.github.zzzyyylllty.lithiumcarbon.util.WorldGuardHelper
+import io.github.zzzyyylllty.lithiumcarbon.util.MultiBlock
 import io.github.zzzyyylllty.lithiumcarbon.util.devLog
+import io.github.zzzyyylllty.lithiumcarbon.util.validate
 import org.bukkit.block.Block
 import org.bukkit.entity.Player
-import org.bukkit.event.world.WorldLoadEvent
 
-class SquareDefine(val from: LootLocation, val to: LootLocation, override val blocks: HashSet<String>, override val condition: Condition?): LootDefine {
+class SquareDefine(val from: LootLocation, val to: LootLocation, override val blocks: HashSet<MultiBlock>, override val condition: Condition?): LootDefine {
 
     override val type: String = "square"
 
@@ -23,7 +23,7 @@ class SquareDefine(val from: LootLocation, val to: LootLocation, override val bl
 
             devLog("Square define passed.")
 
-            if (blocks.contains(block.type.name)) {
+            if (blocks.validate(block)) {
                 return validateCondition(location, block, player)
             }
             return false

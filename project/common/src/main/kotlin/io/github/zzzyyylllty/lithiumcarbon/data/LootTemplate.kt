@@ -7,6 +7,7 @@ import io.github.zzzyyylllty.lithiumcarbon.util.asNumberFormatNullable
 import io.github.zzzyyylllty.lithiumcarbon.util.devLog
 import org.bukkit.block.Block
 import org.bukkit.entity.Player
+import taboolib.common.platform.function.submit
 import taboolib.common.platform.function.submitAsync
 import kotlin.math.roundToLong
 
@@ -70,7 +71,9 @@ data class LootUpdate(
                 }
                 loop.agents?.runAgent("onRefresh", linkedMapOf("loop" to loop, "timestart" to currentLoop, "name" to template.name), null)
                 lootMap.forEach {
-                    if (it.value.templateID == id) it.value.update()
+                    if (it.value.templateID == id) {
+                        it.value.update()
+                    }
                 }
             }
         }

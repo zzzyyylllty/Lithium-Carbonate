@@ -12,12 +12,14 @@ import io.github.zzzyyylllty.lithiumcarbon.data.LootInstance
 import io.github.zzzyyylllty.lithiumcarbon.data.LootLocation
 import io.github.zzzyyylllty.lithiumcarbon.data.LootTemplate
 import io.github.zzzyyylllty.lithiumcarbon.gui.openLootChest
+import io.github.zzzyyylllty.lithiumcarbon.util.DependencyHelper
 import io.github.zzzyyylllty.lithiumcarbon.util.devLog
 import org.bukkit.block.Block
 import org.bukkit.entity.Player
 import org.bukkit.event.block.Action
 import org.bukkit.event.player.PlayerInteractEvent
 import taboolib.common.platform.event.SubscribeEvent
+import taboolib.common.platform.function.submit
 import taboolib.common.platform.function.submitAsync
 import kotlin.collections.get
 
@@ -42,7 +44,13 @@ fun onInteract(e: PlayerInteractEvent) {
         }
 
         val location = LocationHelper.toLootLocation(block.location)
-        val define = getDefines(location, block, player) ?: run {
+        val define =
+//            if (DependencyHelper.wg) {
+//                player ?: getDefines(location, block, player)
+//            }
+//            else
+                getDefines(location, block, player)
+            ?: run {
             devLog("Define is null, return.")
             return
         }
@@ -67,7 +75,7 @@ fun onInteract(e: PlayerInteractEvent) {
                     }
                 }
             }
-            player.openLootChest(instance)
+            submit { player.openLootChest(instance) }
         }
     } else {
         return
@@ -75,10 +83,12 @@ fun onInteract(e: PlayerInteractEvent) {
 }
 
 fun getDefines(location: LootLocation, block: Block, player: Player): LootTemplate? {
-    return getDefinesWithoutCache(location, block, player)?.let {
-        lootCaches.getOrPut(location) {
-            it
-        }
+    return if (lootCaches[location] == null) {
+        val define = getDefinesWithoutCache(location, block, player)
+        define?.let { lootCaches[location] = it }
+        define
+    } else {
+        lootCaches[location]
     }
 }
 

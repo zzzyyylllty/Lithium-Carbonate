@@ -4,14 +4,13 @@ import io.github.zzzyyylllty.lithiumcarbon.data.Condition
 import io.github.zzzyyylllty.lithiumcarbon.data.LocationHelper
 import io.github.zzzyyylllty.lithiumcarbon.data.LootLocation
 import io.github.zzzyyylllty.lithiumcarbon.data.LootVector
-import io.github.zzzyyylllty.lithiumcarbon.util.WorldGuardHelper
+import io.github.zzzyyylllty.lithiumcarbon.util.MultiBlock
 import io.github.zzzyyylllty.lithiumcarbon.util.devLog
-import io.github.zzzyyylllty.lithiumcarbon.util.loc
 import org.bukkit.block.Block
 import org.bukkit.entity.Player
 import kotlin.text.matches
 
-class SpecifyDefine(val locations: LinkedHashMap<String, HashSet<LootVector>>, val worldRegex: Regex?, override val blocks: HashSet<String>, override val condition: Condition?): LootDefine {
+class SpecifyDefine(val locations: LinkedHashMap<String, HashSet<LootVector>>, val worldRegex: Regex?, override val blocks: HashSet<MultiBlock>, override val condition: Condition?): LootDefine {
 
     override val type: String = "world"
 

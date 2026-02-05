@@ -6,6 +6,7 @@ import io.github.zzzyyylllty.lithiumcarbon.gui.openedLootLocation
 import io.github.zzzyyylllty.lithiumcarbon.util.serialize.toUUID
 import org.bukkit.Bukkit
 import org.bukkit.entity.Player
+import taboolib.common.platform.function.submit
 import kotlin.math.roundToLong
 
 data class LootInstance(
@@ -66,9 +67,9 @@ data class LootInstance(
         openedLootLocation
             .filter{ it.value == loc }
             .forEach {
-                Bukkit.getPlayer(it.key.toUUID())?.closeInventory()
+                Bukkit.getPlayer(it.key)?.closeInventory()
             }
-        lootMap.remove(loc)
+        submit { lootMap.remove(loc) }
     }
 
 }

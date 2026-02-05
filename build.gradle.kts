@@ -120,6 +120,7 @@ allprojects {
 
         maven("https://repo.momirealms.net/releases/")
         maven("https://repo.momirealms.net/releases/")
+        maven("https://repo.momirealms.net/releases/")
         maven { url = uri("https://repo.codemc.io/repository/maven-releases/") }
 
         maven { url = uri("https://repo.codemc.io/repository/maven-snapshots/") }
@@ -155,6 +156,8 @@ allprojects {
 //        compileOnly(rootProject.libs.caffeine)
         compileOnly(rootProject.libs.gson)
 
+        compileOnly("net.momirealms:craft-engine-core:0.0.66")
+        compileOnly("net.momirealms:craft-engine-bukkit:0.0.66")
         // 核心功能库 (运行时需要)
 //        implementation(rootProject.libs.bundles.reflex)
 //        implementation(rootProject.libs.bundles.asm)

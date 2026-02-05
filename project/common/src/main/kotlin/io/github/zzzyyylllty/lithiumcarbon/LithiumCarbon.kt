@@ -28,6 +28,7 @@ import taboolib.module.lang.Language
 import taboolib.module.lang.event.PlayerSelectLocaleEvent
 import taboolib.module.lang.event.SystemSelectLocaleEvent
 import java.time.format.DateTimeFormatter
+import java.util.concurrent.ConcurrentHashMap
 
 //@RuntimeDependency(
 //    value = "!com.google.code.gson:gson:2.10.1",
@@ -44,10 +45,10 @@ object LithiumCarbon : Plugin() {
 //    val host by lazy { config.getHost("database") }
 //    val dataSource by lazy { host.createDataSource() }
 //    val playerDataMap = mutableMapOf<String, PlayerData>()
-    val lootMap = mutableMapOf<LootLocation, LootInstance>()
+    val lootMap = ConcurrentHashMap<LootLocation, LootInstance>()
     val lootTemplates = mutableMapOf<String, LootTemplate>()
     val lootDefines = mutableMapOf<String, LootDefines>()
-    val lootCaches = mutableMapOf<LootLocation, LootTemplate>()
+    val lootCaches = ConcurrentHashMap<LootLocation, LootTemplate>()
     val lootItems = mutableMapOf<Char, LootItem>()
     val lootItemsDef = mutableMapOf<String, LootItem>()
     val allowedWorlds = mutableListOf<Regex>()
@@ -80,12 +81,12 @@ object LithiumCarbon : Plugin() {
             lootItems.clear()
             lootItemsDef.clear()
             openedLootLocation.forEach {
-                Bukkit.getPlayer(it.key.toUUID())?.closeInventory()
+                Bukkit.getPlayer(it.key)?.closeInventory()
             }
             openedLootLocation.clear()
             loadItemFiles()
             loadLootFiles()
-            for (world in config.getList("allowed-worlds") ?: listOf("*")) {
+            for (world in config.getList("allowed-worlds") ?: listOf(".+")) {
                 allowedWorlds.add(world.toString().toRegex())
             }
             for (loot in lootTemplates.values) {

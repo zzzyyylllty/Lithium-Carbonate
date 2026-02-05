@@ -17,6 +17,10 @@ object DependencyHelper {
         isPluginInstalled("Sertraline")
     }
 
+    val ce by lazy {
+        isPluginInstalled("CraftEngine")
+    }
+
 
 
 

@@ -25,6 +25,7 @@ import io.github.zzzyyylllty.lithiumcarbon.logger.infoL
 import io.github.zzzyyylllty.lithiumcarbon.logger.severeL
 import io.github.zzzyyylllty.lithiumcarbon.logger.warningL
 import io.github.zzzyyylllty.lithiumcarbon.util.devLog
+import io.github.zzzyyylllty.lithiumcarbon.util.loadBlocks
 import io.github.zzzyyylllty.lithiumcarbon.util.toBooleanTolerance
 
 // import org.yaml.snakeyaml.Yaml
@@ -280,7 +281,7 @@ fun parseDefines(arg: Map<String, Any?>): LinkedHashMap<String, LootDefine> {
                 result[id] = SpecifyDefine(
                     locations = locationsMap,
                     worldRegex = world,
-                    blocks = blocks,
+                    blocks = blocks.loadBlocks(),
                     condition = condition
                 )
             }
@@ -295,7 +296,7 @@ fun parseDefines(arg: Map<String, Any?>): LinkedHashMap<String, LootDefine> {
                 result[id] = SquareDefine(
                     from = fromLoc,
                     to = toLoc,
-                    blocks = blocks,
+                    blocks = blocks.loadBlocks(),
                     condition = condition
                 )
             }
@@ -310,7 +311,7 @@ fun parseDefines(arg: Map<String, Any?>): LinkedHashMap<String, LootDefine> {
                 result[id] = WGDefine(
                     regions = regionsList,
                     regionsRegex = regionsRegex,
-                    blocks = blocks,
+                    blocks = blocks.loadBlocks(),
                     condition = condition
                 )
             }
@@ -325,7 +326,7 @@ fun parseDefines(arg: Map<String, Any?>): LinkedHashMap<String, LootDefine> {
                 result[id] = WorldDefine(
                     worlds = worldsList,
                     regexWorlds = regexWorlds,
-                    blocks = blocks,
+                    blocks = blocks.loadBlocks(),
                     condition = condition
                 )
             }

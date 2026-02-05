@@ -5,6 +5,7 @@ import io.github.zzzyyylllty.lithiumcarbon.LithiumCarbon.lootDefines
 import io.github.zzzyyylllty.lithiumcarbon.LithiumCarbon.lootMap
 import io.github.zzzyyylllty.lithiumcarbon.LithiumCarbon.lootTemplates
 import io.github.zzzyyylllty.lithiumcarbon.function.player.sendComponent
+import io.github.zzzyyylllty.lithiumcarbon.gui.openedLootLocation
 import org.bukkit.command.CommandSender
 import taboolib.common.platform.command.CommandBody
 import taboolib.common.platform.command.CommandHeader
@@ -60,6 +61,12 @@ object LithiumCarbonDebugCommand {
     val getTemplates = subCommand {
         execute<CommandSender> { sender, context, argument ->
             sender.sendComponent(lootTemplates.entries.toString())
+        }
+    }
+    @CommandBody
+    val getopenedLootLocation = subCommand {
+        execute<CommandSender> { sender, context, argument ->
+            sender.sendComponent(openedLootLocation.entries.toString())
         }
     }
 
