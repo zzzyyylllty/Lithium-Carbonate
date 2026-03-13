@@ -58,7 +58,7 @@ fun loadItemFile(file: File) {
 fun loadItem(key: String, arg: Map<String, Any?>) {
     val c = ConfigUtil
 
-    val item = c.getItem(arg)
+    val item = c.getItem(arg, "1")
 
     item?.let {
         if (key.length >= 2) lootItemsDef[key] = it

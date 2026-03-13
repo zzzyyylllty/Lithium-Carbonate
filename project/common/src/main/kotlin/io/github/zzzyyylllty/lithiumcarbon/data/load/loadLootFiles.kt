@@ -121,17 +121,18 @@ fun loadLoot(key: String, arg: Map<String, Any?>) {
 
             val loadedItems = mutableListOf<LootItem>()
 
-            val displayItem = c.getItem(pool["display"])
+            val displayItem = c.getItem(pool["display"], null)
 
             if (it != null) {
                 val items = it["items"]
+                val defaultAmount = it["amount"]?.toString()
 
                 (items as? List<Any?>?)?.let {
                     for (item in items) {
-                        if (item != null) c.getItem(item)?.let { element -> loadedItems.add(element) }
+                        if (item != null) c.getItem(item, defaultAmount)?.let { element -> loadedItems.add(element) }
                     }
                 } ?: (items as? String?)?.let {
-                    c.getItem(items)?.let { element -> loadedItems.add(element) }
+                    c.getItem(items, defaultAmount)?.let { element -> loadedItems.add(element) }
                 }
 
                 loadedLoots.add(

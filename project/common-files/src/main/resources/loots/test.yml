@@ -140,8 +140,6 @@ test_loot:
             player.sendMessage(mmUtil.deserialize("<rainbow>Hello!"))
 
   agents:
-    onSearchLimit: |
-
     onOpen:
       js_async: |
         player.sendMessage(mmUtil.deserialize("Hello world, " + player.name + "!"))

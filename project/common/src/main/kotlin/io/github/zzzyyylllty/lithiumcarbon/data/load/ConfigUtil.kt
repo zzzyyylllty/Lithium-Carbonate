@@ -47,7 +47,7 @@ object ConfigUtil {
         }
         return current
     }
-    fun getItem(input: Any?): LootItem? {
+    fun getItem(input: Any?, defaultAmount: String?): LootItem? {
         val input = input as? LinkedHashMap<String, Any?>? ?: (input as? String?)?.let {
             val namespaceID = it
 
@@ -67,7 +67,7 @@ object ConfigUtil {
         val parameters = (input["parameters"] ?: input["parameter"]) as LinkedHashMap<String, Any?>?
         val components = (input["components"] ?: input["component"]) as LinkedHashMap<String, Any?>?
 
-        return LootItem(source, item, parameters, components)
+        return LootItem(source, item, parameters, components, input["amount"].toString() ?: defaultAmount ?: "1")
 
     }
     fun getAgents(input: Any?): Agents? {

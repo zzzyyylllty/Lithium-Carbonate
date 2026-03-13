@@ -46,6 +46,13 @@ default-layout:
   - '         '
   - '         '
 
+message:
+  SearchLimit: true
+  SearchStart: true
+  Searching: false
+  Searched: false
+  Claim: false
+  ClaimExp: true
 
 sounds:
   open: "minecraft:block.chest.locked 1 0.6 block"

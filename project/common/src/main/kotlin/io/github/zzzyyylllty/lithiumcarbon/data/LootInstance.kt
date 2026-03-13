@@ -64,12 +64,15 @@ data class LootInstance(
     }
 
     fun update() {
-        openedLootLocation
+        val players = openedLootLocation
             .filter{ it.value == loc }
-            .forEach {
+
+        submit {
+            players.forEach {
                 Bukkit.getPlayer(it.key)?.closeInventory()
             }
-        submit { lootMap.remove(loc) }
+            lootMap.remove(loc)
+        }
     }
 
 }

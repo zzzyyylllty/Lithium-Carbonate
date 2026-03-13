@@ -24,7 +24,7 @@ allprojects {
     taboolib {
         env {
             // 调试模式
-            debug = true
+            debug = false
             // 是否在开发模式下强制下载依赖
             forceDownloadInDev = false
             // 中央仓库地址

@@ -1,5 +1,6 @@
 package io.github.zzzyyylllty.lithiumcarbon.gui
 
+import io.github.zzzyyylllty.lithiumcarbon.LithiumCarbon.config
 import io.github.zzzyyylllty.lithiumcarbon.LithiumCarbon.lootItems
 import io.github.zzzyyylllty.lithiumcarbon.LithiumCarbon.lootMap
 import io.github.zzzyyylllty.lithiumcarbon.data.LootElement
@@ -82,7 +83,7 @@ fun Player.openLootChest(initialInstance: LootInstance) { // 将参数名改为 
 
             if (stat == LootElementStat.SEARCHED && currentLootInstance.getSearchingSlots(player)?.contains(slot) == true) {
                 playConfiguredSound(player, "search-end") // Bukkit API
-                player.sendComponent(player.asLangText("Searched", template.name, display?.displayName()?.let { mmUtil.serialize(it) } ?: "")) // Bukkit API
+                if (config.getBoolean("message.Searched")) player.sendComponent(player.asLangText("Searched", template.name, display?.displayName()?.let { mmUtil.serialize(it) } ?: "")) // Bukkit API
                 currentLootInstance.removeSearchingSlots(player, slot) // 操作 LootInstance
             }
             inventory.setItem(slot, display) // Bukkit API
@@ -177,7 +178,7 @@ fun Player.openLootChest(initialInstance: LootInstance) { // 将参数名改为 
                                             ),
                                             player
                                         )
-                                        player.sendComponent(player.asLangText("SearchLimit", template.name, it)) // Bukkit API
+                                        if (config.getBoolean("message.SearchLimit")) player.sendComponent(player.asLangText("SearchLimit", template.name, it)) // Bukkit API
                                         return@sync
                                     }
                                 }
@@ -186,12 +187,12 @@ fun Player.openLootChest(initialInstance: LootInstance) { // 将参数名改为 
                                     if (time > 0) {
                                         devLog("Start search.")
                                         initialInstance.startSearch(player, rawSlot, time) // 操作 LootInstance
-                                        player.sendComponent(player.asLangText("SearchStart", template.name)) // Bukkit API
+                                        if (config.getBoolean("message.SearchStart"))  player.sendComponent(player.asLangText("SearchStart", template.name)) // Bukkit API
                                         playConfiguredSound(player, "search") // Bukkit API
                                     } else {
                                         devLog("Search time is 0, skip search.")
                                         playConfiguredSound(player, "search") // Bukkit API
-                                        player.sendComponent(player.asLangText("SearchStart", template.name)) // Bukkit API
+                                        if (config.getBoolean("message.SearchStart"))  player.sendComponent(player.asLangText("SearchStart", template.name)) // Bukkit API
                                         initialInstance.startSearch(player, rawSlot, time, true) // 操作 LootInstance
                                     }
                                 } else {
@@ -204,7 +205,7 @@ fun Player.openLootChest(initialInstance: LootInstance) { // 将参数名改为 
                                 return@sync
                             }
                             LootElementStat.SEARCHING -> {
-                                player.sendComponent(player.asLangText("Searching", template.name)) // Bukkit API
+                                if (config.getBoolean("message.Searching"))  player.sendComponent(player.asLangText("Searching", template.name)) // Bukkit API
                                 playConfiguredSound(player, "searching") // Bukkit API
                                 return@sync
                             }

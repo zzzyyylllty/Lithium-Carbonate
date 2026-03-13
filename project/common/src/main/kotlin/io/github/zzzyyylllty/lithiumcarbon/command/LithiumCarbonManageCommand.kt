@@ -76,13 +76,21 @@ object LithiumCarbonManageCommand {
         dynamic("template") {
             execute<CommandSender> { sender, context, argument ->
                 submitAsync {
-                    val template = context["location"]
+                    val template = context["template"]
                     lootMap.values
                         .filter { it.templateID == template }
                         .forEach {
                             it.update()
                         }
                 }
+            }
+        }
+        execute<CommandSender> { sender, context, argument ->
+            submitAsync {
+                lootMap.values
+                    .forEach {
+                        it.update()
+                    }
             }
         }
     }

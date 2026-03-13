@@ -1,5 +1,6 @@
 package io.github.zzzyyylllty.lithiumcarbon.data
 
+import io.github.zzzyyylllty.lithiumcarbon.LithiumCarbon.config
 import io.github.zzzyyylllty.lithiumcarbon.function.kether.evalKether
 import io.github.zzzyyylllty.lithiumcarbon.function.player.sendComponent
 import io.github.zzzyyylllty.lithiumcarbon.util.LootGUIHelper
@@ -45,12 +46,12 @@ data class LootElement(
         items?.forEach { lItem ->
             val item = lItem.build(player)
             player.giveItem(item)
-            player.sendComponent(player.asLangText("Claim", template.name, mmUtil.serialize(item.displayName())))
+            if (config.getBoolean("message.Claim")) player.sendComponent(player.asLangText("Claim", template.name, mmUtil.serialize(item.displayName())))
         }
         val exp = exps?.roundToInt()
         if (exp != null && exp != 0) {
             player.giveExp(exp)
-            player.sendComponent(player.asLangText("ClaimExp", template.name, exp))
+            if (config.getBoolean("message.ClaimExp")) player.sendComponent(player.asLangText("ClaimExp", template.name, exp))
         }
         if (kether != null || javaScript != null) {
             val data = defaultData.toMutableMap()
