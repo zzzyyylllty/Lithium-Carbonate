@@ -26,6 +26,8 @@ logger:
 
 # Allowed loot blocks
 # Not support regex - if you want to support all blocks using allowed-all-blocks
+# If you want to allow external blocks
+# Please use real-block in server side, ex BROWN_MUSHROOM_BLOCK
 allowed-blocks:
   - CHEST
   - GRAY_SHULKER_BOX
