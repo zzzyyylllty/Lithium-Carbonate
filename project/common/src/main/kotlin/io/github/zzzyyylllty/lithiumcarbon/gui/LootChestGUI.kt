@@ -7,6 +7,10 @@ import io.github.zzzyyylllty.lithiumcarbon.data.LootElement
 import io.github.zzzyyylllty.lithiumcarbon.data.LootElementStat
 import io.github.zzzyyylllty.lithiumcarbon.data.LootInstance
 import io.github.zzzyyylllty.lithiumcarbon.data.LootLocation
+import io.github.zzzyyylllty.lithiumcarbon.event.ItemSearchCompletePostEvent
+import io.github.zzzyyylllty.lithiumcarbon.event.ItemSearchCompletePreEvent
+import io.github.zzzyyylllty.lithiumcarbon.event.ItemSearchStartEvent
+import io.github.zzzyyylllty.lithiumcarbon.event.LootElementApplyEvent
 import io.github.zzzyyylllty.lithiumcarbon.function.player.sendComponent
 import io.github.zzzyyylllty.lithiumcarbon.util.SoundUtil.playConfiguredSound
 import io.github.zzzyyylllty.lithiumcarbon.util.asNumberFormatNullable
@@ -35,24 +39,15 @@ fun onPlayerLeaveUnloadLocation(e: PlayerQuitEvent) {
 
 
 // 这段我懒得修异步问题了，直接用AI
-fun Player.openLootChest(initialInstance: LootInstance) { // 将参数名改为 initialInstance 以便与协程块内的变量区分
+fun Player.openLootChest(initialInstance: LootInstance) {
 
     val player = this
 
-    // 假设 `template` 及其配置数据是静态的，或者在异步线程访问是安全的。
-    // 如果 `initialInstance.template` 访问本身就需要主线程，那么此函数在调用时就应该被 submitChain { sync { ... } } 包裹。
-    // 但鉴于问题焦点是 `LootInstance` 的方法调用和多人搜刮问题，我们先假设此处是安全的。
     val template = initialInstance.template ?: return
 
     var closed = false
-    // `asNumberFormatNullable(player)` 可能会访问 Player 对象，此处最好也放在主线程，
-    // 但由于它是只读操作且通常不直接触发 Bukkit 错误，我们暂时保持。
-    // 更严格的做法是：val searchLimit = submitChain { sync { template.options.searchLimit.asNumberFormatNullable(player)?.roundToInt() } }.get()
     val searchLimit: Int? = template.options.searchLimit.asNumberFormatNullable(player)?.roundToInt()
 
-    // `player.openMenu` 本身是一个 Bukkit UI 操作，菜单库通常会确保其在主线程执行。
-    // `lootItems` 及其 `build(player)` 如果涉及 Bukkit ItemStacks 的创建或修改，
-    // 理论上也应在主线程。我们假设菜单库或 ItemBuilder 已处理或其操作是线程安全的。
     player.openMenu<Chest>(template.title) {
 
         rows(template.rows)
@@ -63,18 +58,16 @@ fun Player.openLootChest(initialInstance: LootInstance) { // 将参数名改为 
             set(i.key, i.value.build(player))
         }
 
-        // 辅助函数：更新单个槽位及其相关逻辑。此函数必须在主线程中调用。
         fun updateSingleSlotOnMainThread(
             slot: Int,
             element: LootElement?,
             inventory: Inventory,
-            currentLootInstance: LootInstance, // 传入当前 LootInstance 的引用
-            elementsMap: MutableMap<Int, LootElement?> // 传入可变 map 的引用
+            currentLootInstance: LootInstance,
+            elementsMap: MutableMap<Int, LootElement?>
         ) {
-            // slot 不在箱子范围内
+            // slot 不在范围内
             if (slot >= rows*9) return
 
-            // 所有对 `currentLootInstance` 的访问和 Bukkit API 调用都将在此处的主线程环境中执行
             val stat = element?.let { currentLootInstance.getSearchStat(player, it, slot, currentLootInstance) }
             val display = stat?.let { element.getDisplayItem(it, player, template.options) }
             if (display == null && elementsMap.getOrDefault(slot, null) != null) {
@@ -89,9 +82,7 @@ fun Player.openLootChest(initialInstance: LootInstance) { // 将参数名改为 
             inventory.setItem(slot, display) // Bukkit API
         }
 
-        // 辅助函数：更新所有槽位。此函数必须在主线程中调用。
         fun updateAllSlotsOnMainThread(inventory: Inventory, currentLootInstance: LootInstance) {
-            // 先从 LootInstance 读取一份可变副本，进行处理
             val elementsBeingProcessed = currentLootInstance.elements.toMutableMap()
 
             val keysToUpdate = elementsBeingProcessed.keys.toList()
@@ -105,15 +96,13 @@ fun Player.openLootChest(initialInstance: LootInstance) { // 将参数名改为 
         }
 
 
-        // onBuild 回调：由于 `async = true`，此块在异步线程执行。
-        // 其中所有与 `initialInstance` 和 Bukkit API 相关的操作都必须切换到主线程。
-        onBuild(async = true) { _, inventory -> // 将 player 参数重命名为 _ 以避免与外部 player 变量冲突
+        onBuild(async = true) { _, inventory ->
             // 使用 submitChain 来调度主线程操作
             submitChain {
                 sync { // 切换到主线程
-                    openedLootLocation[player.uniqueId] = initialInstance.loc // 操作 LootInstance
+                    openedLootLocation[player.uniqueId] = initialInstance.loc
                     devLog("refreshing")
-                    playConfiguredSound(player, "open") // Bukkit API
+                    playConfiguredSound(player, "open")
 
                     updateAllSlotsOnMainThread(inventory, initialInstance) // 在主线程调用辅助函数
                     template.agents?.runAgent("onOpen", linkedMapOf("inventory" to inventory), player) // 假设 agent 也可能需要主线程
@@ -163,7 +152,10 @@ fun Player.openLootChest(initialInstance: LootInstance) { // 将参数名改为 
 
                         when (stat) {
                             LootElementStat.NOT_SEARCHED -> {
+                                val event = ItemSearchStartEvent(player, initialInstance, element, rawSlot, inventory)
                                 devLog("Starting to search $rawSlot item")
+                                event.call()
+                                if (event.isCancelled) return@sync
                                 searchLimit?.let {
                                     if (it <= (initialInstance.getSearchingSlots(player)?.size ?: 0)) { // 访问 LootInstance
                                         playConfiguredSound(player, "search-limit") // Bukkit API
@@ -199,9 +191,13 @@ fun Player.openLootChest(initialInstance: LootInstance) { // 将参数名改为 
                                     initialInstance.startSearch(player, rawSlot, time, true) // 操作 LootInstance
                                 }
                                 // 获取可变副本，修改，然后赋值回 LootInstance
+                                val eventComplete = ItemSearchCompletePreEvent(player, initialInstance, element, rawSlot, inventory)
+                                eventComplete.call()
+                                if (event.isCancelled) return@sync
                                 val newElements = initialInstance.elements.toMutableMap()
                                 updateSingleSlotOnMainThread(rawSlot, element, inventory, initialInstance, newElements)
-                                initialInstance.elements = newElements // 操作 LootInstance
+                                initialInstance.elements = newElements
+                                ItemSearchCompletePostEvent(player, initialInstance, element, rawSlot, inventory).call()
                                 return@sync
                             }
                             LootElementStat.SEARCHING -> {
@@ -211,11 +207,15 @@ fun Player.openLootChest(initialInstance: LootInstance) { // 将参数名改为 
                             }
                             LootElementStat.SEARCHED -> {
                                 // 移除物品并给予玩家
+
+                                val event = LootElementApplyEvent(player, initialInstance, element, rawSlot)
+                                event.call()
+                                if (event.isCancelled) return@sync
                                 val elementsCopy = initialInstance.elements.toMutableMap()
                                 elementsCopy[rawSlot] = null
                                 initialInstance.elements = elementsCopy // 操作 LootInstance
 
-                                element.applyToPlayer(player, template) // 假设 applyToPlayer 内部是安全的，如果它有 Bukkit API，也需要包裹
+                                element.applyToPlayer(player, template)
                                 template.agents?.runAgent(
                                     "onClaim",
                                     linkedMapOf(

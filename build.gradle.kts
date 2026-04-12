@@ -143,6 +143,7 @@ allprojects {
         // 服务器 API
         implementation(rootProject.libs.paperapi)
 
+        compileOnly("ink.ptms.chemdah:api:1.1.17")
         compileOnly(rootProject.libs.placeholderapi)
 //        compileOnly(rootProject.libs.packeteventsspigot)
 //        compileOnly(rootProject.libs.datafixerupper)

@@ -12,3 +12,4 @@ class LithiumCarbonReloadEvent() : BukkitProxyEvent()
 class LithiumCarbonCustomScriptDataLoadEvent(
     var defaultData: LinkedHashMap<String, Any?>
 ) : BukkitProxyEvent()
+

@@ -1,6 +1,7 @@
 package io.github.zzzyyylllty.lithiumcarbon.data
 
 import io.github.zzzyyylllty.lithiumcarbon.LithiumCarbon.config
+import io.github.zzzyyylllty.lithiumcarbon.event.LootItemGrantEvent
 import io.github.zzzyyylllty.lithiumcarbon.function.kether.evalKether
 import io.github.zzzyyylllty.lithiumcarbon.function.player.sendComponent
 import io.github.zzzyyylllty.lithiumcarbon.util.LootGUIHelper
@@ -32,7 +33,7 @@ data class LootElement(
                 if (options.removeLore) {
                     lore = null
                 }
-                if (options.addLore != null && options.addLore.isNotEmpty()) {
+                if (!options.addLore.isNullOrEmpty()) {
                     lore = ((lore ?: listOf()) + (options.addLore)).toMutableList()
                 }
                 item.parameters?.let { it["lore"] = lore }
@@ -44,9 +45,18 @@ data class LootElement(
 
     fun applyToPlayer(player: Player,template: LootTemplate) {
         items?.forEach { lItem ->
-            val item = lItem.build(player)
-            player.giveItem(item)
-            if (config.getBoolean("message.Claim")) player.sendComponent(player.asLangText("Claim", template.name, mmUtil.serialize(item.displayName())))
+            val event = LootItemGrantEvent(player, template, this, lItem.build(player))
+            event.call()
+            if (!event.isCancelled) {
+                player.giveItem(event.item)
+                if (config.getBoolean("message.Claim")) player.sendComponent(
+                    player.asLangText(
+                        "Claim",
+                        template.name,
+                        mmUtil.serialize(event.item.displayName())
+                    )
+                )
+            }
         }
         val exp = exps?.roundToInt()
         if (exp != null && exp != 0) {
