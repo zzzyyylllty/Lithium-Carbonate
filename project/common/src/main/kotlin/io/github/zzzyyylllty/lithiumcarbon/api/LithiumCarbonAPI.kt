@@ -4,6 +4,7 @@ import io.github.zzzyyylllty.lithiumcarbon.LithiumCarbon.lootCaches
 import io.github.zzzyyylllty.lithiumcarbon.LithiumCarbon.lootDefines
 import io.github.zzzyyylllty.lithiumcarbon.LithiumCarbon.lootItems
 import io.github.zzzyyylllty.lithiumcarbon.LithiumCarbon.lootItemsDef
+import io.github.zzzyyylllty.lithiumcarbon.LithiumCarbon.LootInstanceKey
 import io.github.zzzyyylllty.lithiumcarbon.LithiumCarbon.lootMap
 import io.github.zzzyyylllty.lithiumcarbon.LithiumCarbon.lootTemplates
 import io.github.zzzyyylllty.lithiumcarbon.data.LocationHelper
@@ -16,35 +17,36 @@ import io.github.zzzyyylllty.sertraline.api.SertralineAPI
 import org.bukkit.Location
 import taboolib.common.platform.command.location
 import taboolib.platform.util.toBukkitLocation
+import java.util.Collections
 
 
-public class LithiumCarbonAPIImpl: LithiumCarbonAPI {
-    public val INSTANCE = LithiumCarbonAPIImpl()
+public object LithiumCarbonAPIImpl: LithiumCarbonAPI {
 }
 
 
 interface LithiumCarbonAPI {
-    fun getLootMap(): MutableMap<LootLocation, LootInstance> {
-        return lootMap
+    fun getLootMap(): Map<LootInstanceKey, LootInstance> {
+        return Collections.unmodifiableMap(lootMap)
     }
-    fun getLootTemplates(): MutableMap<String, LootTemplate> {
-        return lootTemplates
+    fun getLootTemplates(): Map<String, LootTemplate> {
+        return Collections.unmodifiableMap(lootTemplates)
     }
-    fun getLootDefines(): MutableMap<String, LootDefines> {
-        return lootDefines
+    fun getLootDefines(): Map<String, LootDefines> {
+        return Collections.unmodifiableMap(lootDefines)
     }
-    fun getLootCaches(): MutableMap<LootLocation, LootTemplate> {
-        return lootCaches
+    fun getLootCaches(): Map<LootLocation, LootTemplate> {
+        return Collections.unmodifiableMap(lootCaches)
     }
-    fun getLootItems(): MutableMap<Char, LootItem> {
-        return lootItems
+    fun getLootItems(): Map<Char, LootItem> {
+        return Collections.unmodifiableMap(lootItems)
     }
-    fun getLootItemsDef(): MutableMap<String, LootItem> {
-        return lootItemsDef
+    fun getLootItemsDef(): Map<String, LootItem> {
+        return Collections.unmodifiableMap(lootItemsDef)
     }
     fun updateInstance(bukkitLocation: Location) {
         val location = LocationHelper.toLootLocation(bukkitLocation)
-        val instance = lootMap[location]
+        val key = LootInstanceKey(location, null) // 更新共享实例
+        val instance = lootMap[key]
         instance?.update()
     }
 }

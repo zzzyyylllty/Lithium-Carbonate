@@ -1,11 +1,12 @@
 
 [versions]
-taboolib = "6.2.4-3b3cd67"
-#taboolib = "6.2.4-local-dev"
-taboolibPlugin = "2.0.27"
+taboolib = "6.3.0-0e96352"
+taboolibPlugin = "2.0.31"
 kotlin = "2.2.20"
 nashorn = "15.4"
 jexl = "3.4.0"
+asm = "9.2"
+
 
 # Minecraft & Server APIs
 paperApi = "1.21.4-R0.1-SNAPSHOT"
@@ -22,7 +23,6 @@ fluxon = "1.2.18"
 # General Purpose Libraries
 netty = "4.1.127.Final"
 reflex = "1.1.4"
-asm = "9.2"
 jackson = "2.16.1"
 arim = "1.2.14"
 caffeine = "3.2.3"

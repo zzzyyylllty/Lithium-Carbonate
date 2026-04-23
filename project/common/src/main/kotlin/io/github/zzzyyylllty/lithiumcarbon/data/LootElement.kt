@@ -5,6 +5,7 @@ import io.github.zzzyyylllty.lithiumcarbon.event.LootItemGrantEvent
 import io.github.zzzyyylllty.lithiumcarbon.function.kether.evalKether
 import io.github.zzzyyylllty.lithiumcarbon.function.player.sendComponent
 import io.github.zzzyyylllty.lithiumcarbon.util.LootGUIHelper
+import io.github.zzzyyylllty.lithiumcarbon.util.asNumberFormat
 import io.github.zzzyyylllty.lithiumcarbon.util.mmUtil
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
@@ -17,7 +18,7 @@ import kotlin.math.roundToInt
 data class LootElement(
     var displayItem: LootItem? = null,
     val exps: Double? = 0.0,
-    val items: List<LootItem>? = null,
+    var items: List<LootItem>? = null,
     val kether: List<String>? = null,
     val javaScript: CompiledScript? = null,
     val searchTime: Double = 0.0,
@@ -28,6 +29,9 @@ data class LootElement(
             LootElementStat.NOT_SEARCHED -> LootGUIHelper.unsearch.build(player, 1)
             LootElementStat.SEARCHING -> LootGUIHelper.searching.build(player, 1)
             LootElementStat.SEARCHED -> {
+                val copy = items
+                copy?.firstOrNull()?.amount = items?.firstOrNull()?.amount.asNumberFormat(player).toString()
+                items = copy
                 val item = (displayItem ?: items?.firstOrNull() ?: LootGUIHelper.undefinedItem)
                 var lore = item.parameters?.let { (it["lore"] as List<String>?)?.toMutableList() }
                 if (options.removeLore) {
@@ -37,7 +41,7 @@ data class LootElement(
                     lore = ((lore ?: listOf()) + (options.addLore)).toMutableList()
                 }
                 item.parameters?.let { it["lore"] = lore }
-                item.build(player, 1)
+                item.build(player, item.amount?.toDoubleOrNull()?.roundToInt() ?: 1)
             }
             LootElementStat.NOITEM -> null
         }

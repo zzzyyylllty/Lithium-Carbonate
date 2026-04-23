@@ -31,6 +31,8 @@ data class LootTemplate (
             elements = generateElements(player, bypassCondition),
             searches = linkedMapOf(),
             nextRefresh = update.expire?.asNumberFormatNullable(player)?.let { System.currentTimeMillis() + (it * 1000).roundToLong() },
+            isPrivate = options.private,
+            playerId = if (options.private) player.uniqueId else null,
         )
     }
     fun generateElements(player: Player, bypassCondition: Boolean = false): LinkedHashMap<Int, LootElement?> {
@@ -52,6 +54,7 @@ data class LootTemplateOptions(
     val addLore: List<String>?,
     val shuffleLoot: Boolean,
     val searchLimit: String?,
+    val private: Boolean = false,
 )
 
 data class LootUpdate(

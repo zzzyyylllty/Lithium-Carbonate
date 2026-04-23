@@ -14,7 +14,7 @@ object PlayerUtil {
         submit {
             player.addPotionEffect(
                 PotionEffect(
-                    PotionEffectType.getByName(type)!!,
+                    PotionEffectType.getByName(type) ?: throw IllegalArgumentException("Invalid potion effect type: $type"),
                     duration,
                     amplifier,
                     ambient,
@@ -28,7 +28,7 @@ object PlayerUtil {
         submit {
             player.addPotionEffect(
                 PotionEffect(
-                    PotionEffectType.getByName(type)!!,
+                    PotionEffectType.getByName(type) ?: throw IllegalArgumentException("Invalid potion effect type: $type"),
                     duration,
                     amplifier
                 )
@@ -38,7 +38,7 @@ object PlayerUtil {
     fun removePotionEffect(player: Player, type: String) {
         submit {
             player.removePotionEffect(
-                PotionEffectType.getByName(type)!!
+                PotionEffectType.getByName(type) ?: throw IllegalArgumentException("Invalid potion effect type: $type")
             )
         }
     }

@@ -1,5 +1,6 @@
 package io.github.zzzyyylllty.lithiumcarbon.data
 
+import io.github.zzzyyylllty.lithiumcarbon.LithiumCarbon.LootInstanceKey
 import io.github.zzzyyylllty.lithiumcarbon.LithiumCarbon.lootMap
 import io.github.zzzyyylllty.lithiumcarbon.LithiumCarbon.lootTemplates
 import io.github.zzzyyylllty.lithiumcarbon.gui.openedLootLocation
@@ -7,6 +8,7 @@ import io.github.zzzyyylllty.lithiumcarbon.util.serialize.toUUID
 import org.bukkit.Bukkit
 import org.bukkit.entity.Player
 import taboolib.common.platform.function.submit
+import java.util.UUID
 import kotlin.math.roundToLong
 
 data class LootInstance(
@@ -15,6 +17,8 @@ data class LootInstance(
     var elements: MutableMap<Int, LootElement?>,
     var searches: MutableMap<String, SearchStat>,
     var nextRefresh: Long?,
+    val isPrivate: Boolean = false,
+    val playerId: UUID? = null,
 ) {
     val template get() = lootTemplates[templateID]
 
@@ -55,23 +59,29 @@ data class LootInstance(
      * @return LootInstance - 不需要更新
      */
     fun checkUpdate(): LootInstance? {
+        val key = LootInstanceKey(loc, playerId)
         nextRefresh?.let {
             if (it <= System.currentTimeMillis()) {
                 update()
             }
         } ?: return this
-        return lootMap[loc]
+        return lootMap[key]
     }
 
     fun update() {
-        val players = openedLootLocation
-            .filter{ it.value == loc }
-
+        val key = LootInstanceKey(loc, playerId)
+        val players = if (playerId != null) {
+            // 私有箱子，只关闭该玩家的库存
+            openedLootLocation.filter { it.key == playerId && it.value == loc }
+        } else {
+            // 共享箱子，关闭所有在该位置的玩家库存
+            openedLootLocation.filter { it.value == loc }
+        }
         submit {
             players.forEach {
                 Bukkit.getPlayer(it.key)?.closeInventory()
             }
-            lootMap.remove(loc)
+            lootMap.remove(key)
         }
     }
 

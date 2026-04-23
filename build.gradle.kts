@@ -4,7 +4,7 @@ import io.izzel.taboolib.gradle.BukkitNMSUtil
 import org.gradle.internal.impldep.org.apache.http.client.methods.RequestBuilder.options
 import org.gradle.kotlin.dsl.implementation
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+//import org.jetbrains.kotlin.gradle.dsl.KotlinCompile
 
 plugins {
     java
@@ -41,7 +41,6 @@ allprojects {
             enableIsolatedClassloader = false
             install(Basic, Bukkit, BukkitHook, BukkitNMSUtil, Database, Kether, CommandHelper, BukkitNMSItemTag, JavaScript, BukkitUI, BukkitUtil, Jexl, Metrics, PtcObject)
             install(BukkitNMS)
-            install(BukkitUI)
             install(BukkitNMSDataSerializer)
             // install("bukkit-nms-tag-component")
         }
@@ -63,8 +62,7 @@ allprojects {
         maven("https://repo.gtemc.net/releases/")
         maven("https://repo.auxilor.io/repository/maven-public/")
         maven("https://nexus.phoenixdevt.fr/repository/maven-public/")
-        maven("https://repo.aeoliancloud.com/release")
-        maven("https://repo.aeoliancloud.com/releases")
+        maven("https://repo.aeoliancloud.com/releases/")
         maven("https://repo.xiao-jie.top/repository/maven-releases")
         maven("https://jitpack.io")
         maven {
@@ -83,14 +81,10 @@ allprojects {
         maven("https://maven.aliyun.com/repository/public")
         maven("https://maven.aliyun.com/repository/jcenter")
         mavenCentral()
-        jcenter()
 
-        maven { url = uri("https://repo.tabooproject.org/repository/releases/") }
-        mavenCentral()
         maven("https://dl.bintray.com/kotlin/kotlinx/")
         maven("https://repo.papermc.io/repository/maven-public/")
         maven("https://repo.papermc.io/repository/maven-snapshots/")
-        maven("https://repo.tabooproject.org/repository/releases/")
         maven {
             name = "mythicmobs"
             url = uri("https://mvn.lumine.io/repository/maven-public/")
@@ -98,44 +92,27 @@ allprojects {
         maven {
             url = uri("https://repo.extendedclip.com/content/repositories/placeholderapi/")
         }
-        maven("https://repo.extendedclip.com/content/repositories/placeholderapi/")
         maven("https://repo.codemc.org/repository/maven-public")
         maven("https://repo.rosewooddev.io/repository/public/")
         maven("https://repo.opencollab.dev/main/")
-        maven("https://nexus.phoenixdevt.fr/repository/maven-public/")
         maven("https://r.irepo.space/maven/")
-        maven("https://repo.auxilor.io/repository/maven-public/")
         maven("https://repo.hibiscusmc.com/releases/")
-        maven("https://repo.tabooproject.org/repository/releases/")
         maven(url = "https://oss.sonatype.org/content/repositories/snapshots/") {
             name = "sonatype-oss-snapshots"
         }
 
         maven("https://libraries.minecraft.net")
-        maven {
-            // 枫溪的仓库
-            url = uri("https://nexus.maplex.top/repository/maven-public/")
-            isAllowInsecureProtocol = true
-        }
-
-        maven("https://repo.momirealms.net/releases/")
-        maven("https://repo.momirealms.net/releases/")
         maven("https://repo.momirealms.net/releases/")
         maven { url = uri("https://repo.codemc.io/repository/maven-releases/") }
-
         maven { url = uri("https://repo.codemc.io/repository/maven-snapshots/") }
-
         maven { url = uri("https://repo.dmulloy2.net/repository/public/") }
         maven("https://repo.extendedclip.com/releases/")
-        maven("https://nexus.phoenixdevt.fr/repository/maven-public/")
     }
 
     dependencies {
-//        compileOnly("com.github.cryptomorin:XSeries:master-57d7b42")
-//        taboo("io.github.zzzyyylllty:EmbianComponent:1.0.2")
-//        compileOnly("com.willfp:eco:6.77.2")
-        taboo("io.github.zzzyyylllty:EmbianComponent:1.0.2")
+        taboo("io.github.zzzyyylllty:EmbianComponent:1.0.5")
         implementation("com.github.zzzyyylllty:Sertraline-Hydrochloride:3.8.2")
+        implementation(rootProject.libs.bundles.asm)
 
         taboo("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
         implementation("com.sk89q.worldguard:worldguard-bukkit:7.0.10-SNAPSHOT")
@@ -145,45 +122,25 @@ allprojects {
 
         compileOnly("ink.ptms.chemdah:api:1.1.17")
         compileOnly(rootProject.libs.placeholderapi)
-//        compileOnly(rootProject.libs.packeteventsspigot)
-//        compileOnly(rootProject.libs.datafixerupper)
-//        compileOnly(rootProject.libs.fluxoncore)
 
         // 本地依赖 (这行需要保留)
-        compileOnly(fileTree("rootProject.libs"))
+        compileOnly(fileTree("libs"))
 
         // 工具库
-//        compileOnly(rootProject.libs.netty.all)
-//        compileOnly(rootProject.libs.caffeine)
         compileOnly(rootProject.libs.gson)
 
         compileOnly("net.momirealms:craft-engine-core:0.0.66")
         compileOnly("net.momirealms:craft-engine-bukkit:0.0.66")
         // 核心功能库 (运行时需要)
-//        implementation(rootProject.libs.bundles.reflex)
-//        implementation(rootProject.libs.bundles.asm)
         implementation(rootProject.libs.bundles.adventure)
         taboo(rootProject.libs.arim)
-//        taboo(platform(rootProject.libs.kotlincrypto.bom))
-//        taboo(rootProject.libs.kotlincrypto.sha2)
         taboo(rootProject.libs.bundles.jackson)
         taboo("cn.gtemc:itembridge:1.0.18")
-        taboo(rootProject.libs.kotlin.stdlib) // 将 kotlin("stdlib") 替换为此格式
+        kotlin("stdlib")
     }
 
 
-    tasks.withType<KotlinCompile> {
-        compilerOptions {
-            freeCompilerArgs.addAll(listOf("-Xjvm-default=all","-Xskip-prerelease-check","-Xallow-unstable-dependencies"))
-            jvmTarget.set(JvmTarget.JVM_21)
-        }
-//        kotlinOptions {
-//            jvmTarget = "21"
-//            freeCompilerArgs = listOf("--add-modules org.graalvm.js.scriptengine",-Xjvm-default=all","-Xskip-prerelease-check","-Xallow-unstable-dependencies")
-//        }
-    }
-
-    configure<JavaPluginConvention> {
+    java {
         sourceCompatibility = JavaVersion.VERSION_21
         targetCompatibility = JavaVersion.VERSION_21
     }

@@ -74,7 +74,11 @@ object ConfigUtil {
 
         if (input == null) return null
 
-        val agentsRaw = (if (input !is Map<*, *>) return null else input["agents"] ?: input["agent"])  as LinkedHashMap<String, LinkedHashMap<String, Any?>>? ?: return null
+        val raw = if (input !is Map<*, *>) return null else (input["agents"] ?: input["agent"]) ?: return null
+        @Suppress("UNCHECKED_CAST")
+        val agentsRaw = (raw as? Map<String, Map<String, Any?>>)?.let { map ->
+            LinkedHashMap<String, Map<String, Any?>>().also { it.putAll(map) }
+        } ?: return null
 
         val agents = LinkedHashMap<String, Agent>()
 

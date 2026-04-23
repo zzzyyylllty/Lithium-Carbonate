@@ -80,6 +80,7 @@ fun loadLoot(key: String, arg: Map<String, Any?>) {
         addLore = c.getDeep(arg, "options.add-lore") as? List<String>? ?: config.getStringList("default-options.add-lore"),
         shuffleLoot = c.getDeep(arg, "options.shuffle-loot") as? Boolean? ?: config.getBoolean("default-options.shuffle-loot", false),
         searchLimit = c.getDeep(arg, "options.search-limit")?.toString(),
+        private = c.getDeep(arg, "options.private") as? Boolean? ?: config.getBoolean("default-options.private", false),
     )
 
     val layoutP = c.getDeep(arg, "display.layout").asListEnhanced() ?: config.getStringList("default-layout")

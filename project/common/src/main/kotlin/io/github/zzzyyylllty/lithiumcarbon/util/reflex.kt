@@ -21,7 +21,7 @@ fun assembleCBClass(className: String): String {
 }
 
 
-val holderClass by lazy { getClazz("net.minecraft.core.Holder")!! }
+val holderClass by lazy { getClazz("net.minecraft.core.Holder") ?: throw IllegalStateException("Holder class not found") }
 
 fun unwrapValue(obj: Any): Any {
     if (obj is java.util.Optional<*>) {
@@ -42,7 +42,7 @@ fun unwrapValue(obj: Any): Any {
 
         if (getMethod != null) {
             getMethod.isAccessible = true
-            return unwrapValue(getMethod.invoke(obj)!!)
+            return unwrapValue(getMethod.invoke(obj) ?: throw IllegalStateException("Holder value is null"))
         } else {
             throw IllegalStateException("No suitable get method found on Holder class")
         }

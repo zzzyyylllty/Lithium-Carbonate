@@ -19,14 +19,15 @@ import taboolib.module.nms.NMSItemTag.Companion.asNMSCopy
 import kotlin.math.roundToInt
 
 private val specialItemNamespace = listOf("minecraft", "mc", "vanilla")
-val componentHelper by lazy { if (VersionHelper().isOrAbove12005()) EmbianComponent.SafetyComponentSetter else null }
+private val versionHelper = VersionHelper()
+val componentHelper by lazy { if (versionHelper.isOrAbove12005()) EmbianComponent.SafetyComponentSetter else null }
 
 data class LootItem(
     val source: String,
     val item: String,
     val parameters: LinkedHashMap<String, Any?>? = null,
     val components: LinkedHashMap<String, Any?>? = null,
-    val amount: String? = "1",
+    var amount: String? = "1",
 ) {
     fun build(player: Player?, overrideAmount: Int? = null): ItemStack {
 
@@ -83,12 +84,12 @@ data class LootItem(
 
         }
         if (components != null && components.isNotEmpty()) {
-            if (VersionHelper().isOrAbove12005()) {
+            if (versionHelper.isOrAbove12005()) {
                 var nmsStack = asNMSCopy(itemStack)
                 components.forEach {
                     val value = it.value
-                    if (value != null) componentUtil.setComponentNMS(nmsStack, it.key, value)?.let { nmsStack = it }
-                    else componentUtil.removeComponentNMS(nmsStack, it.key).let { nmsStack = it }
+                    if (value != null) componentUtil?.setComponentNMS(nmsStack, it.key, value)?.let { nmsStack = it }
+                    else componentUtil?.removeComponentNMS(nmsStack, it.key)?.let { nmsStack = it }
                 }
             } else {
                 warningL("WarningNotSupportDataComponent")

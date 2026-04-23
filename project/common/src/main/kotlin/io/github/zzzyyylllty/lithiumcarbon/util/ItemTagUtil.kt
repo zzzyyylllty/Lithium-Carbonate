@@ -11,8 +11,7 @@ object ItemTagUtil{
             ItemTagType.COMPOUND -> (tagData).parseMapNBT()
             ItemTagType.LIST -> serializeList(tagData.asList())
             ItemTagType.BYTE -> tagData.asByte()
-            // ItemTagType.BOOLEAN -> tagData.asBoolean()
-//        ItemTagType.BOOLEAN -> tagData.asByte()
+            // ItemTagType.BOOLEAN -> tagData.asByte() // 布尔值存储为字节
             ItemTagType.SHORT -> tagData.asShort()
             ItemTagType.INT -> tagData.asInt()
             ItemTagType.LONG -> tagData.asLong()

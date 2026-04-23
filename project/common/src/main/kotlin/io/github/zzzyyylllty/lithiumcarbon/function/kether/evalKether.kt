@@ -5,6 +5,7 @@ import org.bukkit.Bukkit
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import taboolib.common.platform.function.adaptCommandSender
+import taboolib.common.platform.function.warning
 import taboolib.common5.Coerce
 import taboolib.library.kether.ParsedAction
 import taboolib.module.kether.KetherFunction
@@ -188,7 +189,8 @@ fun String?.evalKetherBoolean(
         }.build()).thenApply {
             Coerce.toBoolean(it)
         }.get()
-    } catch (_: Exception) {
+    } catch (e: Exception) {
+        warning("Kether evaluation failed: ${e.message}")
         def
     }
 }
@@ -233,7 +235,8 @@ fun List<String>.evalKetherBoolean(
         }.build()).thenApply {
             Coerce.toBoolean(it)
         }.get()
-    } catch (_: Exception) {
+    } catch (e: Exception) {
+        warning("Kether evaluation failed: ${e.message}")
         def
     }
 }
