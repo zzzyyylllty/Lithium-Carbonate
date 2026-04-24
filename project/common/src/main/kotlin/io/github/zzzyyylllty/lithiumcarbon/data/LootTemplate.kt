@@ -2,6 +2,7 @@ package io.github.zzzyyylllty.lithiumcarbon.data
 
 import io.github.zzzyyylllty.lithiumcarbon.LithiumCarbon.lootMap
 import io.github.zzzyyylllty.lithiumcarbon.LithiumCarbon.reloadTimes
+import io.github.zzzyyylllty.lithiumcarbon.event.LootInstanceCreateEvent
 import io.github.zzzyyylllty.lithiumcarbon.util.asNumberFormat
 import io.github.zzzyyylllty.lithiumcarbon.util.asNumberFormatNullable
 import io.github.zzzyyylllty.lithiumcarbon.util.devLog
@@ -25,7 +26,7 @@ data class LootTemplate (
     val update: LootUpdate,
 ) {
     fun createInstance(block: Block, player: Player, bypassCondition: Boolean = false): LootInstance {
-        return LootInstance(
+        val i = LootInstance(
             templateID = id,
             loc = LocationHelper.toLootLocation(block.location),
             elements = generateElements(player, bypassCondition),
@@ -34,6 +35,9 @@ data class LootTemplate (
             isPrivate = options.private,
             playerId = if (options.private) player.uniqueId else null,
         )
+        val event = LootInstanceCreateEvent(player, i)
+        event.callEvent()
+        return event.instance
     }
     fun generateElements(player: Player, bypassCondition: Boolean = false): LinkedHashMap<Int, LootElement?> {
         return lootTable.apply(bypassCondition, getExtraVariables(player), player, availableSlots, shuffleLoot = options.shuffleLoot)

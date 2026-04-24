@@ -8,6 +8,13 @@ import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.ItemStack
 import taboolib.platform.type.BukkitProxyEvent
 
+class LootInstanceCreateEvent(
+    val player: Player,
+    val instance: LootInstance,
+    override val allowCancelled: Boolean = false
+) : BukkitProxyEvent()
+
+
 class ItemSearchStartEvent(
     val player: Player,
     val initialInstance: LootInstance,

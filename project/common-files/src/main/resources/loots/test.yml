@@ -1,33 +1,28 @@
 test_loot:
   refresh:
     loops:
-      # Every 600 Seconds refresh all loots
-      - period: 600
+      - period: 300
         agent:
           onRefresh:
             js:
-              org.bukkit.Bukkit.broadcast(mmUtil.deserialize("<#dcaaff>[Li2CO3Loot] <gray>Loot <yellow>" + name + "</yellow> refreshed."))
-          onCancel:
-            js:
-              org.bukkit.Bukkit.broadcast(mmUtil.deserialize("<#dcaaff>[Li2CO3Loot] <gray>Loot <yellow>" + name + "</yellow> cancelled."))
+              org.bukkit.Bukkit.broadcast(mmUtil.deserialize("<#dcaaff>[Li2CO3] <gray>All <yellow>" + name + "</yellow> Refreshed. "))
     # When loot opened, expired when 300 second passed.
     expire: 300
-
   display:
 
     # Loot Name
-    name: "Test Loot CHEST"
+    name: "Test Loot"
 
     # GUI Name
-    title: "Loot"
+    title: "Loot Title"
 
     # Loot rows
     rows: 3
 
     layout:
-      - 'A       A'
-      - 'A       A'
-      - 'A       A'
+      - '         '
+      - '         '
+      - '         '
 
     # Manually set available slots.
     # Leave a null for automatic find spaces in layout.
@@ -37,112 +32,68 @@ test_loot:
 #    region_a:
 #      type: worldguard
 #      region: sample_region
-#      OR:
-#      region： |
-#        sample1
-#        sample2
-#      OR:
-#      region：
-#        - sample1
-#        - sample2
-#      regex: false # Use regex in region validate, ex region: "region_.+"
-
-    region_b:
-      type: square
-
-      # For performance reasons, when reading,
-      # 'from' will be read as the side with the smallest coordinates, and 'to' will be read as the side with the largest coordinates
-      # EX:
-      # from: 'world 100 0 100'; to: 'world 0 100 0' -> from: 'world 0 0 0' to: 'world 100 100 100'
-      # You can use regex in world names. Square only use the `from` location's world.
-      from: 'world 0 0 0'
-      to: 'world 100 100 100'
-      blocks:
-        - CHEST
-
-      # Only world supports regex.
-      regex: true
-    # conditions:
-    #   js: |
-    #     type == "CHEST"
-    #   ke:
-    #     check &type == "CHEST"
-
-    region_c:
+#      blocks:
+#        - LIGHT_GRAY_SHULKER_BOX
+    region_world:
       type: world
       world: world_.+
-      regex: true # Use regex in region validate, ex world: "level_.+"
-      blocks:
-        - CHEST
-        - HOPPER
-    region_d:
-      type: specify
-      # For performance reasons, only vector definitions are supported here.
-      locations:
-        - '114 51 4'
-      # Only world supports regex.
-      world: world
       regex: true
-      regenerate:
-        # If this block is air, regenerate it on reload & WorldLoadEvent.
-        # Only works on specify mode!
-        enabled: true
-        replace: CHEST
-
+      blocks: # Don't forget add blocks to config.yml
+        - CHEST
   options:
-    # Can only search for one item at a time
-    # Support inline kether / numeric format (refresh on GUI Open)
-    # This option will not apply default value in config, leave null for unlimited.
+    #    remove-lore: true
+    shuffle-loot: true
     search-limit: 1
-    add-lore: |
-      Click to claim!
-#    remove-lore: true
   pools:
-    - rolls: 5
-    # conditions: {}
+    - rolls: 1~3
       loots:
-        - conditions:
-          # mode: ALL - Optional, ALL by default, require js and kether must all true, accept values: ANY, ALL
-            js: |
-              player.name != "AmeChan"
-            ke:
-              all [ check player name != "AmeChan" check player name != "ChoTenChan" ]
-
-          # External item like: craftengine:item:topaz, mmoitems:MATERIAL:RARE_DIAMOND
-          # Supported plugins: https://github.com/jhqwqmc/ItemBridge
-          # Note: ItemBridge dependency may not be latest. If you have issues with external items,
-          # Please contact me at discord / qq or open an issue.
-          items:
-            - item: minecraft:glass
-            # component: {}
-
-          exp: 3~5 # exp: "{{ random 1 to 10 }}"
-
-          weight: 3.14 # Supported decimal
-          # weight: "{{ random 1 to 10 }}" for dynamic weight.
-
-          search-time: 1.5 # Seconds
-          skip-search: false # Skip search? (skip will not play sound and agent)
-
-          # Displayed item. This is optional. if leave a blank will use reward item.
-          display:
-            item: minecraft:tinted_glass # Optional if leave a blank will use reward item for base.
-            lore: |
-              An visual line here
-              If you look missing texture here, it's normal.
-              Just remove components & tooltip_style in your loot config to fix.
-            components: # Supported 1.20.5+ DataComponent
-              tooltip_style: default:topaz
-
-          kether: |
-            minitell "hello!"
-          javascript: |
-            player.sendMessage(mmUtil.deserialize("<rainbow>Hello!"))
-
-  agents:
-    onOpen:
-      js_async: |
-        player.sendMessage(mmUtil.deserialize("Hello world, " + player.name + "!"))
-    onClaim:
-      js_async: |
-        player.sendMessage(mmUtil.deserialize("Claimed Item: ").append(item.displayname))
+        - items:
+            - item: oak_log
+              amount: 1~4
+          weight: 25
+          search-time: 0.3
+        - items:
+            - item: wooden_sword
+              amount: 1
+          weight: 12
+          search-time: 0.8
+        - items:
+            - item: stone_sword
+              amount: 1
+          weight: 12
+          search-time: 0.8
+        - items:
+            - item: iron_axe
+              amount: 1
+          weight: 5
+          search-time: 1.2
+        - items:
+            - item: bow
+              amount: 1
+          weight: 3
+          search-time: 0.7
+        - items:
+            - item: arrow
+              amount: 3
+          weight: 7
+          search-time: 0.3
+        - items:
+            - item: spectral_arrow
+              amount: 1
+          weight: 3
+          search-time: 0.4
+        - items:
+            - item: bread
+              amount: 3
+          weight: 10
+          search-time: 0.3
+        - items:
+            - item: snowball
+              amount: 8
+          weight: 6
+          search-time: 0.2
+        - items:
+            - item: string
+              amount: 1
+          weight: 12
+          search-time: 0.7

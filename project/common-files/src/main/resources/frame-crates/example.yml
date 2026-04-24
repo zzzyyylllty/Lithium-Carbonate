@@ -1,0 +1,24 @@
+# 展示框物资箱 示例配置文件
+# Frame crate example configuration
+# 展示框物资箱使用现有的战利品模板生成物品，最终只会产出1个物品放入展示框
+
+example_frame_crate:
+  # 引用的战利品模板ID（必填）
+  # 展示框会从此模板中随机生成1个物品，放入展示框展示
+  loot-template: "test_loot"
+
+  # 展示框过期时间（秒，不填或0则永不过期）
+  expire: 120
+
+  # 是否使用发光展示框（默认：false）
+  glow: true
+
+  # 领取时执行的事件代理
+  agents:
+    onSpawn:
+      js: |-
+        Bukkit.broadcastMessage("A frame loot has been created")
+
+    onClaim:
+      js: |-
+        player.sendMessage("Claimed！")

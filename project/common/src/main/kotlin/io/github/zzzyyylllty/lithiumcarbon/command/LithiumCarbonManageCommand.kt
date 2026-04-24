@@ -298,52 +298,12 @@ object LithiumCarbonManageCommand {
             }
         }
 
-        // 查看卡房详细信息
-        dynamic("id") {
-            execute<CommandSender> { sender, context, argument ->
-                submitAsync {
-                    val id = context["id"].toString()
-                    val config = cardRoomConfigs[id]
-                    if (config == null) {
-                        sender.severeS("<red>Card room configuration not found: $id")
-                        return@submitAsync
-                    }
-
-                    val instance = cardRoomInstances[id]
-
-                    sender.sendComponent("<gradient:yellow:aqua>=== Card Room Info: $id ===")
-                    sender.sendComponent("<gray>Name: <white>${config.name}")
-                    sender.sendComponent("<gray>State: <white>${instance?.state?.name ?: "IDLE"}")
-                    sender.sendComponent("<gray>Trigger Block: <white>${config.trigger.block}")
-                    sender.sendComponent("<gray>Actions: <white>${config.actions.size}")
-                    sender.sendComponent("<gray>Reset Delay: <white>${config.reset.delay}s")
-                    sender.sendComponent("<gray>Restore Environment: <white>${config.reset.restore}")
-
-                    if (instance != null) {
-                        sender.sendComponent("<gray>Spawned Chests: <white>${instance.spawnedChests.size}")
-                        sender.sendComponent("<gray>Modified Blocks: <white>${instance.modifiedBlocks.size}")
-                        if (instance.state == CardRoomState.ACTIVE && instance.nextResetTime != null) {
-                            val remaining = (instance.nextResetTime!! - System.currentTimeMillis()) / 1000
-                            if (remaining > 0) {
-                                sender.sendComponent("<gray>Reset in: <white>${remaining}s")
-                            }
-                        }
-                    }
-
-                    // 显示动作列表
-                    if (config.actions.isNotEmpty()) {
-                        sender.sendComponent("<gray>Actions:")
-                        config.actions.forEachIndexed { index, action ->
-                            sender.sendComponent("<gray>  ${index + 1}. <white>${action.type} <gray>at</gray> <white>${action.location}")
-                        }
-                    }
-                }
-            }
-        }
-
         // 激活卡房
         literal("activate") {
             dynamic("id") {
+                suggestion<CommandSender> { sender, context ->
+                    cardRoomConfigs.keys.toList()
+                }
                 player("player", optional = true) {
                     execute<CommandSender> { sender, context, argument ->
                         submitAsync {
@@ -365,6 +325,9 @@ object LithiumCarbonManageCommand {
         // 重置卡房
         literal("reset") {
             dynamic("id") {
+                suggestion<CommandSender> { sender, context ->
+                    cardRoomConfigs.keys.toList()
+                }
                 execute<CommandSender> { sender, context, argument ->
                     submitAsync {
                         val id = context["id"].toString()
@@ -388,6 +351,9 @@ object LithiumCarbonManageCommand {
         // 查看卡房状态
         literal("status") {
             dynamic("id") {
+                suggestion<CommandSender> { sender, context ->
+                    cardRoomConfigs.keys.toList()
+                }
                 execute<CommandSender> { sender, context, argument ->
                     submitAsync {
                         val id = context["id"].toString()
@@ -429,6 +395,53 @@ object LithiumCarbonManageCommand {
                         // 检查区域内是否有玩家
                         val hasPlayers = CardRoomManager.hasPlayersInRange(id)
                         sender.sendComponent("<gray>Players in range: <white>${if (hasPlayers) "Yes" else "No"}")
+                    }
+                }
+            }
+        }
+        // 查看卡房详细信息
+        literal("info") {
+            dynamic("id") {
+                suggestion<CommandSender> { sender, context ->
+                    cardRoomConfigs.keys.toList()
+                }
+                execute<CommandSender> { sender, context, argument ->
+                    submitAsync {
+                        val id = context["id"].toString()
+                        val config = cardRoomConfigs[id]
+                        if (config == null) {
+                            sender.severeS("<red>Card room configuration not found: $id")
+                            return@submitAsync
+                        }
+
+                        val instance = cardRoomInstances[id]
+
+                        sender.sendComponent("<gradient:yellow:aqua>=== Card Room Info: $id ===")
+                        sender.sendComponent("<gray>Name: <white>${config.name}")
+                        sender.sendComponent("<gray>State: <white>${instance?.state?.name ?: "IDLE"}")
+                        sender.sendComponent("<gray>Trigger Block: <white>${config.trigger.block}")
+                        sender.sendComponent("<gray>Actions: <white>${config.actions.size}")
+                        sender.sendComponent("<gray>Reset Delay: <white>${config.reset.delay}s")
+                        sender.sendComponent("<gray>Restore Environment: <white>${config.reset.restore}")
+
+                        if (instance != null) {
+                            sender.sendComponent("<gray>Spawned Chests: <white>${instance.spawnedChests.size}")
+                            sender.sendComponent("<gray>Modified Blocks: <white>${instance.modifiedBlocks.size}")
+                            if (instance.state == CardRoomState.ACTIVE && instance.nextResetTime != null) {
+                                val remaining = (instance.nextResetTime!! - System.currentTimeMillis()) / 1000
+                                if (remaining > 0) {
+                                    sender.sendComponent("<gray>Reset in: <white>${remaining}s")
+                                }
+                            }
+                        }
+
+                        // 显示动作列表
+                        if (config.actions.isNotEmpty()) {
+                            sender.sendComponent("<gray>Actions:")
+                            config.actions.forEachIndexed { index, action ->
+                                sender.sendComponent("<gray>  ${index + 1}. <white>${action.type} <gray>at</gray> <white>${action.location}")
+                            }
+                        }
                     }
                 }
             }
