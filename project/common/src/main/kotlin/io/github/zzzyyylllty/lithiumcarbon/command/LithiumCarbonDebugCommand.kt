@@ -4,6 +4,7 @@ import io.github.zzzyyylllty.lithiumcarbon.LithiumCarbon.lootCaches
 import io.github.zzzyyylllty.lithiumcarbon.LithiumCarbon.lootDefines
 import io.github.zzzyyylllty.lithiumcarbon.LithiumCarbon.lootMap
 import io.github.zzzyyylllty.lithiumcarbon.LithiumCarbon.lootTemplates
+import io.github.zzzyyylllty.lithiumcarbon.data.defaultData
 import io.github.zzzyyylllty.lithiumcarbon.function.player.sendComponent
 import io.github.zzzyyylllty.lithiumcarbon.gui.openedLootLocation
 import org.bukkit.command.CommandSender
@@ -40,6 +41,13 @@ object LithiumCarbonDebugCommand {
     val getAllLoots = subCommand {
         execute<CommandSender> { sender, context, argument ->
             sender.sendComponent(lootMap.entries.toString())
+        }
+    }
+
+    @CommandBody
+    val getDefaultData = subCommand {
+        execute<CommandSender> { sender, context, argument ->
+            sender.sendComponent(defaultData.toString())
         }
     }
 

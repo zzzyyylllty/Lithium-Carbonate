@@ -1,5 +1,6 @@
 package io.github.zzzyyylllty.lithiumcarbon
 
+import io.github.zzzyyylllty.lithiumcarbon.LithiumCarbon.isLithiumCarbonStopping
 import io.github.zzzyyylllty.lithiumcarbon.LithiumCarbon.reloadCustomConfig
 import io.github.zzzyyylllty.lithiumcarbon.data.LootInstance
 import io.github.zzzyyylllty.lithiumcarbon.data.LootItem
@@ -62,6 +63,7 @@ object LithiumCarbon : Plugin() {
     val lootItemsDef = mutableMapOf<String, LootItem>()
     val allowedWorlds = mutableListOf<Regex>()
     var reloadTimes: Int = 0
+    var isLithiumCarbonStopping = false
 
     // 卡房系统集合
     val cardRoomConfigs = mutableMapOf<String, CardRoomConfig>()
@@ -135,6 +137,7 @@ fun onEnable() {
 
 @Awake(LifeCycle.DISABLE)
 fun onDisable() {
+    isLithiumCarbonStopping = true
     // 服务器关闭时同步重置所有卡房
     CardRoomManager.resetAllCardRoomsSync()
     // 清理所有展示框物资箱

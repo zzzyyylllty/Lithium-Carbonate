@@ -37,7 +37,6 @@ fun registerExternalData() {
             "EventUtil" to EventUtil,
             "ThreadUtil" to ThreadUtil,
             "PlayerUtil" to PlayerUtil,
-            "msg" to { player: Player, message: String -> player.sendMessage(mmUtil.deserialize(message)) } as java.util.function.BiConsumer<Player, String>,
             "LithiumCarbonAPI" to LithiumCarbonAPI::class.java,
             "Math" to Math::class.java,
             "System" to System::class.java,
@@ -53,7 +52,7 @@ data class Agents(
     val agents: LinkedHashMap<String, Agent>
 ) {
     fun runAgent(agent: String, extraVariables: Map<String, Any?>, player: Player?) {
-        agents[agent]?.runAgent(extraVariables + defaultData, player)
+        agents[agent]?.runAgent(extraVariables, player)
     }
 }
 

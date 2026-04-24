@@ -245,11 +245,28 @@ object CardRoomManager {
         instance.spawnedChests.forEach { (location, key) ->
             val lootInstance = LithiumCarbon.lootMap[key]
             lootInstance?.update()
+            // 如果未启用还原，则将箱子方块设为空气
+            if (!config.reset.restore) {
+                location.toBukkitLocation().block.type = org.bukkit.Material.AIR
+            }
         }
 
         // 清除生成的展示框
         instance.spawnedFrames.forEach { location ->
             FrameCrateManager.removeFrame(location)
+        }
+
+        // 还原所有修改过的方块（当 restore 为 true 时）
+        if (config.reset.restore) {
+            instance.modifiedBlocks.forEach { (location, blockData) ->
+                try {
+                    val bukkitLocation = location.toBukkitLocation()
+                    bukkitLocation.block.blockData = blockData
+                    devLog("Restored block at $location to original state")
+                } catch (e: Exception) {
+                    devLog("Failed to restore block at $location: ${e.message}")
+                }
+            }
         }
 
         // 完成重置
@@ -284,11 +301,26 @@ object CardRoomManager {
         instance.spawnedChests.forEach { (location, key) ->
             val lootInstance = LithiumCarbon.lootMap[key]
             lootInstance?.update()
+            // 如果未启用还原，则将箱子方块设为空气
+            if (!config.reset.restore) {
+                location.toBukkitLocation().block.type = org.bukkit.Material.AIR
+            }
         }
 
         // 清除生成的展示框
         instance.spawnedFrames.forEach { location ->
             FrameCrateManager.removeFrame(location)
+        }
+
+        // 还原所有修改过的方块（同步重置时始终还原，用于插件卸载场景）
+        instance.modifiedBlocks.forEach { (location, blockData) ->
+            try {
+                val bukkitLocation = location.toBukkitLocation()
+                bukkitLocation.block.blockData = blockData
+                devLog("Restored block at $location to original state")
+            } catch (e: Exception) {
+                devLog("Failed to restore block at $location: ${e.message}")
+            }
         }
 
         // 完成重置

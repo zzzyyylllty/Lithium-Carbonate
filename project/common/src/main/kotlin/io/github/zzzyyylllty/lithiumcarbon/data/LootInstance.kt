@@ -1,10 +1,12 @@
 package io.github.zzzyyylllty.lithiumcarbon.data
 
+import io.github.zzzyyylllty.lithiumcarbon.LithiumCarbon
 import io.github.zzzyyylllty.lithiumcarbon.LithiumCarbon.LootInstanceKey
 import io.github.zzzyyylllty.lithiumcarbon.LithiumCarbon.lootMap
 import io.github.zzzyyylllty.lithiumcarbon.LithiumCarbon.lootTemplates
 import io.github.zzzyyylllty.lithiumcarbon.gui.openedLootLocation
 import io.github.zzzyyylllty.lithiumcarbon.util.serialize.toUUID
+import io.papermc.paper.command.brigadier.argument.ArgumentTypes.player
 import org.bukkit.Bukkit
 import org.bukkit.entity.Player
 import taboolib.common.platform.function.submit
@@ -77,11 +79,18 @@ data class LootInstance(
             // 共享箱子，关闭所有在该位置的玩家库存
             openedLootLocation.filter { it.value == loc }
         }
-        submit {
+        if (LithiumCarbon.isLithiumCarbonStopping) {
             players.forEach {
                 Bukkit.getPlayer(it.key)?.closeInventory()
             }
             lootMap.remove(key)
+        } else {
+            submit {
+                players.forEach {
+                    Bukkit.getPlayer(it.key)?.closeInventory()
+                }
+                lootMap.remove(key)
+            }
         }
     }
 
