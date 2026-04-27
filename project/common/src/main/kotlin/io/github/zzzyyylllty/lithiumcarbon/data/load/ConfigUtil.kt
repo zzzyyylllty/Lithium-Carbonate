@@ -42,7 +42,7 @@ object ConfigUtil {
         var current: Any? = input
 
         for (key in keys) {
-            if (current !is Map<*, *>) return input
+            if (current !is Map<*, *>) return null
             current = current[key]
         }
         return current
@@ -125,7 +125,7 @@ object ConfigUtil {
         var current: Any? = input
 
         for (key in keys) {
-            if (current !is Map<*, *>) return (current != null)
+            if (current !is Map<*, *>) return false
             current = current[key]
         }
         return (current != null)

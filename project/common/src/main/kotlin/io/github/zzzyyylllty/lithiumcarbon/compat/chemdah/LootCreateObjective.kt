@@ -37,7 +37,7 @@ object LootCreateObjective: ObjectiveCountableI<LootInstanceCreateEvent>() {
         handler { it.player }
 
         addSimpleCondition("id") { data, e ->
-            data.toString() == e.instance.templateID
+            data.asList().any { it.equals(e.instance.templateID, true) }
         }
 
         addSimpleCondition("location") { data, e ->

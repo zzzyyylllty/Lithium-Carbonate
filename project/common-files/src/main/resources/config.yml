@@ -1,9 +1,9 @@
-# lithiumcarbon Configuration
+# lithiumcarbon Configuration / lithiumcarbon 配置
 debug: false
 
 hook:
   worldguard: true
-  # sertraline: true - Deprecated.
+  # sertraline: true - Deprecated / 已弃用
 
 file-load:
   loots: "^(?![#!]).*\\.(?i)(yaml|yml|toml|tml|json|conf)$"
@@ -13,8 +13,10 @@ lang: en_US
 default-options:
   add-lore: null
   remove-lore: false
+  shuffle-loot: false
+  private: false
 
-# Ignore warnings and errors
+# Ignore warnings and errors / 忽略警告和错误
 logger:
   ignore-errors:
     ErrorNoAvailableSlots: false
@@ -24,23 +26,23 @@ logger:
   ignore-warnings:
     WarningNotSupportDataComponent: false
 
-# Allowed loot blocks
-# Not support regex - if you want to support all blocks using allowed-all-blocks
-# If you want to allow external blocks
-# Please use real-block in server side, ex BROWN_MUSHROOM_BLOCK
+# Allowed loot blocks / 允许的战利品方块
+# Not support regex - if you want to support all blocks using allowed-all-blocks / 不支持正则表达式 - 如需允许所有方块请使用 allowed-all-blocks
+# If you want to allow external blocks / 如需允许外部方块
+# Please use real-block in server side, ex BROWN_MUSHROOM_BLOCK / 请使用服务端真实方块ID，例如 BROWN_MUSHROOM_BLOCK
 allowed-blocks:
   - CHEST
   - GRAY_SHULKER_BOX
 
-# Bypass allowed-blocks check
+# Bypass allowed-blocks check / 绕过允许方块检查
 allowed-all-blocks: false
 
-# Allowed loot worlds
-# Supported regex
+# Allowed loot worlds / 允许的战利品世界
+# Supported regex / 支持正则表达式
 allowed-worlds:
   - "world.+"
 
-# Bypass allowed-worlds check
+# Bypass allowed-worlds check / 绕过允许世界检查
 allowed-all-worlds: true
 
 default-layout:

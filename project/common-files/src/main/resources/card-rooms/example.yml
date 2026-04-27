@@ -1,181 +1,182 @@
-# 卡房系统示例配置
-# 文件位置：plugins/LithiumCarbon/card-rooms/
-# 支持格式：yml, yaml, json, toml, conf
+# Card Room System Example Configuration / 卡房系统示例配置
+# File location: plugins/LithiumCarbon/card-rooms/ / 文件位置：plugins/LithiumCarbon/card-rooms/
+# Supported formats: yml, yaml, json, toml, conf / 支持格式：yml, yaml, json, toml, conf
 
-# 示例：地下城入口卡房
+# Example: Dungeon Entrance Card Room / 示例：地下城入口卡房
 dungeon_entrance:
-  # 卡房显示名称
+  # Card room display name / 卡房显示名称
   name: "地下城入口"
 
-  # 触发配置
+  # Trigger configuration / 触发配置
   trigger:
-    # 触发方块位置（格式：世界名 x y z）
+    # Trigger block location (format: world x y z) / 触发方块位置（格式：世界名 x y z）
     block: "world 100 64 100"
 
-    # 物品匹配规则列表（从上到下匹配，首匹配决定消耗方式）
+    # Item matching rules (matched top to bottom, first match determines consumption mode) / 物品匹配规则列表（从上到下匹配，首匹配决定消耗方式）
     item:
-      # 匹配物品A：要求有 custom-key=a 标签，匹配后消耗耐久
+      # Match item A: requires custom-key=a tag, consumes durability on match / 匹配物品A：要求有 custom-key=a 标签，匹配后消耗耐久
       - tag:
           custom-key: a
         consume-key:
           mode: durability
           value: -1
 
-      # 匹配物品B：要求有 custom-key=b 标签，匹配后消耗物品
+      # Match item B: requires custom-key=b tag, consumes item on match / 匹配物品B：要求有 custom-key=b 标签，匹配后消耗物品
       - tag:
           custom-key: b
         consume-key: true
 
-      # 匹配任意物品（没有 tag 或 tag 为空则匹配所有）
+      # Match any item (no tag or empty tag matches all) / 匹配任意物品（没有 tag 或 tag 为空则匹配所有）
       # - consume-key: false
 
-    # 额外条件（可选）
+    # Additional conditions (optional) / 额外条件（可选）
     condition:
-      # JavaScript条件
+      # JavaScript condition / JavaScript条件
       js: |
         player.level >= 10 &&
         player.gameMode == "SURVIVAL"
-      # Kether条件
+      # Kether condition / Kether条件
       # ke: |
       #   check player level >= 10
       #   check &player gamemode == "survival"
-      # 条件模式：ALL（所有条件必须满足），ANY（任意条件满足）
+      # Condition mode: ALL (all conditions must be met), ANY (any condition met) / 条件模式：ALL（所有条件必须满足），ANY（任意条件满足）
       mode: ALL
 
-  # 动作列表（按顺序执行）
+  # Actions list (executed in order) / 动作列表（按顺序执行）
   actions:
-    # 移除方块动作
+    # Remove block action / 移除方块动作
     - type: "remove-block"
       location: "world 100 65 100"
-      # 可选：验证要移除的方块类型
+      # Optional: verify the block type to remove / 可选：验证要移除的方块类型
       block: "STONE"
 
-    # 开门动作
+    # Open door action / 开门动作
     - type: "open-door"
       location: "world 101 64 100"
-      # 可选：门方向（NORTH, EAST, SOUTH, WEST）
+      # Optional: door direction (NORTH, EAST, SOUTH, WEST) / 可选：门方向（NORTH, EAST, SOUTH, WEST）
       direction: "NORTH"
 
-    # 生成物资箱动作
+    # Spawn loot chest action / 生成物资箱动作
     - type: "spawn-chest"
       location: "world 102 64 100"
-      # 战利品模板ID（必须在loots/中定义）
+      # Loot template ID (must be defined in loots/) / 战利品模板ID（必须在loots/中定义）
       loot-template: "dungeon_rewards"
-      # 是否为私有箱子（只有触发玩家能打开）
+      # Whether it's a private chest (only the triggering player can open) / 是否为私有箱子（只有触发玩家能打开）
       private: false
-      # 可选：方块类型，默认为CHEST（例如：CHEST, TRAPPED_CHEST, BARREL）
+      # Optional: block type, defaults to CHEST (e.g. CHEST, TRAPPED_CHEST, BARREL) / 可选：方块类型，默认为CHEST（例如：CHEST, TRAPPED_CHEST, BARREL）
       # block: "CHEST"
 
-    # 执行脚本动作
+    # Execute script action / 执行脚本动作
     - type: "execute-script"
-      # 可选：脚本执行位置
+      # Optional: script execution location / 可选：脚本执行位置
       # location: "world 103 64 100"
-      # JavaScript脚本
+      # JavaScript script / JavaScript脚本
       js: |
         player.sendMessage(mmUtil.deserialize("<green>地下城已开启！"))
         player.playSound(player.location, "block.iron_door.open", 1.0, 1.0)
-      # Kether脚本
+      # Kether script / Kether脚本
       # kether: |
       #   minitell "<green>地下城已开启！"
       #   sound "block.iron_door.open" 1 1
 
-  # 重置配置
+  # Reset configuration / 重置配置
   reset:
-    # 检测玩家区域（可选，如果不设置则不检测玩家）
+    # Player detection range (optional, if not set, player detection is disabled) / 检测玩家区域（可选，如果不设置则不检测玩家）
     range:
       from: "world 90 60 90"
       to: "world 110 70 110"
 
-    # 没有玩家后重置延迟（秒）
+    # Reset delay after no players are detected (seconds) / 没有玩家后重置延迟（秒）
     delay: 300
 
-    # 是否恢复环境（默认：true）
+    # Whether to restore the environment (default: true) / 是否恢复环境（默认：true）
     restore: true
 
-    # 重置时执行的动作
+    # Actions to execute on reset / 重置时执行的动作
     actions:
-      # 移除生成的箱子
+      # Remove spawned chest / 移除生成的箱子
       - type: "remove-block"
         location: "world 102 64 100"
         block: "CHEST"
 
-
-          # 恢复移除的方块
+      # Restore removed block / 恢复移除的方块
       - type: "set-block"
         location: "world 100 65 100"
         block: "STONE"
 
-      # 关门
+      # Close door / 关门
       - type: "close-door"
         location: "world 101 64 100"
         direction: "NORTH"
 
-      # 重置完成通知
+      # Reset complete notification / 重置完成通知
       - type: "execute-script"
         js: |
           Bukkit.broadcastMessage("§e地下城入口已重置，可以再次挑战！")
 
-  # 事件代理（可选）
-  # 支持以下触发点：onOpen, onReset, onActivate, onWrongKey, onConditionFail,
+  # Event agents (optional) / 事件代理（可选）
+  # Supported trigger points: onOpen, onReset, onActivate, onWrongKey, onConditionFail,
   #                 onAlreadyActive, onOpeningBlocked, onResetComplete
-  # 可使用 js/ke (同步) 或 async_js/async_ke (异步) 编写脚本
-  # 上下文变量：player, config, block, instance, trigger
-  # 内置方法：msg(player, "<text>") — MiniMessage格式发送消息
+  # Supports js/ke (sync) or async_js/async_ke (async) scripting / 可使用 js/ke (同步) 或 async_js/async_ke (异步) 编写脚本
+  # Context variables: player, config, block, instance, trigger / 上下文变量：player, config, block, instance, trigger
+  # Built-in method: msg(player, "<text>") — MiniMessage format to send messages / 内置方法：msg(player, "<text>") — MiniMessage格式发送消息
   agents:
-    # 卡房开启时触发（由 CardRoomManager.activateCardRoom 调用）
+    # Triggered when the card room is opened (called by CardRoomManager.activateCardRoom) / 卡房开启时触发（由 CardRoomManager.activateCardRoom 调用）
     onOpen:
       js: |-
+        var Bukkit = Java.type("org.bukkit.Bukkit")
         msg(player, "<gold>你使用钥匙打开了地下城入口！")
         Bukkit.broadcast(mmUtil.deserialize("<yellow>玩家 " + player.name + " 开启了地下城入口！"))
 
-    # 卡房重置开始时触发（由 CardRoomManager.startReset 调用）
+    # Triggered when card room reset starts (called by CardRoomManager.startReset) / 卡房重置开始时触发（由 CardRoomManager.startReset 调用）
     onReset:
       js: |-
         devLog("卡房 " + name + " 已重置")
 
-    # 卡房完全重置完成后触发（由 CardRoomManager.resetCardRoom 调用）
-    # 上下文：config, instance
+    # Triggered when card room reset is complete (called by CardRoomManager.resetCardRoom) / 卡房完全重置完成后触发（由 CardRoomManager.resetCardRoom 调用）
+    # Context: config, instance / 上下文：config, instance
     onResetComplete:
       js: |-
-        Bukkit.broadcastMessage("§a卡房已重置完成！")
+        var Bukkit = Java.type("org.bukkit.Bukkit")
+        Bukkit.broadcast(mmUtil.deserialize("<yellow>Cardroom Reset."))
 
-    # 成功激活且动作执行完成后触发（由 CardRoomListener.activateCardRoom 调用）
-    # 上下文：player, config, instance
+    # Triggered after successful activation and actions execution (called by CardRoomListener.activateCardRoom) / 成功激活且动作执行完成后触发（由 CardRoomListener.activateCardRoom 调用）
+    # Context: player, config, instance / 上下文：player, config, instance
     onActivate:
       js: |-
         msg(player, "<green>卡房已激活！")
 
-    # 玩家使用错误钥匙（物品标签不匹配）时触发
-    # 上下文：player, config, block
+    # Triggered when the player uses the wrong key (item tag mismatch) / 玩家使用错误钥匙（物品标签不匹配）时触发
+    # Context: player, config, block / 上下文：player, config, block
     onWrongKey:
       js: |-
         msg(player, "<red>你没有正确的钥匙！")
 
-    # 条件检查失败时触发
-    # 上下文：player, config, block, condition
+    # Triggered when condition check fails / 条件检查失败时触发
+    # Context: player, config, block, condition / 上下文：player, config, block, condition
     onConditionFail:
       js: |-
         msg(player, "<red>你不满足开启条件！")
 
-    # 卡房已经处于激活状态时触发
-    # 上下文：player, config, block
+    # Triggered when the card room is already active / 卡房已经处于激活状态时触发
+    # Context: player, config, block / 上下文：player, config, block
     onAlreadyActive:
       js: |-
         msg(player, "<yellow>该卡房已经开启了！")
 
-    # 开启前事件被取消时触发
-    # 上下文：player, config, block
+    # Triggered when the opening event is blocked / 开启前事件被取消时触发
+    # Context: player, config, block / 上下文：player, config, block
     onOpeningBlocked:
       js: |-
         msg(player, "<red>卡房开启被阻止！")
 
-# 示例2：简单的宝箱房间
+# Example 2: Simple Treasure Room / 示例2：简单的宝箱房间
 simple_treasure_room:
   name: "宝箱房间"
 
   trigger:
     block: "world 200 64 200"
-    # 不需要特殊钥匙，任何玩家都可以触发
+    # No special key required, any player can trigger / 不需要特殊钥匙，任何玩家都可以触发
     item:
       - consume-key: false
 
@@ -186,22 +187,22 @@ simple_treasure_room:
     - type: "spawn-chest"
       location: "world 200 65 200"
       loot-template: "common_treasure"
-      private: true  # 私有箱子，只有触发玩家能打开
-      # 可选：方块类型，默认为CHEST
+      private: true  # Private chest, only the triggering player can open / 私有箱子，只有触发玩家能打开
+      # Optional: block type, defaults to CHEST / 可选：方块类型，默认为CHEST
       # block: "CHEST"
 
   reset:
-    # 不检测玩家区域，只在箱子被领取后重置
+    # No player detection range, resets only after chest is claimed / 不检测玩家区域，只在箱子被领取后重置
     # range: null
-    delay: 600  # 10分钟后重置
-    restore: false  # 不恢复环境（只有箱子）
+    delay: 600  # Reset after 10 minutes / 10分钟后重置
+    restore: false  # Don't restore environment (chest only) / 不恢复环境（只有箱子）
 
     actions:
       - type: "remove-block"
         location: "world 200 65 200"
         block: "CHEST"
 
-# 示例3：多障碍物关卡
+# Example 3: Obstacle Course / 示例3：多障碍物关卡
 obstacle_course:
   name: "障碍关卡"
 
@@ -213,7 +214,7 @@ obstacle_course:
         consume-key: true
 
   actions:
-    # 移除多个障碍物
+    # Remove multiple obstacles / 移除多个障碍物
     - type: "remove-block"
       location: "world 300 65 300"
       block: "COBBLESTONE"
@@ -226,18 +227,18 @@ obstacle_course:
       location: "world 300 65 302"
       block: "COBBLESTONE"
 
-    # 开门
+    # Open door / 开门
     - type: "open-door"
       location: "world 301 64 300"
 
-    # 生成奖励箱子
+    # Spawn reward chest / 生成奖励箱子
     - type: "spawn-chest"
       location: "world 302 64 300"
       loot-template: "obstacle_reward"
-      # 可选：方块类型，默认为CHEST
+      # Optional: block type, defaults to CHEST / 可选：方块类型，默认为CHEST
       # block: "CHEST"
 
-    # 提示信息
+    # Notification message / 提示信息
     - type: "execute-script"
       js: |
         player.sendTitle("§a关卡开启！", "§7你有5分钟时间领取奖励", 10, 70, 20)
@@ -246,11 +247,11 @@ obstacle_course:
     range:
       from: "world 290 60 290"
       to: "world 310 70 310"
-    delay: 300  # 5分钟
+    delay: 300  # 5 minutes / 5分钟
     restore: true
 
     actions:
-      # 恢复所有障碍物
+      # Restore all obstacles / 恢复所有障碍物
       - type: "set-block"
         location: "world 300 65 300"
         block: "COBBLESTONE"
@@ -263,72 +264,72 @@ obstacle_course:
         location: "world 300 65 302"
         block: "COBBLESTONE"
 
-      # 关门
+      # Close door / 关门
       - type: "close-door"
         location: "world 301 64 300"
 
-      # 移除箱子
+      # Remove chest / 移除箱子
       - type: "remove-block"
         location: "world 302 64 300"
         block: "CHEST"
 
-# 示例4：展示框物资箱房间
+# Example 4: Item Frame Crate Room / 示例4：展示框物资箱房间
 frame_reward_room:
   name: "展示框奖励房间"
 
   trigger:
     block: "world 400 64 400"
-    # 不需要钥匙，靠近即可触发
+    # No key required, trigger on proximity / 不需要钥匙，靠近即可触发
     item:
       - consume-key: false
 
   actions:
-    # 生成发光展示框物资箱
+    # Spawn glowing item frame crate / 生成发光展示框物资箱
     - type: "spawn-frame"
       location: "world 400 65 400"
-      # 展示框物资箱配置ID（必须在frame-crates/中定义）
+      # Item frame crate configuration ID (must be defined in frame-crates/) / 展示框物资箱配置ID（必须在frame-crates/中定义）
       frame-crate: "example_frame_crate"
-      # 展示框朝向（可选）
+      # Item frame facing direction (optional) / 展示框朝向（可选）
       facing: "SOUTH"
 
-    # 普通展示框（不发光）
+    # Normal item frame (non-glowing) / 普通展示框（不发光）
     - type: "spawn-frame"
       location: "world 401 65 400"
       frame-crate: "example_frame_crate"
       facing: "SOUTH"
 
-    # 提示信息
+    # Notification message / 提示信息
     - type: "execute-script"
       js: |
         player.sendMessage("§a展示框已生成！右键点击领取奖励。")
 
   reset:
-    delay: 120  # 2分钟后重置
+    delay: 120  # Reset after 2 minutes / 2分钟后重置
     restore: false
 
     actions:
-      # 清理所有生成的展示框
+      # Clean up all spawned item frames / 清理所有生成的展示框
       - type: "remove-frame"
         location: "world 400 65 400"
 
       - type: "remove-frame"
         location: "world 401 65 400"
 
-# 配置说明：
-# 1. 位置格式：'世界名 x y z'，如 'world 100 64 100'
-# 2. 方块类型：使用Minecraft原版方块ID，如 'STONE', 'CHEST', 'IRON_DOOR'
-# 3. NBT标签：支持嵌套结构，布尔值存储为字节（1=true, 0=false）
-# 4. 条件脚本：支持JavaScript和Kether，可以使用player, block, item等变量
-# 5. 动作类型：
-#    - remove-block: 移除方块（可验证方块类型）
-#    - set-block: 设置方块
-#    - door/open-door/close-door: 门操作
-#    - spawn-chest: 生成物资箱（需要配置战利品模板，可指定方块类型）
-#    - spawn-frame: 生成展示框物资箱（需要配置展示框物资箱ID）
-#    - remove-frame: 移除展示框
-#    - execute-script: 执行脚本
-# 6. 重置机制：
-#    - 如果配置了range，会检测区域内是否有玩家
-#    - 没有玩家后，经过delay秒重置
-#    - restore为true时会恢复所有修改的方块
-#    - 重置时会执行actions列表中的动作
+# Configuration notes / 配置说明：
+# 1. Location format: 'world x y z', e.g. 'world 100 64 100' / 位置格式：'世界名 x y z'，如 'world 100 64 100'
+# 2. Block type: Use Minecraft vanilla block IDs, e.g. 'STONE', 'CHEST', 'IRON_DOOR' / 方块类型：使用Minecraft原版方块ID，如 'STONE', 'CHEST', 'IRON_DOOR'
+# 3. NBT tags: Support nested structures, boolean values stored as bytes (1=true, 0=false) / NBT标签：支持嵌套结构，布尔值存储为字节（1=true, 0=false）
+# 4. Condition scripts: Support JavaScript and Kether, variables like player, block, item are available / 条件脚本：支持JavaScript和Kether，可以使用player, block, item等变量
+# 5. Action types / 动作类型：
+#    - remove-block: Remove block (can verify block type) / 移除方块（可验证方块类型）
+#    - set-block: Set block / 设置方块
+#    - door/open-door/close-door: Door operations / 门操作
+#    - spawn-chest: Spawn loot chest (requires loot template, can specify block type) / 生成物资箱（需要配置战利品模板，可指定方块类型）
+#    - spawn-frame: Spawn item frame crate (requires frame crate ID) / 生成展示框物资箱（需要配置展示框物资箱ID）
+#    - remove-frame: Remove item frame / 移除展示框
+#    - execute-script: Execute script / 执行脚本
+# 6. Reset mechanism / 重置机制：
+#    - If range is configured, player detection in the area is enabled / 如果配置了range，会检测区域内是否有玩家
+#    - After no players detected, resets after delay seconds / 没有玩家后，经过delay秒重置
+#    - When restore is true, all modified blocks are restored / restore为true时会恢复所有修改的方块
+#    - Actions in the actions list are executed on reset / 重置时会执行actions列表中的动作

@@ -36,7 +36,7 @@ data class LootTemplate (
             playerId = if (options.private) player.uniqueId else null,
         )
         val event = LootInstanceCreateEvent(player, i)
-        event.callEvent()
+        event.call()
         return event.instance
     }
     fun generateElements(player: Player, bypassCondition: Boolean = false): LinkedHashMap<Int, LootElement?> {

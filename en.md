@@ -1,214 +1,638 @@
-I write a simple doc before, but it's too fucking idiot, so I drop it to AI
+# LithiumCarbon Documentation
 
-Example config
+> LithiumCarbon (Li₂CO₃) — Loot Chest Management System  
+> Version 1.2.x | Liminal Skyline Series Plugin
 
+---
 
+## Table of Contents
+
+1. [Overview](#1-overview)
+2. [Installation](#2-installation)
+3. [Configuration](#3-configuration)
+4. [Loot Chest System](#4-loot-chest-system)
+5. [Card Room System](#5-card-room-system)
+6. [Frame Crate System](#6-frame-crate-system)
+7. [Item Configuration](#7-item-configuration)
+8. [Scripting & Agents](#8-scripting--agents)
+9. [Commands](#9-commands)
+10. [API](#10-api)
+11. [Events](#11-events)
+
+---
+
+## 1. Overview
+
+LithiumCarbon is a comprehensive loot chest management system with three core modules:
+
+- **Loot Chest System**: Define loot templates with custom GUI layouts, weighted item pools, search mechanics, and auto-refresh.
+- **Card Room System**: Trigger-based room mechanics — place trigger blocks, execute multi-step actions (spawn chests, open doors, run scripts), and auto-reset.
+- **Frame Crate System**: Spawn item frame crates that display loot items visually; players claim by right-clicking.
+
+---
+
+## 2. Installation
+
+### Requirements
+- **Java 21+**
+- **Paper 1.20.x+** (or forks)
+- **TabooLib 6.2+** (bundled)
+
+### Optional Dependencies
+- **WorldGuard**: For region-based loot definitions (`type: worldguard`)
+- **Sertraline**: For external item integration
+- **CraftEngine / ItemsAdder**: For custom item support
+- **Chemdah**: For quest objectives integration
+
+### Setup
+1. Place the plugin jar in `plugins/` folder.
+2. Restart the server.
+3. Configure files in `plugins/LithiumCarbon/`.
+
+### Folder Structure
 ```
-sample:
+plugins/LithiumCarbon/
+├── config.yml              # Main configuration
+├── items.yml               # GUI display items definition
+├── lang/
+│   ├── en_US.yml           # English messages
+│   └── zh_CN.yml           # Chinese messages
+├── loots/                  # Loot template files (*.yml, *.yaml, *.toml, *.json, *.conf)
+├── card-rooms/             # Card room configuration files
+└── frame-crates/           # Frame crate configuration files
+```
+
+---
+
+## 3. Configuration
+
+### config.yml
+
+```yaml
+# LithiumCarbon Configuration
+debug: false
+
+hook:
+  worldguard: true  # Enable WorldGuard integration
+
+file-load:
+  loots: "^(?![#!]).*\\.(?i)(yaml|yml|toml|tml|json|conf)$"  # Loot file loading pattern
+
+lang: en_US  # Default language
+
+default-options:
+  add-lore: null       # Default lore to append to all loot items
+  remove-lore: false   # Remove original lore from loot items
+  shuffle-loot: false  # Shuffle loot positions in GUI
+  private: false       # Whether chests are private by default
+
+logger:
+  ignore-errors:
+    ErrorNoAvailableSlots: false
+    ErrorNoPools: false
+    ErrorItemGenerationFailed: false
+    ErrorItemGenerationFailedNull: false
+  ignore-warnings:
+    WarningNotSupportDataComponent: false
+
+# Allowed loot blocks (block types that can be loot chests)
+allowed-blocks:
+  - CHEST
+  - GRAY_SHULKER_BOX
+
+allowed-all-blocks: false  # Bypass allowed-blocks check
+
+allowed-worlds:
+  - "world.+"  # Worlds where loot can generate (supports regex)
+
+allowed-all-worlds: true  # Bypass allowed-worlds check
+
+message:           # Toggle in-game messages
+  SearchLimit: true
+  SearchStart: true
+  Searching: false
+  Searched: false
+  Claim: false
+  ClaimExp: true
+
+sounds:            # Custom sound effects (format: "sound volume pitch category")
+  open: "minecraft:block.chest.locked 1 0.6 block"
+  search: "minecraft:item.armor.equip_chain 1 1 block"
+  searching: "minecraft:block.stone_pressure_plate.click_on 1 0.5 block"
+  search-end: "minecraft:block.dispenser.dispense 1 1 block"
+  search-limit: "minecraft:entity.villager.no 1 1 block"
+  claim: "minecraft:block.stone_pressure_plate.click_on 1 1 block"
+```
+
+---
+
+## 4. Loot Chest System
+
+The core system for creating loot chests with custom GUI, weighted items, search mechanics, and refresh cycles.
+
+### Loot Template Structure
+
+```yaml
+# plugins/LithiumCarbon/loots/<name>.yml
+template_id:
   refresh:
     loops:
-      - period: 300
+      - period: 300        # Refresh every 300 seconds
         agent:
           onRefresh:
-            js:
-              org.bukkit.Bukkit.broadcast(mmUtil.deserialize("<#dcaaff>[提示] <gray>所有 <yellow>" + name + "</yellow> 已刷新."))
-    expire: 500
+            js: |
+              org.bukkit.Bukkit.broadcast(
+                mmUtil.deserialize("<yellow>" + name + " Refreshed.")
+              )
+    expire: 300            # Auto-refresh 300s after being opened
+
   display:
-    name: "Sample Loot"
-    title: "Sample Loot Menu"
-    rows: 3
-    layout:
+    name: "Template Name"  # Display name (used in messages)
+    title: "GUI Title"      # GUI window title
+    rows: 3                 # GUI rows (1-6)
+    layout:                 # Layout pattern (9 chars per row)
       - '         '
       - '         '
       - '         '
-  defines:
-    region:
-      type: square
+    # available-slots: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26]
+
+  defines:              # Define which blocks/regions are this loot type
+    region_a:
+      type: square      # Square region by coordinates
       from: 'world 0 0 0'
       to: 'world 100 100 100'
       blocks:
         - CHEST
-  options:
-    shuffle-loot: true
-    search-limit: 1
-  pools:
-  - rolls: 1~4
-    loots:
-      - items: diamond
-        weight: 4
-        search-time: 0.5
-      - items: emerald
-        weight: 1
-        search-time: 1.5
-```
-
-### 1. `display`
-
-This section defines how the loot chest appears in the game's user interface.
-
-```yaml
-  display:
-    name: "Sample Loot"
-    title: "Sample Loot Menu"
-    rows: 3
-    layout:
-      - '         '
-      - '         '
-      - '         '
-```
-
-*   **`name`**:
-    *   **Description**: This is the display name of the loot chest, primarily used for in-game messages, logging, or any context where the loot chest's name needs to be referenced.
-    *   **Example**: "Sample Loot"
-    *   **Function**: When players interact with the loot chest (e.g., opening, refresh notifications), this name will be shown to them, providing clear identification.
-
-*   **`title`**:
-    *   **Description**: Defines the title of the Graphical User Interface (GUI), typically a custom menu or chest interface, that appears when a player opens the loot chest.
-    *   **Example**: "Sample Loot Menu"
-    *   **Function**: Directly displayed at the top of the GUI window, informing the player which loot chest's contents they are viewing.
-
-*   **`rows`**:
-    *   **Description**: Specifies the number of rows in the loot chest's GUI. In many games, GUIs are grid-based, and `rows` determines the height.
-    *   **Example**: `3`
-    *   **Function**: Determines the size of the GUI. For instance, a 3-row GUI typically displays 27 item slots (assuming 9 slots per row), influencing how many items a player can see at once.
-
-*   **`layout`**:
-    *   **Description**: A list of strings used to define the specific layout of the loot chest's GUI. Each string represents a row of the GUI. You can reference IDs of "display items" defined in an `items.yml` file here to place decorative items or functional buttons in specific slots.
-    *   **Example**:
-        ```yaml
-          - '         '
-          - '         '
-          - '         '
-        ```
-        In this example, each string consists of 9 spaces, representing an empty 3x9 grid layout where all slots are empty and can be filled by loot items.
-    *   **Function**: Provides a high degree of customization, allowing designers to create unique GUI interfaces. For example, one could place "search" buttons, pagination buttons, or background decorations in fixed positions.
-
-### 2. `defines` (Definitions)
-
-This section is used to define which "blocks" or "regions" can be recognized as `sample` type loot chests. It supports multiple ways of definition.
-
-```yaml
-  defines:
-    region:
-      type: square
-      from: 'world 0 0 0'
-      to: 'world 100 100 100'
-      blocks:
-        - CHEST
+        - BARREL
     region_wg:
-      type: worldguard
-      region: regionname
-      blocks: 
+      type: worldguard  # WorldGuard region
+      region: region_name
+      blocks:
         - CHEST
     region_world:
-      type: world
+      type: world       # World-wide (regex supported)
       world: world_.+
       regex: true
       blocks:
         - CHEST
-```
 
-*   **`region` (Square Region Definition)**:
-    *   **`type: square`**: Specifies that this is a coordinate-based square (cuboid) region.
-    *   **`from: 'world 0 0 0'`**: Defines the starting point of the region (lowest x, y, z coordinates). The format is typically `'world_name x y z'`.
-    *   **`to: 'world 100 100 100'`**: Defines the ending point of the region (highest x, y, z coordinates).
-        *   **Note**: You must manually ensure that `from` is the lowest point and `to` is the highest point. Although the configuration mentions future versions might auto-sort, it currently requires manual specification.
-    *   **`blocks:`**:
-        *   **Description**: A list of block types. Only blocks of these specified types within this `square` region will be considered loot chests.
-        *   **Example**: `- CHEST`
-        *   **Note**: Block names must be all uppercase. If you want to use blocks other than chests (e.g., barrels, furnaces), you usually need to add additional configuration in the plugin's `config` file.
-
-*   **`region_wg` (WorldGuard Region Definition)**:
-    *   **`type: worldguard`**: Specifies that this is a region defined using the popular WorldGuard plugin.
-    *   **`region: regionname`**: The name of a pre-existing region defined in the WorldGuard plugin.
-    *   **`blocks:`**: Same as above, specifying which blocks within this WorldGuard region are loot chests.
-
-*   **`region_world` (Specific World Block Definition)**:
-    *   **`type: world`**: Specifies that this definition is based on a specific world and its blocks.
-    *   **`world: world_.+`**: Specifies the world name. Supports the use of regular expressions for matching.
-    *   **`regex: true`**: If regular expressions (`.+` for matching any character, for example) are used in the `world` parameter, this needs to be set to `true`.
-    *   **`blocks:`**: Same as above, specifying which blocks in this world are loot chests.
-
-### 3. `pools` (Item Pools)
-
-This section defines the specific items that can be obtained from the loot chest, along with their drop probabilities and search times. A loot chest can have one or more item pools.
-
-```yaml
-  pools:
-  - rolls: 1~4
-    loots:
-      - items: diamond
-        weight: 4
-        search-time: 0.5
-      - items: emerald
-        weight: 1
-        search-time: 1.5
-```
-
-*   **`- rolls: 1~4`**:
-    *   **Description**: This is the range of items that will be dropped each time this item pool is searched.
-    *   **Example**: `1~4` means that 1 to 4 items will be randomly obtained per search.
-
-*   **`loots:`**:
-    *   **Description**: This is a list containing all possible drop items from this pool and their attributes.
-    *   **`- items: diamond`**:
-        *   **Description**: The ID of the item. This can be a vanilla Minecraft item ID (like `diamond`) or an item ID defined by another plugin.
-        *   **External Plugin Items**: For items from external plugins like CraftEngine, the format is usually `plugin_ID:namespace:item_ID`, e.g., `craftengine:default:topaz`.
-    *   **`weight: 4`**:
-        *   **Description**: The weight of the item within the current item pool. A higher weight means a higher probability of being selected. Within a `loots` list, the sum of all item weights is used to calculate each item's relative probability.
-        *   **Example**: Diamond has a weight of `4`, Emerald has `1`. The total weight is `4+1=5`. So, the probability of getting a Diamond is `4/5 (80%)`, and Emerald is `1/5 (20%)`.
-    *   **`search-time: 0.5`**:
-        *   **Description**: The time, typically in seconds, required for a player to "search" for and obtain this item from the loot chest. This can simulate a search process, adding to gameplay.
-        *   **Example**: Diamond takes 0.5 seconds, Emerald takes 1.5 seconds.
-
-### 4. `options`
-
-This section provides additional global options to adjust the behavior of the loot chest.
-
-```yaml
   options:
-    shuffle-loot: true
-    search-limit: 1
+    remove-lore: true     # Strip original lore from items
+    add-lore:             # Append extra lore lines
+      - "<gray>Event Loot"
+    shuffle-loot: true    # Randomize item positions in GUI
+    search-limit: 1       # Max simultaneous searches per player
+    private: false        # Private chest (only the placer can open)
+
+  pools:
+    - rolls: 1~3          # Number of items to draw (supports expressions)
+      conditions:         # Optional: conditions for this pool
+        js: "player.hasPermission('vip.loot')"
+      loots:
+        - items:
+            - item: diamond
+              amount: 1~3
+          weight: 10
+          search-time: 0.5
+          exps: 50        # Experience awarded on claim
+          skipSearch: false  # Skip search animation
+        - items:
+            - item: custom_sword
+              amount: 1
+          weight: 5
+          search-time: 1.2
+          displayItem:     # Custom display item in GUI
+            item: GOLD_INGOT
+            parameters:
+              name: "<gold>Mysterious Sword"
 ```
 
-*   **`shuffle-loot: true`**:
-    *   **Description**: If set to `true`, the order of items selected from the item pool will be randomized when displayed to the player.
-    *   **Function**: Increases the sense of surprise and randomness each time the loot chest is opened.
+### Key Concepts
 
-*   **`search-limit: 1`**:
-    *   **Description**: Limits the number of items a player can simultaneously search for (or extract) from this loot chest.
-    *   **Example**: `1` means a player can only perform one search task at a time.
-    *   **Function**: Can control the rate at which players acquire items, preventing them from taking all items at once and forcing them to make choices or wait.
+#### `defines` — Block/Region Matching
+| Type | Description |
+|------|-------------|
+| `square` | Cuboid region by coordinate ranges |
+| `worldguard` | Region defined by WorldGuard plugin |
+| `world` | All matching blocks in a world (supports regex) |
 
-### 5. `refresh`
+#### `pools` — Item Pools
+- **`rolls`**: Number of items to draw per chest open. Supports number expressions and ranges (e.g. `1~3`, `{player_level}`, `Math.min(5, level)`).
+- **`weight`**: Relative probability within a pool. Higher = more likely.
+- **`search-time`**: Time in seconds required to search/find this item.
+- **`exps`**: Experience points granted when item is claimed.
+- **`skipSearch`**: Set to `true` to make the item instantly claimable.
+- **`conditions`**: Script conditions that must be met for this pool to roll.
 
-This section defines the refresh mechanism for items in the loot chest, ensuring they are not permanently depleted. It supports two modes: periodic refresh and expiration refresh.
+#### `refresh` — Auto-Refresh
+- **`loops`**: Periodic refresh on a timer. Multiple loops supported.
+- **`expire`**: Refresh triggered N seconds after the chest is first opened.
+- **Agent events**: `onRefresh`, `onCancel` for custom refresh behavior.
+
+---
+
+## 5. Card Room System
+
+Trigger-based interactive rooms. Place a trigger block, configure item matching, and define multi-step actions that execute when a player activates the room. Rooms auto-reset.
+
+### Card Room Configuration
 
 ```yaml
-  refresh:
-    loops:
-      - period: 500
-        agent:
-          onRefresh:
-            js:
-              org.bukkit.Bukkit.broadcast(mmUtil.deserialize("<#dcaaff>[Tip] <gray>All <yellow>" + name + "</yellow> supply chests have been refreshed."))
-    expire: 300
+# plugins/LithiumCarbon/card-rooms/<name>.yml
+room_id:
+  name: "Room Display Name"
+
+  # Trigger configuration
+  trigger:
+    block: "world 100 64 100"     # Trigger block location (format: "world x y z")
+
+    item:                          # Item matching rules (first match wins)
+      - tag:                       #   Match item with specific NBT tags
+          custom-key: a
+        consume-key:
+          mode: durability         #   Consume mode: durability / item / tag
+          value: -1
+      - tag:
+          custom-key: b
+        consume-key: true          #   Consume 1 item (default mode)
+      - consume-key: false         #   No key required (catch-all)
+
+    # Optional trigger conditions
+    condition:
+      js: |
+        player.level >= 10 &&
+        player.gameMode == "SURVIVAL"
+      mode: ALL                    # ALL = all conditions must pass, ANY = any one passes
+
+  # Actions to execute (in order)
+  actions:
+    # Remove a block
+    - type: "remove-block"
+      location: "world 100 65 100"
+      block: "STONE"              # Optional: verify block type before removing
+
+    # Open a door
+    - type: "open-door"
+      location: "world 101 64 100"
+      direction: "NORTH"
+
+    # Close a door
+    - type: "close-door"
+      location: "world 101 64 100"
+
+    # Set a block
+    - type: "set-block"
+      location: "world 100 65 100"
+      block: "STONE"
+
+    # Spawn a loot chest
+    - type: "spawn-chest"
+      location: "world 102 64 100"
+      loot-template: "dungeon_rewards"
+      private: false               # Private chest (only trigger player can open)
+      block: "CHEST"               # Block type (CHEST, TRAPPED_CHEST, BARREL, etc.)
+
+    # Spawn an item frame crate
+    - type: "spawn-frame"
+      location: "world 103 64 100"
+      frame-crate: "example_frame_crate"
+      facing: "SOUTH"
+
+    # Remove an item frame crate
+    - type: "remove-frame"
+      location: "world 103 64 100"
+
+    # Execute a script
+    - type: "execute-script"
+      js: |
+        player.sendMessage("Room activated!")
+        player.playSound(player.location, "block.iron_door.open", 1.0, 1.0)
+
+  # Reset configuration
+  reset:
+    range:                          # Player detection area (optional)
+      from: "world 90 60 90"
+      to: "world 110 70 110"
+    delay: 300                      # Reset delay after no players (seconds)
+    restore: true                   # Restore environment on reset
+    actions:                        # Actions to execute on reset
+      - type: "remove-block"
+        location: "world 102 64 100"
+        block: "CHEST"
+      - type: "set-block"
+        location: "world 100 65 100"
+        block: "STONE"
+      - type: "close-door"
+        location: "world 101 64 100"
+      - type: "execute-script"
+        js: |
+          Bukkit.broadcastMessage("Room has been reset!")
+
+  # Event agents
+  agents:
+    onOpen:
+      js: |
+        msg(player, "<gold>You opened the dungeon entrance!")
+    onReset:
+      js: |
+        devLog("Room " + name + " has been reset")
+    onResetComplete:
+      js: |
+        Bukkit.broadcast(mmUtil.deserialize("<yellow>Room reset complete."))
+    onActivate:
+      js: |
+        msg(player, "<green>Room activated!")
+    onWrongKey:
+      js: |
+        msg(player, "<red>You don't have the right key!")
+    onConditionFail:
+      js: |
+        msg(player, "<red>You don't meet the requirements!")
+    onAlreadyActive:
+      js: |
+        msg(player, "<yellow>This room is already active!")
+    onOpeningBlocked:
+      js: |
+        msg(player, "<red>Room opening was blocked!")
 ```
 
-*   **`loops` (Periodic Refresh)**:
-    *   **Description**: This is a list that can define multiple periodic refresh rules. Each rule specifies that loot chests will automatically restock their items after a certain period.
-    *   **`- period: 500`**:
-        *   **Description**: The refresh cycle, in seconds. Here it is `500` seconds.
-        *   **Function**: Every `500` seconds, all loot chests of type `sample` will be refreshed, and their internal item counts (or item generation) will be reset.
-    *   **`agent.onRefresh.js:`**:
-        *   **Description**: A JavaScript script executed when the loot chest performs a refresh operation. This provides a powerful way to add custom behaviors.
-        *   **Example**:
-            ```javascript
-              org.bukkit.Bukkit.broadcast(mmUtil.deserialize("<#dcaaff>[Tip] <gray>All <yellow>" + name + "</yellow> supply chests have been refreshed."))
-            ```
-            This script broadcasts a custom message to all players on the server, notifying them that the `sample` loot chests have been refreshed. The `name` placeholder will be replaced with the value defined in `display.name` (e.g., "Sample Loot").
+### Action Types Reference
 
-*   **`expire` (Expiration Refresh)**:
-    *   **Description**: When a loot chest is opened (or first interacted with) by a player, it will automatically refresh after a specified amount of time.
-    *   **Example**: `300` represents 300 seconds.
-    *   **Function**: This is a lazy-loading refresh mechanism. The timer only starts when the chest is opened. When the timer reaches `300` seconds, if the chest is currently open or a player attempts to open it again, the chest will be refreshed. This method saves server resources as it doesn't frequently check unused chests.
+| Type | Description |
+|------|-------------|
+| `remove-block` | Remove a block at location (optional block verification) |
+| `set-block` | Place a block at location |
+| `open-door` | Open a door |
+| `close-door` | Close a door |
+| `spawn-chest` | Spawn a loot chest with a template |
+| `spawn-frame` | Spawn an item frame crate |
+| `remove-frame` | Remove an item frame |
+| `execute-script` | Run JavaScript or Kether script |
+
+### Item Consumption Modes
+
+| Mode | Description |
+|------|-------------|
+| `item` | Decrease item amount by `value` (default) |
+| `durability` | Damage the item by `value` (use `-1` for one use) |
+| `tag` | Modify an NBT tag value |
+
+---
+
+## 6. Frame Crate System
+
+Spawn item frames that display a loot item visually. Players right-click to claim.
+
+### Frame Crate Configuration
+
+```yaml
+# plugins/LithiumCarbon/frame-crates/<name>.yml
+crate_id:
+  loot-template: "template_id"   # Loot template to draw the item from
+  expire: 120                     # Expiry time in seconds (0 = never expires)
+  glow: true                      # Use glowing item frame (default: false)
+
+  # Event agents
+  agents:
+    onSpawn:
+      js: |
+        Bukkit.broadcastMessage("A frame crate has spawned!")
+    onClaim:
+      js: |
+        player.sendMessage("You claimed the reward!")
+```
+
+### Spawning Frame Crates
+
+Use the card room's `spawn-frame` action or the `/lcmanage spawnFrame` command.
+
+---
+
+## 7. Item Configuration
+
+Items are defined in `items.yml` and can be referenced in loot templates.
+
+```yaml
+# plugins/LithiumCarbon/items.yml
+unsearch:
+  item: GRAY_STAINED_GLASS_PANE
+  parameters:
+    name: "<!i><red><bold>Click to Search..."
+
+searching:
+  item: GRAY_STAINED_GLASS_PANE
+  parameters:
+    name: "<!i><red><bold>Searching..."
+
+undefinedItem:
+  item: GOLD_INGOT
+  parameters:
+    name: "<!i><gold><bold>Loot"
+
+A:                                    # Custom display item (referenced in layout as 'A')
+  item: TINTED_GLASS
+  parameters:
+    name: "<!i><gold><bold>Fixed Item"
+```
+
+### Item Sources
+
+Items can come from:
+
+1. **Vanilla Minecraft**: Use standard material names (`DIAMOND`, `CHEST`, etc.)
+2. **External Plugins**: Format `plugin_id:namespace:item_id`
+   - CraftEngine: `craftengine:default:ruby`
+   - ItemsAdder: `itemsadder:my_item`
+   - Sertraline: `sertraline:namespace:id`
+
+### Item Parameters
+
+| Parameter | Description |
+|-----------|-------------|
+| `name` | Item display name (MiniMessage format) |
+| `display-name` | Same as name |
+| `custom-name` | Minecraft custom name |
+| `item-name` | Minecraft item name (1.20.5+) |
+| `item-model` / `model` | Custom model data / item model |
+| `lore` | Item lore lines (list of MiniMessage strings) |
+
+### Data Components (1.20.5+)
+
+```yaml
+item_id:
+  item: DIAMOND_SWORD
+  components:
+    minecraft:unbreakable: true
+    minecraft:attribute_modifiers: []
+    minecraft:enchantments:
+      levels:
+        minecraft:sharpness: 5
+```
+
+---
+
+## 8. Scripting & Agents
+
+### JavaScript
+
+Available in loot templates, card rooms, frame crates, and everywhere `agents` is supported.
+
+**Pre-configured variables**:
+
+| Variable | Description |
+|----------|-------------|
+| `player` | Bukkit Player object |
+| `mmUtil` | MiniMessage utility |
+| `mmJsonUtil` | MiniMessage JSON utility |
+| `Bukkit` | Bukkit server API |
+| `LithiumCarbonAPI` | Plugin API |
+| `Math` | Java Math class |
+| `System` | Java System class |
+| `Gson` | Gson JSON parser |
+| `ItemStackUtil` | Item stack utility |
+| `EventUtil` | Event utility |
+| `ThreadUtil` | Thread/async utility |
+| `PlayerUtil` | Player utility |
+
+Plus template-specific variables like `name`, `id`, `template`, `element`, etc.
+
+### Kether
+
+Kether scripts are also supported alongside JS:
+
+```yaml
+agents:
+  onOpen:
+    ke: |
+      minitell "<green>Room opened!"
+      command papi "say hello world %player_name%!" as console
+```
+
+### Async Scripts
+
+Use `async_js` or `async_ke` for scripts that should run asynchronously.
+
+---
+
+## 9. Commands
+
+### Main Command: `/lithiumcarbon` (aliases: `/li2co3`, `/lc`)
+
+| Subcommand | Permission | Description |
+|------------|-----------|-------------|
+| `about` | `lithiumcarbon.command.main` | Show plugin info |
+| `reload` | `lithiumcarbon.command.main` | Reload all configurations |
+
+### Manage Command: `/lithiumcarbon-manage` (aliases: `/li2co3manage`, `/lcmanage`)
+
+| Subcommand | Permission | Description |
+|------------|-----------|-------------|
+| `generateItem <template> <player> <count>` | `lithiumcarbon.command.manage` | Generate loot items from template |
+| `update <location>` | `lithiumcarbon.command.manage` | Force update loot instance at location |
+| `updateWithoutCheck <location>` | `lithiumcarbon.command.manage` | Force update without validation |
+| `updateAll [template]` | `lithiumcarbon.command.manage` | Update all instances (optionally filtered by template) |
+| `spawnFrame <configId> [world x y z] [facing]` | `lithiumcarbon.command.manage` | Spawn a frame crate |
+| `cardroom list` | `lithiumcarbon.command.manage` | List all card rooms |
+| `cardroom info <id>` | `lithiumcarbon.command.manage` | View card room details |
+| `cardroom activate <id> [player]` | `lithiumcarbon.command.manage` | Activate a card room |
+| `cardroom reset <id>` | `lithiumcarbon.command.manage` | Reset a card room |
+| `cardroom resetall` | `lithiumcarbon.command.manage` | Reset all card rooms |
+| `cardroom status <id>` | `lithiumcarbon.command.manage` | Check card room status |
+
+---
+
+## 10. API
+
+### Dependency
+
+```kotlin
+repositories {
+    maven { url = uri("https://jitpack.io") }
+}
+
+dependencies {
+    implementation("com.github.zzzyyylllty:lithiumcarbon:VERSION")
+}
+```
+
+### Available API Methods
+
+Access via `LithiumCarbonAPI`:
+
+```kotlin
+// Get loot maps
+getLootMap(): Map<LootInstanceKey, LootInstance>
+getLootTemplates(): Map<String, LootTemplate>
+getLootDefines(): Map<String, LootDefines>
+getLootCaches(): Map<LootLocation, LootTemplate>
+getLootItems(): Map<Char, LootItem>
+getLootItemsDef(): Map<String, LootItem>
+
+// Force update a loot instance at a Bukkit location
+updateInstance(bukkitLocation: Location)
+```
+
+### Adding Custom Script Variables
+
+```kotlin
+// Listen to LithiumCarbonCustomScriptDataLoadEvent
+// Add custom bindings to the defaultData map
+```
+
+---
+
+## 11. Events
+
+All events extend `BukkitProxyEvent` from TabooLib.
+
+### Loot Events
+
+| Event | Cancellable | Description |
+|-------|-------------|-------------|
+| `LootInstanceCreateEvent` | No | A loot instance is created |
+| `ItemSearchStartEvent` | Yes | Player begins searching an item |
+| `ItemSearchCompletePreEvent` | Yes | Search complete, before item granted |
+| `ItemSearchCompletePostEvent` | No | Search complete, after item granted |
+| `LootElementApplyEvent` | Yes | A loot element is applied to a player |
+| `LootItemGrantEvent` | Yes | An item is about to be given to player |
+
+### Card Room Events
+
+| Event | Cancellable | Description |
+|-------|-------------|-------------|
+| `CardRoomPreOpenEvent` | Yes | Before card room activation, before key consumption |
+| `CardRoomOpenEvent` | No | Card room fully activated, all actions executed |
+| `CardRoomPreResetEvent` | Yes | Before card room reset starts |
+| `CardRoomResetEvent` | No | Card room reset complete |
+
+### Frame Crate Events
+
+| Event | Cancellable | Description |
+|-------|-------------|-------------|
+| `FrameCratePreClaimEvent` | Yes | Before frame crate item is claimed |
+| `FrameCrateClaimEvent` | No | Frame crate claimed, item granted |
+
+### Other Events
+
+| Event | Description |
+|-------|-------------|
+| `LithiumCarbonReloadEvent` | Fired after plugin configuration reload |
+| `LithiumCarbonCustomScriptDataLoadEvent` | Fired when JS script data bindings are initialized |
+
+---
+
+## Building from Source
+
+```bash
+# Normal build
+./gradlew clean build
+# Artifact in plugin/build/libs/
+
+# API build (for developers)
+./gradlew clean taboolibBuildApi -PDeleteCode
+```
+
+---
+
+*LithiumCarbon — Liminal Skyline Series*  
+*Designed by AkaCandyKAngel*
