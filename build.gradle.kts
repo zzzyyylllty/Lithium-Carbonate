@@ -135,7 +135,7 @@ allprojects {
         implementation(rootProject.libs.bundles.adventure)
         taboo(rootProject.libs.arim)
         taboo(rootProject.libs.bundles.jackson)
-        taboo("cn.gtemc:itembridge:1.0.18")
+        taboo("cn.gtemc:itembridge:1.0.25")
         kotlin("stdlib")
     }
 
