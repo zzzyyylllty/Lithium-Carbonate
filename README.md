@@ -12,6 +12,9 @@ Here are two simple docs
 
 超天战利品箱管理系统服务 (Liminal Skyline v4.0 服务)
 
+<img width="2002" height="1816" alt="53c234ba-0e04-4aec-8810-1270a7b5c2be" src="https://github.com/user-attachments/assets/a1dfc4fc-6a30-4dec-82c9-b3b8dac37674" />
+
+
 ChoTen Loot Chest management system service (Liminal Skyline v4.0 Service)
 
 ## Used server
