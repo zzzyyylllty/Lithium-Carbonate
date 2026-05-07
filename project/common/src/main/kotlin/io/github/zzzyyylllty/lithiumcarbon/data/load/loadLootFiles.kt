@@ -259,6 +259,9 @@ fun parseDefines(arg: Map<String, Any?>): LinkedHashMap<String, LootDefine> {
 
         val blocks = (define["blocks"]?.asListEnhanced() ?: emptyList()).toHashSet()
 
+        // 读取权重
+        val weight = (define["weight"] as? Number)?.toInt() ?: 0
+
         // 读取regex标志
         val regexFlag = (define["regex"] as? Boolean) ?: false
 
@@ -278,11 +281,12 @@ fun parseDefines(arg: Map<String, Any?>): LinkedHashMap<String, LootDefine> {
                     }
                 }
 
-                val world = define["world"].toString().toRegex()
+                val worldRegex = define["world"]?.toString()?.toRegex()
 
                 result[id] = SpecifyDefine(
                     locations = locationsMap,
-                    worldRegex = world,
+                    worldRegex = worldRegex,
+                    weight = weight,
                     blocks = blocks.loadBlocks(),
                     condition = condition
                 )
@@ -298,6 +302,7 @@ fun parseDefines(arg: Map<String, Any?>): LinkedHashMap<String, LootDefine> {
                 result[id] = SquareDefine(
                     from = fromLoc,
                     to = toLoc,
+                    weight = weight,
                     blocks = blocks.loadBlocks(),
                     condition = condition
                 )
@@ -313,6 +318,7 @@ fun parseDefines(arg: Map<String, Any?>): LinkedHashMap<String, LootDefine> {
                 result[id] = WGDefine(
                     regions = regionsList,
                     regionsRegex = regionsRegex,
+                    weight = weight,
                     blocks = blocks.loadBlocks(),
                     condition = condition
                 )
@@ -328,6 +334,7 @@ fun parseDefines(arg: Map<String, Any?>): LinkedHashMap<String, LootDefine> {
                 result[id] = WorldDefine(
                     worlds = worldsList,
                     regexWorlds = regexWorlds,
+                    weight = weight,
                     blocks = blocks.loadBlocks(),
                     condition = condition
                 )

@@ -6,13 +6,14 @@ import io.github.zzzyyylllty.lithiumcarbon.data.LootLocation
 import io.github.zzzyyylllty.lithiumcarbon.data.LootVector
 import io.github.zzzyyylllty.lithiumcarbon.util.MultiBlock
 import io.github.zzzyyylllty.lithiumcarbon.util.devLog
+import io.github.zzzyyylllty.lithiumcarbon.util.validate
 import org.bukkit.block.Block
 import org.bukkit.entity.Player
 import kotlin.text.matches
 
-class SpecifyDefine(val locations: LinkedHashMap<String, HashSet<LootVector>>, val worldRegex: Regex?, override val blocks: HashSet<MultiBlock>, override val condition: Condition?): LootDefine {
+class SpecifyDefine(val locations: LinkedHashMap<String, HashSet<LootVector>>, val worldRegex: Regex?, override val weight: Int, override val blocks: HashSet<MultiBlock>, override val condition: Condition?): LootDefine {
 
-    override val type: String = "world"
+    override val type: String = "specify"
 
     override fun isValidLocation(location: LootLocation, block: Block, player: Player): Boolean {
 
@@ -29,14 +30,14 @@ class SpecifyDefine(val locations: LinkedHashMap<String, HashSet<LootVector>>, v
         val blockVector = LocationHelper.toLootVector(block.location)
 
         if (worldRegex != null) {
-            locations.forEach { (world, vector) ->
+            locations.forEach { (_, vector) ->
                 if (blockWorld.matches(worldRegex)) {
-                    if (vector.contains(blockVector)) return true
+                    if (vector.contains(blockVector) && blocks.validate(block)) return validateCondition(location, block, player)
                 }
             }
         } else {
             locations[blockWorld]?.let { vector ->
-                if (vector.contains(blockVector)) return true
+                if (vector.contains(blockVector) && blocks.validate(block)) return validateCondition(location, block, player)
             }
         }
 

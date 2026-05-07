@@ -14,6 +14,8 @@ import org.bukkit.entity.Entity
 import org.bukkit.entity.GlowItemFrame
 import org.bukkit.entity.ItemFrame
 import org.bukkit.entity.Player
+import taboolib.common.platform.function.submit
+import taboolib.common.platform.function.warning
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.math.roundToLong
@@ -90,32 +92,38 @@ object FrameCrateManager {
         displayStack.amount = 1 // item frames show amount=1
 
         // Spawn the item frame (normal or glow)
-        val frame = if (config.glow) {
-            world.spawn(location, GlowItemFrame::class.java)
-        } else {
-            world.spawn(location, ItemFrame::class.java)
-        }
-
-        // Set facing direction
-        if (facing != null) {
-            try {
-                val blockFace = org.bukkit.block.BlockFace.valueOf(facing.uppercase())
-                frame.setFacingDirection(blockFace)
-            } catch (e: IllegalArgumentException) {
-                devLog("Invalid facing direction: $facing, using default")
+        var frame: ItemFrame? = null
+        submit {
+            frame = if (config.glow) {
+                world.spawn(location, GlowItemFrame::class.java)
+            } else {
+                world.spawn(location, ItemFrame::class.java)
             }
+
+            // Set facing direction
+            if (facing != null) {
+                try {
+                    val blockFace = org.bukkit.block.BlockFace.valueOf(facing.uppercase())
+                    frame.setFacingDirection(blockFace)
+                } catch (e: IllegalArgumentException) {
+                    devLog("Invalid facing direction: $facing, using default")
+                }
+            }
+
+            // Set item in frame
+            frame.setItem(displayStack)
+            frame.setFixed(true)
+            frame.setVisible(true)
         }
-
-        // Set item in frame
-        frame.setItem(displayStack)
-        frame.setFixed(true)
-        frame.setVisible(true)
-
         // Calculate expire time
         val expireTime = config.expire?.let {
             (it.toDoubleOrNull() ?: 0.0).let { exp ->
                 if (exp > 0) System.currentTimeMillis() + (exp * 1000).roundToLong() else null
             }
+        }
+        if (frame == null) {
+            warning("item frame creation failed.")
+            return null
         }
 
         val data = FrameCrateData(
@@ -154,7 +162,7 @@ object FrameCrateManager {
             frameLoc.world?.name == location.world?.name
         } ?: return false
 
-        frame.value.itemFrame.remove()
+        submit { frame.value.itemFrame.remove() }
         activeFrameCrates.remove(frame.key)
         devLog("Removed frame crate at $location")
         return true

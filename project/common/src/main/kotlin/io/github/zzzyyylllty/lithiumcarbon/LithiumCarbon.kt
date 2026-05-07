@@ -73,6 +73,7 @@ object LithiumCarbon : Plugin() {
     val frameCrateConfigs = mutableMapOf<String, FrameCrateConfig>()
 
     var devMode = true
+    val weightSystem: Boolean get() = config.getBoolean("weight-system", false)
 
 
     @SubscribeEvent

@@ -9,7 +9,7 @@ import org.bukkit.block.Block
 import org.bukkit.entity.Player
 import kotlin.text.matches
 
-class WorldDefine(val worlds: HashSet<String>, val regexWorlds: HashSet<Regex>?, override val blocks: HashSet<MultiBlock>, override val condition: Condition?): LootDefine {
+class WorldDefine(val worlds: HashSet<String>, val regexWorlds: HashSet<Regex>?, override val weight: Int, override val blocks: HashSet<MultiBlock>, override val condition: Condition?): LootDefine {
 
     override val type: String = "world"
 

@@ -9,7 +9,7 @@ import io.github.zzzyyylllty.lithiumcarbon.util.validate
 import org.bukkit.block.Block
 import org.bukkit.entity.Player
 
-class WGDefine(val regions: List<String>, val regionsRegex: List<Regex>?, override val blocks: HashSet<MultiBlock>, override val condition: Condition?): LootDefine {
+class WGDefine(val regions: List<String>, val regionsRegex: List<Regex>?, override val weight: Int, override val blocks: HashSet<MultiBlock>, override val condition: Condition?): LootDefine {
 
     override val type: String = "worldguard"
 

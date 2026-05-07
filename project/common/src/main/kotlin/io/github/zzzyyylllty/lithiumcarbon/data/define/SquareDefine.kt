@@ -8,13 +8,13 @@ import io.github.zzzyyylllty.lithiumcarbon.util.validate
 import org.bukkit.block.Block
 import org.bukkit.entity.Player
 
-class SquareDefine(val from: LootLocation, val to: LootLocation, override val blocks: HashSet<MultiBlock>, override val condition: Condition?): LootDefine {
+class SquareDefine(val from: LootLocation, val to: LootLocation, override val weight: Int, override val blocks: HashSet<MultiBlock>, override val condition: Condition?): LootDefine {
 
     override val type: String = "square"
 
     override fun isValidLocation(location: LootLocation, block: Block, player: Player): Boolean {
 
-        if (!block.world.name.contains(from.world.toRegex())) {
+        if (!block.world.name.matches(from.world.toRegex())) {
             devLog("World not met,return false.")
             return false
         }

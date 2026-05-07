@@ -8,11 +8,13 @@ import io.github.zzzyyylllty.lithiumcarbon.LithiumCarbon.lootDefines
 import io.github.zzzyyylllty.lithiumcarbon.LithiumCarbon.LootInstanceKey
 import io.github.zzzyyylllty.lithiumcarbon.LithiumCarbon.lootMap
 import io.github.zzzyyylllty.lithiumcarbon.LithiumCarbon.lootTemplates
+import io.github.zzzyyylllty.lithiumcarbon.LithiumCarbon.weightSystem
 import io.github.zzzyyylllty.lithiumcarbon.cardroom.CardRoomManager
 import io.github.zzzyyylllty.lithiumcarbon.data.LocationHelper
 import io.github.zzzyyylllty.lithiumcarbon.data.LootInstance
 import io.github.zzzyyylllty.lithiumcarbon.data.LootLocation
 import io.github.zzzyyylllty.lithiumcarbon.data.LootTemplate
+import io.github.zzzyyylllty.lithiumcarbon.data.define.getMaxMatchingWeight
 import io.github.zzzyyylllty.lithiumcarbon.gui.openLootChest
 import io.github.zzzyyylllty.lithiumcarbon.util.DependencyHelper
 import io.github.zzzyyylllty.lithiumcarbon.util.devLog
@@ -94,7 +96,36 @@ fun onInteract(e: PlayerInteractEvent) {
     }
 }
 
+/**
+ * 权重系统：找出所有匹配的模板，按 define 中的最高权重分组，返回权重最高的模板列表。
+ * 权重相等时全部返回（由调用方决定如何混合）。
+ */
+fun resolveTemplatesByWeight(location: LootLocation, block: Block, player: Player): List<LootTemplate> {
+    val matches = mutableListOf<Pair<Int, LootTemplate>>()
+    for ((id, defines) in lootDefines) {
+        val weight = defines.getMaxMatchingWeight(location, block, player) ?: continue
+        matches.add(weight to (lootTemplates[id] ?: continue))
+    }
+    if (matches.isEmpty()) return emptyList()
+    val maxWeight = matches.maxOf { it.first }
+    return matches.filter { it.first == maxWeight }.map { it.second }
+}
+
 fun getDefines(location: LootLocation, block: Block, player: Player): LootTemplate? {
+    if (weightSystem) {
+        // 权重系统启用：从缓存读取，或按权重解析并缓存
+        val cached = lootCaches[location]
+        if (cached != null) return cached
+
+        val templates = resolveTemplatesByWeight(location, block, player)
+        if (templates.isEmpty()) return null
+
+        // 权重相等时随机选取一个，实现"混合刷新"
+        val winner = if (templates.size == 1) templates[0] else templates.random()
+        lootCaches[location] = winner
+        return winner
+    }
+
     return if (lootCaches[location] == null) {
         val define = getDefinesWithoutCache(location, block, player)
         define?.let { lootCaches[location] = it }

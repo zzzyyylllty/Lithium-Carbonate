@@ -16,6 +16,12 @@ default-options:
   shuffle-loot: false
   private: false
 
+# Weight system / 权重系统
+# Higher weight defines replace lower weight ones when overlapping. Equal weights mix together.
+# / 权重大的区域会替换掉权重小的区域的箱子刷新，权重相等混合刷新。
+# Must add "weight: <number>" to each define in loot config files / 需在战利品配置文件的 define 中添加 "weight: <数字>"
+weight-system: false
+
 # Ignore warnings and errors / 忽略警告和错误
 logger:
   ignore-errors:
