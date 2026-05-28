@@ -112,7 +112,8 @@ sealed class ActionConfig(val type: String) {
     data class SpawnFrameAction(
         override val location: LootLocation,
         val frameCrateConfig: String,  // 展示框物资箱配置ID
-        val facing: String? = null     // 可选：展示框朝向
+        val facing: String? = null,    // 可选：展示框朝向
+        val removeExisting: Boolean = true // 是否在生成前移除当前位置的展示框（防止服务器意外关闭后遗留的展示框冲突）
     ) : ActionConfig("spawn-frame")
 
     // 移除展示框动作

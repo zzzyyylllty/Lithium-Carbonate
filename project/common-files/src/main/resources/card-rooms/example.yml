@@ -291,6 +291,10 @@ frame_reward_room:
       frame-crate: "example_frame_crate"
       # Item frame facing direction (optional) / 展示框朝向（可选）
       facing: "SOUTH"
+      # Whether to remove existing item frame at this location before spawning (default: true) / 是否在生成前移除当前位置的展示框（默认：true）
+      # Set to false to keep the existing frame (may cause conflicts when server restarts after unexpected shutdown)
+      # 设置为false可保留现有展示框（但服务器意外关闭后重启可能产生冲突）
+      remove-existing: true
 
     # Normal item frame (non-glowing) / 普通展示框（不发光）
     - type: "spawn-frame"
@@ -325,7 +329,7 @@ frame_reward_room:
 #    - set-block: Set block / 设置方块
 #    - door/open-door/close-door: Door operations / 门操作
 #    - spawn-chest: Spawn loot chest (requires loot template, can specify block type) / 生成物资箱（需要配置战利品模板，可指定方块类型）
-#    - spawn-frame: Spawn item frame crate (requires frame crate ID) / 生成展示框物资箱（需要配置展示框物资箱ID）
+#    - spawn-frame: Spawn item frame crate (requires frame crate ID, optional remove-existing) / 生成展示框物资箱（需要配置展示框物资箱ID，可选remove-existing）
 #    - remove-frame: Remove item frame / 移除展示框
 #    - execute-script: Execute script / 执行脚本
 # 6. Reset mechanism / 重置机制：

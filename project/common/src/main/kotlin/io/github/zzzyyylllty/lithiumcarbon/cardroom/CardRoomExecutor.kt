@@ -15,6 +15,7 @@ import org.bukkit.block.BlockFace
 import org.bukkit.block.data.BlockData
 import org.bukkit.block.data.Directional
 import org.bukkit.block.data.Openable
+import org.bukkit.entity.ItemFrame
 import org.bukkit.entity.Player
 import org.bukkit.inventory.meta.Damageable
 import taboolib.common.platform.function.submit
@@ -334,6 +335,14 @@ object CardRoomExecutor {
     ) {
         val location = action.location.toBukkitLocation()
         val actionBlock = {
+            // 在生成前移除当前位置的现有展示框（防止服务器意外关闭后遗留的展示框冲突）
+            if (action.removeExisting) {
+                FrameCrateManager.removeFrameAtLocation(location)
+                location.world?.getNearbyEntities(location, 0.5, 0.5, 0.5)
+                    ?.filterIsInstance<ItemFrame>()
+                    ?.forEach { it.remove() }
+            }
+
             val frameUuid = FrameCrateManager.spawnFrame(
                 location = location,
                 configId = action.frameCrateConfig,

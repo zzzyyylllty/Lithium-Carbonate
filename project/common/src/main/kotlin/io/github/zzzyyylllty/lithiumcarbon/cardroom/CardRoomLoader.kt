@@ -306,8 +306,9 @@ object CardRoomLoader {
             return null
         }
         val facing = config["facing"]?.toString()
+        val removeExisting = config["remove-existing"] as? Boolean ?: true
 
-        return ActionConfig.SpawnFrameAction(location, frameCrateConfig, facing)
+        return ActionConfig.SpawnFrameAction(location, frameCrateConfig, facing, removeExisting)
     }
 
     /**
