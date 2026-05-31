@@ -129,8 +129,8 @@ allprojects {
         // 工具库
         compileOnly(rootProject.libs.gson)
 
-        compileOnly("net.momirealms:craft-engine-core:0.0.66")
-        compileOnly("net.momirealms:craft-engine-bukkit:0.0.66")
+        compileOnly("net.momirealms:craft-engine-core:26.5.3")
+        compileOnly("net.momirealms:craft-engine-bukkit:26.5.3")
         // 核心功能库 (运行时需要)
         implementation(rootProject.libs.bundles.adventure)
         taboo(rootProject.libs.arim)

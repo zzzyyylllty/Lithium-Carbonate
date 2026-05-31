@@ -18,6 +18,9 @@ import io.github.zzzyyylllty.lithiumcarbon.data.define.getMaxMatchingWeight
 import io.github.zzzyyylllty.lithiumcarbon.gui.openLootChest
 import io.github.zzzyyylllty.lithiumcarbon.util.DependencyHelper
 import io.github.zzzyyylllty.lithiumcarbon.util.devLog
+import net.momirealms.craftengine.bukkit.api.CraftEngineBlocks
+import net.momirealms.craftengine.core.plugin.CraftEngine
+import net.momirealms.craftengine.core.world.BlockPos
 import org.bukkit.block.Block
 import org.bukkit.entity.Player
 import org.bukkit.event.block.Action
@@ -25,12 +28,28 @@ import org.bukkit.event.player.PlayerInteractEvent
 import taboolib.common.platform.event.SubscribeEvent
 import taboolib.common.platform.function.submit
 import taboolib.common.platform.function.submitAsync
+import taboolib.platform.util.isMainhand
 import kotlin.collections.get
 
 @SubscribeEvent
 fun onInteract(e: PlayerInteractEvent) {
     if (e.action != Action.RIGHT_CLICK_BLOCK) return
+    if (!e.isMainhand()) return
     val block = e.clickedBlock ?: return
+
+//    var currentState = CraftEngineBlocks.getCustomBlockState(block);
+//    if (currentState != null) {
+//        var stateWrapper = currentState.customBlockState();
+//        var newStateWrapper = stateWrapper.withProperty("open", "true");
+//        var newState = newStateWrapper;
+//        var worldManager = CraftEngine.instance().worldManager();
+//        var ceWorld = worldManager.getWorld(block.getWorld().uid);
+//        var pos = BlockPos(block.getX(), block.getY(), block.getZ());
+//        CraftEngineBlocks.
+//        var success = ceWorld.setBlockStateAtIfLoaded(pos, newState.);
+//    }
+
+
     if (block.type.isAir) return
     val player = e.player ?: return // 防止 NPC 搞鬼
 
@@ -89,7 +108,7 @@ fun onInteract(e: PlayerInteractEvent) {
                     }
                 }
             }
-            submit { player.openLootChest(instance) }
+            submit { player.openLootChest(instance, e) }
         }
     } else {
         return

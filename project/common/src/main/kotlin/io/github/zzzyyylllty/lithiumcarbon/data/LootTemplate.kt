@@ -6,6 +6,7 @@ import io.github.zzzyyylllty.lithiumcarbon.event.LootInstanceCreateEvent
 import io.github.zzzyyylllty.lithiumcarbon.util.asNumberFormat
 import io.github.zzzyyylllty.lithiumcarbon.util.asNumberFormatNullable
 import io.github.zzzyyylllty.lithiumcarbon.util.devLog
+import org.bukkit.Bukkit
 import org.bukkit.block.Block
 import org.bukkit.entity.Player
 import taboolib.common.platform.function.submit
@@ -78,6 +79,9 @@ data class LootUpdate(
                 }
                 loop.agents?.runAgent("onRefresh", linkedMapOf("loop" to loop, "timestart" to currentLoop, "name" to template.name), null)
                 lootMap.forEach {
+                    val loc = it.value.loc.toBukkitLocation()
+                    val block = loc.world.getBlockAt(loc)
+                    loop.agents?.runAgent("onRefreshEach", linkedMapOf("loop" to loop, "timestart" to currentLoop, "name" to template.name, "loc" to loc, "block" to block), null)
                     if (it.value.templateID == id) {
                         it.value.update()
                     }

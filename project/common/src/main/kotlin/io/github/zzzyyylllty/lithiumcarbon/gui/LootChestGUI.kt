@@ -17,6 +17,7 @@ import io.github.zzzyyylllty.lithiumcarbon.util.asNumberFormatNullable
 import io.github.zzzyyylllty.lithiumcarbon.util.devLog
 import io.github.zzzyyylllty.lithiumcarbon.util.mmUtil
 import org.bukkit.entity.Player
+import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.event.player.PlayerQuitEvent
 import org.bukkit.inventory.Inventory
 import taboolib.common.platform.event.SubscribeEvent
@@ -39,7 +40,7 @@ fun onPlayerLeaveUnloadLocation(e: PlayerQuitEvent) {
 
 
 // 这段我懒得修异步问题了，直接用AI
-fun Player.openLootChest(initialInstance: LootInstance) {
+fun Player.openLootChest(initialInstance: LootInstance, event: PlayerInteractEvent?) {
 
     val player = this
 
@@ -105,7 +106,7 @@ fun Player.openLootChest(initialInstance: LootInstance) {
                     playConfiguredSound(player, "open")
 
                     updateAllSlotsOnMainThread(inventory, initialInstance) // 在主线程调用辅助函数
-                    template.agents?.runAgent("onOpen", linkedMapOf("inventory" to inventory), player) // 假设 agent 也可能需要主线程
+                    template.agents?.runAgent("onOpen", linkedMapOf("inventory" to inventory, "event" to event, "block" to event?.clickedBlock), player) // 假设 agent 也可能需要主线程
                 }
             }
 
@@ -119,7 +120,7 @@ fun Player.openLootChest(initialInstance: LootInstance) {
                     submitChain { // 每次周期执行都创建一个新的调度链
                         sync { // 切换到主线程执行
                             updateAllSlotsOnMainThread(inventory, initialInstance) // 在主线程调用辅助函数
-                            template.agents?.runAgent("onUpdate", linkedMapOf("inventory" to inventory), player) // 假设 agent 也可能需要主线程
+                            template.agents?.runAgent("onUpdate", linkedMapOf("inventory" to inventory, "event" to event, "block" to event?.clickedBlock), player) // 假设 agent 也可能需要主线程
                         }
                     }
                 }
@@ -249,13 +250,13 @@ fun Player.openLootChest(initialInstance: LootInstance) {
         }
 
         // onClose 回调：假设也在异步线程执行。
-        onClose { event ->
+        onClose { closeEvent ->
             submitChain { // 为关闭事件创建一个新的调度链
                 sync { // 切换到主线程
                     closed = true // 修改局部变量是安全的
-                    initialInstance.resetPlayerSearch(event.player as Player) // 操作 LootInstance
-                    openedLootLocation.remove(event.player.uniqueId) // 假设 openedLootLocation 是线程安全的
-                    template.agents?.runAgent("onClose", linkedMapOf("event" to event, "inventory" to inventory), player) // 假设 agent 也可能需要主线程
+                    initialInstance.resetPlayerSearch(closeEvent.player as Player) // 操作 LootInstance
+                    openedLootLocation.remove(closeEvent.player.uniqueId) // 假设 openedLootLocation 是线程安全的
+                    template.agents?.runAgent("onClose", linkedMapOf("closeEvent" to closeEvent, "inventory" to inventory, "event" to event, "block" to event?.clickedBlock), player) // 假设 agent 也可能需要主线程
                 }
             }
         }
