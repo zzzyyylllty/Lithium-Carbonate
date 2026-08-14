@@ -7,8 +7,10 @@ import io.github.zzzyyylllty.lithiumcarbon.data.LootItem
 import io.github.zzzyyylllty.lithiumcarbon.data.LootLocation
 import io.github.zzzyyylllty.lithiumcarbon.data.LootTemplate
 import io.github.zzzyyylllty.lithiumcarbon.data.define.LootDefines
+import io.github.zzzyyylllty.lithiumcarbon.data.index.LootIndex
 import io.github.zzzyyylllty.lithiumcarbon.data.load.loadItemFiles
 import io.github.zzzyyylllty.lithiumcarbon.data.load.loadLootFiles
+import io.github.zzzyyylllty.lithiumcarbon.data.load.loadLootIndexes
 import io.github.zzzyyylllty.lithiumcarbon.event.LithiumCarbonReloadEvent
 import io.github.zzzyyylllty.lithiumcarbon.gui.openedLootLocation
 import io.github.zzzyyylllty.lithiumcarbon.util.serialize.toUUID
@@ -37,7 +39,17 @@ import io.github.zzzyyylllty.lithiumcarbon.cardroom.CardRoomLoader
 import io.github.zzzyyylllty.lithiumcarbon.cardroom.CardRoomManager
 import io.github.zzzyyylllty.lithiumcarbon.data.FrameCrateConfig
 import io.github.zzzyyylllty.lithiumcarbon.data.load.loadFrameCrateFiles
+import io.github.zzzyyylllty.lithiumcarbon.event.UnlockFlowRegisterEvent
 import io.github.zzzyyylllty.lithiumcarbon.frame.FrameCrateManager
+import io.github.zzzyyylllty.lithiumcarbon.unlock.UnlockFlowRegistry
+import io.github.zzzyyylllty.lithiumcarbon.unlock.UnlockStateManager
+import io.github.zzzyyylllty.lithiumcarbon.unlock.UnlockUIConfig
+import io.github.zzzyyylllty.lithiumcarbon.unlock.flow.BruteForceFlow
+import io.github.zzzyyylllty.lithiumcarbon.unlock.flow.DecipherFlow
+import io.github.zzzyyylllty.lithiumcarbon.unlock.flow.PasswordFlow
+import io.github.zzzyyylllty.lithiumcarbon.unlock.flow.SpeedFlow
+import io.github.zzzyyylllty.lithiumcarbon.unlock.flow.TimerFlow
+import io.github.zzzyyylllty.lithiumcarbon.unlock.load.loadUnlockUIFiles
 
 //@RuntimeDependency(
 //    value = "!com.google.code.gson:gson:2.10.1",
@@ -58,6 +70,7 @@ object LithiumCarbon : Plugin() {
     val lootMap = ConcurrentHashMap<LootInstanceKey, LootInstance>()
     val lootTemplates = mutableMapOf<String, LootTemplate>()
     val lootDefines = mutableMapOf<String, LootDefines>()
+    var lootIndex: LootIndex? = null
     val lootCaches = ConcurrentHashMap<LootLocation, LootTemplate>()
     val lootItems = mutableMapOf<Char, LootItem>()
     val lootItemsDef = mutableMapOf<String, LootItem>()
@@ -72,8 +85,15 @@ object LithiumCarbon : Plugin() {
     // 展示框物资箱系统
     val frameCrateConfigs = mutableMapOf<String, FrameCrateConfig>()
 
+    // 开箱解锁流程系统
+    val unlockUIConfigs = mutableMapOf<String, UnlockUIConfig>()
+
     var devMode = true
     val weightSystem: Boolean get() = config.getBoolean("weight-system", false)
+
+    // 用于取消旧的循环更新任务的代次计数器
+    val updateTaskGenerations = ConcurrentHashMap<String, Long>()
+    val cardRoomCheckGeneration = java.util.concurrent.atomic.AtomicLong(0)
 
 
     @SubscribeEvent
@@ -90,10 +110,16 @@ object LithiumCarbon : Plugin() {
         submit(async) {
 
             reloadTimes++
+            // 提升所有模板的代次，取消旧循环任务
+            val newGen = System.nanoTime()
+            updateTaskGenerations.keys.forEach { updateTaskGenerations[it] = newGen }
+            // 提升卡房检查代次，取消旧检查任务
+            cardRoomCheckGeneration.incrementAndGet()
             config.reload()
             devMode = config.getBoolean("debug",false)
             lootCaches.clear()
             lootDefines.clear()
+            lootIndex = null
             lootTemplates.clear()
             lootMap.clear()
             allowedWorlds.clear()
@@ -106,19 +132,31 @@ object LithiumCarbon : Plugin() {
             // 重载时清除所有展示框物资箱
             FrameCrateManager.removeAll()
             frameCrateConfigs.clear()
+            // 清除解锁流程状态
+            UnlockStateManager.cleanupAll()
+            UnlockFlowRegistry.cleanupAll()
+            unlockUIConfigs.clear()
             openedLootLocation.forEach {
                 Bukkit.getPlayer(it.key)?.closeInventory()
             }
             openedLootLocation.clear()
             loadItemFiles()
             loadLootFiles()
+            // Load loot indexes
+            loadLootIndexes()
             // 加载展示框物资箱配置
             loadFrameCrateFiles()
             // 加载卡房配置
             CardRoomLoader.loadCardRoomFiles()
+            // 加载解锁流程UI
+            loadUnlockUIFiles()
+            registerBuiltinFlows()
+            UnlockFlowRegisterEvent(UnlockFlowRegistry).call()
             for (world in config.getList("allowed-worlds") ?: listOf(".+")) {
                 allowedWorlds.add(world.toString().toRegex())
             }
+            // 清理已不存在模板的代次条目，防止内存泄漏
+            updateTaskGenerations.keys.retainAll(lootTemplates.keys)
             for (loot in lootTemplates.values) {
                 loot.update.runUpdate(loot)
             }
@@ -129,6 +167,14 @@ object LithiumCarbon : Plugin() {
     }
 
 
+}
+
+fun registerBuiltinFlows() {
+    UnlockFlowRegistry.register(BruteForceFlow)
+    UnlockFlowRegistry.register(PasswordFlow)
+    UnlockFlowRegistry.register(DecipherFlow)
+    UnlockFlowRegistry.register(SpeedFlow)
+    UnlockFlowRegistry.register(TimerFlow)
 }
 
 @Awake(LifeCycle.ENABLE)
@@ -143,4 +189,7 @@ fun onDisable() {
     CardRoomManager.resetAllCardRoomsSync()
     // 清理所有展示框物资箱
     FrameCrateManager.removeAll()
+    // 清理解锁流程
+    UnlockStateManager.cleanupAll()
+    UnlockFlowRegistry.cleanupAll()
 }

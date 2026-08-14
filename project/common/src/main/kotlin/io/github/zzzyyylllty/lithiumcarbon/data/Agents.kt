@@ -94,6 +94,7 @@ data class Agents(
     fun runAgent(agent: String, extraVariables: Map<String, Any?>, player: Player?) {
         agents[agent]?.runAgent(extraVariables, player)
     }
+    fun hasAction(agent: String): Boolean = agents.containsKey(agent)
 }
 
 data class Agent(

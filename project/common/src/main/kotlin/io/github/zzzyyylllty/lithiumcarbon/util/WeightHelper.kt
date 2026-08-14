@@ -16,6 +16,7 @@ object WeightHelper {
     fun parse(weights: List<Loots>, repeat: Int, player: Player): List<Loots> {
         if (repeat < 1) {
             severeL("ErrorWeightRepeat")
+            return emptyList()
         }
 
         // 构造前缀权重
@@ -32,8 +33,9 @@ object WeightHelper {
             prefixSum[i] = sum
         }
 
-        if (sum < 0) {
+        if (sum <= 0) {
             severeL("ErrorWeightTotal")
+            return emptyList()
         }
 
         val result = ArrayList<Loots>(repeat)

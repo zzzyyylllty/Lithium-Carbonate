@@ -13,6 +13,8 @@ import io.github.zzzyyylllty.lithiumcarbon.data.LootItem
 import io.github.zzzyyylllty.lithiumcarbon.data.LootLocation
 import io.github.zzzyyylllty.lithiumcarbon.data.LootTemplate
 import io.github.zzzyyylllty.lithiumcarbon.data.define.LootDefines
+import io.github.zzzyyylllty.lithiumcarbon.data.index.LootIndexConditionRegistry
+import io.github.zzzyyylllty.lithiumcarbon.unlock.UnlockFlowRegistry
 import io.github.zzzyyylllty.sertraline.api.SertralineAPI
 import org.bukkit.Location
 import taboolib.common.platform.command.location
@@ -48,5 +50,11 @@ interface LithiumCarbonAPI {
         val key = LootInstanceKey(location, null) // 更新共享实例
         val instance = lootMap[key]
         instance?.update()
+    }
+    fun getUnlockFlowRegistry(): UnlockFlowRegistry {
+        return UnlockFlowRegistry
+    }
+    fun getLootIndexConditionRegistry(): LootIndexConditionRegistry {
+        return LootIndexConditionRegistry
     }
 }

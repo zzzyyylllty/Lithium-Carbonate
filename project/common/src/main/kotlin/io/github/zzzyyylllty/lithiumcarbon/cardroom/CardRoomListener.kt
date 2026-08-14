@@ -19,10 +19,11 @@ import org.bukkit.inventory.ItemStack
 import taboolib.common.platform.event.SubscribeEvent
 import taboolib.common.platform.function.submitAsync
 import java.util.*
+import java.util.concurrent.ConcurrentHashMap
 
 object CardRoomListener : Listener {
 
-    private val playerCooldowns = mutableMapOf<UUID, Long>()
+    private val playerCooldowns = ConcurrentHashMap<UUID, Long>()
     private const val COOLDOWN_MS = 500L
 
     @SubscribeEvent(priority = EventPriority.HIGH)

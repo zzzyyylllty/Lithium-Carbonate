@@ -14,7 +14,7 @@ class SquareDefine(val from: LootLocation, val to: LootLocation, override val we
 
     override fun isValidLocation(location: LootLocation, block: Block, player: Player): Boolean {
 
-        if (!block.world.name.matches(from.world.toRegex())) {
+        if (!block.world.name.matches(Regex.fromLiteral(from.world))) {
             devLog("World not met,return false.")
             return false
         }
@@ -41,7 +41,7 @@ class SquareDefine(val from: LootLocation, val to: LootLocation, override val we
                 "block" to block,
                 "type" to block.type.name,
                 "x" to block.x,
-                "u" to block.y,
+                "y" to block.y,
                 "z" to block.z,
                 "world" to block.world.name,
                 "player" to player,

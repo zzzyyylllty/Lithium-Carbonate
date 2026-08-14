@@ -15,7 +15,6 @@ import org.bukkit.entity.GlowItemFrame
 import org.bukkit.entity.ItemFrame
 import org.bukkit.entity.Player
 import taboolib.common.platform.function.submit
-import taboolib.common.platform.function.warning
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.math.roundToLong
@@ -91,40 +90,34 @@ object FrameCrateManager {
         val displayStack = lootItem.build(contextPlayer)
         displayStack.amount = 1 // item frames show amount=1
 
-        // Spawn the item frame (normal or glow)
-        var frame: ItemFrame? = null
-        submit {
-            frame = if (config.glow) {
-                world.spawn(location, GlowItemFrame::class.java)
-            } else {
-                world.spawn(location, ItemFrame::class.java)
-            }
-
-            // Set facing direction
-            if (facing != null) {
-                try {
-                    val blockFace = org.bukkit.block.BlockFace.valueOf(facing.uppercase())
-                    frame.setFacingDirection(blockFace)
-                } catch (e: IllegalArgumentException) {
-                    devLog("Invalid facing direction: $facing, using default")
-                }
-            }
-
-            // Set item in frame
-            frame.setItem(displayStack)
-            frame.setFixed(true)
-            frame.setVisible(true)
-        }
         // Calculate expire time
         val expireTime = config.expire?.let {
             (it.toDoubleOrNull() ?: 0.0).let { exp ->
                 if (exp > 0) System.currentTimeMillis() + (exp * 1000).roundToLong() else null
             }
         }
-        if (frame == null) {
-            warning("item frame creation failed.")
-            return null
+
+        // Spawn the item frame (caller must be on main thread)
+        val frame: ItemFrame = if (config.glow) {
+            world.spawn(location, GlowItemFrame::class.java)
+        } else {
+            world.spawn(location, ItemFrame::class.java)
         }
+
+        // Set facing direction
+        if (facing != null) {
+            try {
+                val blockFace = org.bukkit.block.BlockFace.valueOf(facing.uppercase())
+                frame.setFacingDirection(blockFace)
+            } catch (e: IllegalArgumentException) {
+                devLog("Invalid facing direction: $facing, using default")
+            }
+        }
+
+        // Set item in frame
+        frame.setItem(displayStack)
+        frame.setFixed(true)
+        frame.setVisible(true)
 
         val data = FrameCrateData(
             frameCrateConfig = config,
@@ -137,7 +130,6 @@ object FrameCrateManager {
         )
 
         activeFrameCrates[frame.uniqueId] = data
-
         devLog("Spawned frame crate $configId at $location (frame UUID: ${frame.uniqueId})")
         return frame.uniqueId
     }
@@ -162,8 +154,10 @@ object FrameCrateManager {
             frameLoc.world?.name == location.world?.name
         } ?: return false
 
-        submit { frame.value.itemFrame.remove() }
-        activeFrameCrates.remove(frame.key)
+        submit {
+            if (!frame.value.itemFrame.isDead) frame.value.itemFrame.remove()
+            activeFrameCrates.remove(frame.key)
+        }
         devLog("Removed frame crate at $location")
         return true
     }
@@ -173,7 +167,7 @@ object FrameCrateManager {
      */
     fun removeFrameByUUID(uuid: UUID): Boolean {
         val data = activeFrameCrates[uuid] ?: return false
-        data.itemFrame.remove()
+        if (!data.itemFrame.isDead) data.itemFrame.remove()
         activeFrameCrates.remove(uuid)
         devLog("Removed frame crate (UUID: $uuid)")
         return true
@@ -193,7 +187,7 @@ object FrameCrateManager {
         // Check expire
         if (data.expireTime != null && System.currentTimeMillis() > data.expireTime) {
             devLog("Frame crate ${data.configId} has expired")
-            data.itemFrame.remove()
+            if (!data.itemFrame.isDead) data.itemFrame.remove()
             activeFrameCrates.remove(frameUuid)
             return false
         }
@@ -224,7 +218,7 @@ object FrameCrateManager {
         ), player)
 
         // Remove the frame entity
-        data.itemFrame.remove()
+        if (!data.itemFrame.isDead) data.itemFrame.remove()
         activeFrameCrates.remove(frameUuid)
 
         // 触发领取完成事件

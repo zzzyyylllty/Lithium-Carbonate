@@ -12,9 +12,11 @@ import io.github.zzzyyylllty.lithiumcarbon.event.ItemSearchCompletePreEvent
 import io.github.zzzyyylllty.lithiumcarbon.event.ItemSearchStartEvent
 import io.github.zzzyyylllty.lithiumcarbon.event.LootElementApplyEvent
 import io.github.zzzyyylllty.lithiumcarbon.function.player.sendComponent
+import io.github.zzzyyylllty.lithiumcarbon.unlock.UnlockStateManager
 import io.github.zzzyyylllty.lithiumcarbon.util.SoundUtil.playConfiguredSound
 import io.github.zzzyyylllty.lithiumcarbon.util.asNumberFormatNullable
 import io.github.zzzyyylllty.lithiumcarbon.util.devLog
+import io.github.zzzyyylllty.lithiumcarbon.util.mmJsonUtil
 import io.github.zzzyyylllty.lithiumcarbon.util.mmUtil
 import org.bukkit.entity.Player
 import org.bukkit.event.player.PlayerInteractEvent
@@ -36,6 +38,11 @@ val openedLootLocation = ConcurrentHashMap<UUID, LootLocation>()
 @SubscribeEvent
 fun onPlayerLeaveUnloadLocation(e: PlayerQuitEvent) {
     openedLootLocation.remove(e.player.uniqueId)
+    val active = UnlockStateManager.getActive(e.player)
+    if (active != null) {
+        active.flow.cancel(e.player)
+        UnlockStateManager.removeActive(e.player)
+    }
 }
 
 
@@ -46,10 +53,14 @@ fun Player.openLootChest(initialInstance: LootInstance, event: PlayerInteractEve
 
     val template = initialInstance.template ?: return
 
-    var closed = false
+    // 打开的战利品位置对应的方块，供 agents 使用（event 可能为 null 或过时）
+    val block = initialInstance.loc.toBukkitLocation().block
+
+    val closed = java.util.concurrent.atomic.AtomicBoolean(false)
+    var cancelUpdateTask: (() -> Unit)? = null
     val searchLimit: Int? = template.options.searchLimit.asNumberFormatNullable(player)?.roundToInt()
 
-    player.openMenu<Chest>(template.title) {
+    player.openMenu<Chest>(mmJsonUtil.serialize(mmUtil.deserialize("<black>" + template.title))) {
 
         rows(template.rows)
         handLocked(true)
@@ -71,9 +82,6 @@ fun Player.openLootChest(initialInstance: LootInstance, event: PlayerInteractEve
 
             val stat = element?.let { currentLootInstance.getSearchStat(player, it, slot, currentLootInstance) }
             val display = stat?.let { element.getDisplayItem(it, player, template.options) }
-            if (display == null && elementsMap.getOrDefault(slot, null) != null) {
-                elementsMap.remove(slot)
-            }
 
             if (stat == LootElementStat.SEARCHED && currentLootInstance.getSearchingSlots(player)?.contains(slot) == true) {
                 playConfiguredSound(player, "search-end") // Bukkit API
@@ -81,6 +89,16 @@ fun Player.openLootChest(initialInstance: LootInstance, event: PlayerInteractEve
                 currentLootInstance.removeSearchingSlots(player, slot) // 操作 LootInstance
             }
             inventory.setItem(slot, display) // Bukkit API
+        }
+
+        // 刷新所有搜索中的槽位，包括已完成的（让显示从"搜索中"切换到物品）
+        fun updateSearchingSlotsOnMainThread(inventory: Inventory, currentLootInstance: LootInstance) {
+            val search = currentLootInstance.searches[player.uniqueId.toString()]?.searches?.keys ?: return
+            val elements = currentLootInstance.elements
+            for (slot in search) {
+                val element = elements[slot]
+                updateSingleSlotOnMainThread(slot, element, inventory, currentLootInstance, elements)
+            }
         }
 
         fun updateAllSlotsOnMainThread(inventory: Inventory, currentLootInstance: LootInstance) {
@@ -106,25 +124,24 @@ fun Player.openLootChest(initialInstance: LootInstance, event: PlayerInteractEve
                     playConfiguredSound(player, "open")
 
                     updateAllSlotsOnMainThread(inventory, initialInstance) // 在主线程调用辅助函数
-                    template.agents?.runAgent("onOpen", linkedMapOf("inventory" to inventory, "event" to event, "block" to event?.clickedBlock), player) // 假设 agent 也可能需要主线程
+                    template.agents?.runAgent("onOpen", linkedMapOf("inventory" to inventory, "event" to event, "block" to block), player) // 假设 agent 也可能需要主线程
                 }
             }
 
-            // 周期任务：`submitAsync` 本身就将任务提交到异步线程。
-            // 因此，其内部所有涉及 `initialInstance` 和 Bukkit API 的操作仍然需要 `submitChain { sync { ... } }`。
-            submitAsync(period = 5) {
-                // 此处仍在异步线程
-                if (closed) {
-                    cancel() // 取消 `submitAsync` 任务
+            // 周期任务：只刷新正在搜索的格子（替代原来的全量刷新）
+            val task = submitAsync(period = 5) {
+                if (closed.get()) {
+                    cancel()
                 } else {
-                    submitChain { // 每次周期执行都创建一个新的调度链
-                        sync { // 切换到主线程执行
-                            updateAllSlotsOnMainThread(inventory, initialInstance) // 在主线程调用辅助函数
-                            template.agents?.runAgent("onUpdate", linkedMapOf("inventory" to inventory, "event" to event, "block" to event?.clickedBlock), player) // 假设 agent 也可能需要主线程
+                    submitChain {
+                        sync {
+                            updateSearchingSlotsOnMainThread(inventory, initialInstance)
+                            template.agents?.runAgent("onUpdate", linkedMapOf("inventory" to inventory, "event" to event, "block" to block), player)
                         }
                     }
                 }
             }
+            cancelUpdateTask = { task.cancel() }
         }
 
 
@@ -167,7 +184,8 @@ fun Player.openLootChest(initialInstance: LootInstance, event: PlayerInteractEve
                                                 "event" to event,
                                                 "element" to element,
                                                 "displayItem" to element.displayItem,
-                                                "inventory" to inventory
+                                                "inventory" to inventory,
+                                                "block" to block
                                             ),
                                             player
                                         )
@@ -194,7 +212,7 @@ fun Player.openLootChest(initialInstance: LootInstance, event: PlayerInteractEve
                                 // 获取可变副本，修改，然后赋值回 LootInstance
                                 val eventComplete = ItemSearchCompletePreEvent(player, initialInstance, element, rawSlot, inventory)
                                 eventComplete.call()
-                                if (event.isCancelled) return@sync
+                                if (eventComplete.isCancelled) return@sync
                                 val newElements = initialInstance.elements.toMutableMap()
                                 updateSingleSlotOnMainThread(rawSlot, element, inventory, initialInstance, newElements)
                                 initialInstance.elements = newElements
@@ -223,7 +241,8 @@ fun Player.openLootChest(initialInstance: LootInstance, event: PlayerInteractEve
                                         "event" to event,
                                         "element" to element,
                                         "displayItem" to element.displayItem,
-                                        "inventory" to inventory
+                                        "inventory" to inventory,
+                                        "block" to block
                                     ),
                                     player
                                 )
@@ -232,6 +251,19 @@ fun Player.openLootChest(initialInstance: LootInstance, event: PlayerInteractEve
                                 val newElements = initialInstance.elements.toMutableMap()
                                 updateSingleSlotOnMainThread(rawSlot, element, inventory, initialInstance, newElements)
                                 initialInstance.elements = newElements // 操作 LootInstance
+                                if (initialInstance.isFullyLooted()) {
+                                    template.agents?.runAgent(
+                                        "onEmpty",
+                                        linkedMapOf(
+                                            "event" to event,
+                                            "inventory" to inventory,
+                                            "instance" to initialInstance,
+                                            "player" to player,
+                                            "block" to block,
+                                        ),
+                                        player
+                                    )
+                                }
                                 return@sync
                             }
                             LootElementStat.NOITEM -> {
@@ -253,10 +285,11 @@ fun Player.openLootChest(initialInstance: LootInstance, event: PlayerInteractEve
         onClose { closeEvent ->
             submitChain { // 为关闭事件创建一个新的调度链
                 sync { // 切换到主线程
-                    closed = true // 修改局部变量是安全的
+                    closed.set(true)
+                    cancelUpdateTask?.invoke()
                     initialInstance.resetPlayerSearch(closeEvent.player as Player) // 操作 LootInstance
                     openedLootLocation.remove(closeEvent.player.uniqueId) // 假设 openedLootLocation 是线程安全的
-                    template.agents?.runAgent("onClose", linkedMapOf("closeEvent" to closeEvent, "inventory" to inventory, "event" to event, "block" to event?.clickedBlock), player) // 假设 agent 也可能需要主线程
+                    template.agents?.runAgent("onClose", linkedMapOf("closeEvent" to closeEvent, "inventory" to inventory, "event" to event, "block" to block), player) // 假设 agent 也可能需要主线程
                 }
             }
         }

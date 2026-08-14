@@ -64,10 +64,16 @@ object ConfigUtil {
         val source = if (split.size >= 2) split.first().lowercase() else "mc"
         val item = split.joinToString(":").removePrefix("$source:")
 
-        val parameters = (input["parameters"] ?: input["parameter"]) as LinkedHashMap<String, Any?>?
+        val parameters = ((input["parameters"] ?: input["parameter"]) as? LinkedHashMap<String, Any?>?)?.toMutableMap() ?: mutableMapOf()
+        // 支持顶层 name/lore，兼容 unlock-uis 简写
+        input["name"]?.toString()?.let { if (it.isNotEmpty()) parameters["name"] = it }
+        input["display-name"]?.toString()?.let { if (it.isNotEmpty()) parameters["display-name"] = it }
+        input["custom-name"]?.toString()?.let { if (it.isNotEmpty()) parameters["custom-name"] = it }
+        input["item-name"]?.toString()?.let { if (it.isNotEmpty()) parameters["item-name"] = it }
+        input["lore"]?.let { parameters["lore"] = it }
         val components = (input["components"] ?: input["component"]) as LinkedHashMap<String, Any?>?
 
-        return LootItem(source, item, parameters, components, input["amount"].toString() ?: defaultAmount ?: "1")
+        return LootItem(source, item, parameters.ifEmpty { null }?.let { LinkedHashMap(it) }, components, (input["amount"]?.toString() ?: defaultAmount) ?: "1")
 
     }
     fun getAgents(input: Any?): Agents? {
@@ -75,9 +81,15 @@ object ConfigUtil {
         if (input == null) return null
 
         val raw = if (input !is Map<*, *>) return null else (input["agents"] ?: input["agent"]) ?: return null
-        @Suppress("UNCHECKED_CAST")
-        val agentsRaw = (raw as? Map<String, Map<String, Any?>>)?.let { map ->
-            LinkedHashMap<String, Map<String, Any?>>().also { it.putAll(map) }
+        val agentsRaw = (raw as? Map<*, *>)?.let { map ->
+            LinkedHashMap<String, Map<String, Any?>>().also { result ->
+                map.forEach { (key, value) ->
+                    if (key is String && value is Map<*, *>) {
+                        @Suppress("UNCHECKED_CAST")
+                        result[key] = value as Map<String, Any?>
+                    }
+                }
+            }
         } ?: return null
 
         val agents = LinkedHashMap<String, Agent>()
@@ -92,7 +104,7 @@ object ConfigUtil {
                 js = (agentsPartRaw["js"] ?: agentsPartRaw["JS"] ?: agentsPartRaw["javascript"] ?: agentsPartRaw["JAVASCRIPT"]).asListedStringEnhanced()?.compileJS(),
                 asyncJs = (agentsPartRaw["async_js"] ?: agentsPartRaw["ASYNC_JS"] ?: agentsPartRaw["asyncjs"] ?: agentsPartRaw["ASYNCJS"] ?: agentsPartRaw["js_async"] ?: agentsPartRaw["JS_ASYNC"] ?: agentsPartRaw["jsasync"] ?: agentsPartRaw["JSASYNC"]).asListedStringEnhanced()?.compileJS(),
                 kether = (agentsPartRaw["ke"] ?: agentsPartRaw["KE"] ?: agentsPartRaw["KETHER"]?: agentsPartRaw["kether"]).asListEnhanced(),
-                asyncKe = (agentsPartRaw["ke"] ?: agentsPartRaw["KE"] ?: agentsPartRaw["KETHER"]?: agentsPartRaw["kether"]).asListEnhanced(),
+                asyncKe = (agentsPartRaw["async_ke"] ?: agentsPartRaw["ASYNC_KE"] ?: agentsPartRaw["async-ke"] ?: agentsPartRaw["asyncKe"] ?: agentsPartRaw["ASYNCKE"]).asListEnhanced(),
             )
         }
 
@@ -113,6 +125,7 @@ object ConfigUtil {
             Condition(
                 kether = (map["ke"] ?: map["KE"] ?: map["KETHER"]?: map["kether"]).asListEnhanced(),
                 js = (map["js"] ?: map["JS"] ?: map["javascript"] ?: map["JAVASCRIPT"]).asListedStringEnhanced()?.compileJS(),
+                papi = (map["papi"] ?: map["PAPI"] ?: map["Papi"]).asListEnhanced(),
                 mode = ConditionMode.valueOf((map["mode"] ?: "ALL").toString().uppercase())
             )
         }

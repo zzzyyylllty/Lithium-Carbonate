@@ -13,6 +13,7 @@ import org.bukkit.entity.Player
 import taboolib.common.platform.function.submit
 import taboolib.common.platform.function.submitAsync
 import java.util.*
+import java.util.concurrent.ConcurrentHashMap
 
 /**
  * 卡房状态管理器
@@ -20,7 +21,7 @@ import java.util.*
 object CardRoomManager {
 
     // 正在重置的卡房集合
-    private val resettingRooms = mutableSetOf<String>()
+    private val resettingRooms = ConcurrentHashMap.newKeySet<String>()
 
     // 正在激活的卡房集合（防止并发重复激活）
     private val pendingActivations = mutableSetOf<String>()
@@ -60,8 +61,11 @@ object CardRoomManager {
      * 初始化管理器
      */
     fun init() {
+        // 提升代次以取消上一个检查任务
+        val gen = LithiumCarbon.cardRoomCheckGeneration.incrementAndGet()
         // 启动定期检查任务（每5秒检查一次）
         submitAsync(period = 100L) { // 100 ticks = 5 seconds
+            if (gen != LithiumCarbon.cardRoomCheckGeneration.get()) { cancel(); return@submitAsync }
             checkActiveRooms()
         }
     }
@@ -160,19 +164,22 @@ object CardRoomManager {
             } else {
                 // 如果配置了检测区域，检查区域内是否有玩家
                 val config = cardRoomConfigs[configId] ?: continue
-                if (config.reset.range != null && !hasPlayersInRange(configId)) {
-                    // 区域内没有玩家，检查是否应该启动重置计时器
-                    if (instance.nextResetTime == null) {
-                        val resetDelay = config.reset.delay
-                        if (resetDelay > 0) {
-                            instance.nextResetTime = now + (resetDelay * 1000).toLong()
-                            devLog("Reset timer started for card room $configId")
+                if (config.reset.range != null) {
+                    if (!hasPlayersInRange(configId)) {
+                        // 区域内没有玩家，检查是否应该启动重置计时器
+                        if (instance.nextResetTime == null) {
+                            val resetDelay = config.reset.delay
+                            if (resetDelay > 0) {
+                                instance.nextResetTime = now + (resetDelay * 1000).toLong()
+                                devLog("Reset timer started for card room $configId")
+                            }
                         }
+                    } else {
+                        // 区域内还有玩家，清除重置计时器
+                        instance.nextResetTime = null
                     }
-                } else {
-                    // 区域内还有玩家，清除重置计时器
-                    instance.nextResetTime = null
                 }
+                // range 为 null 时不干预计时器（由 activation 时设定的 nextResetTime 决定）
             }
         }
     }

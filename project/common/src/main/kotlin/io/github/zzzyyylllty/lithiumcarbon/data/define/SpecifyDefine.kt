@@ -51,7 +51,7 @@ class SpecifyDefine(val locations: LinkedHashMap<String, HashSet<LootVector>>, v
                 "block" to block,
                 "type" to block.type.name,
                 "x" to block.x,
-                "u" to block.y,
+                "y" to block.y,
                 "z" to block.z,
                 "world" to block.world.name,
                 "player" to player,

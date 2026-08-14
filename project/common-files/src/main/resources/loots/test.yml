@@ -6,17 +6,17 @@ test_loot:
           onRefresh:
             js:
               org.bukkit.Bukkit.broadcast(mmUtil.deserialize("<#dcaaff>[Li2CO3] <gray>All <yellow>" + name + "</yellow> Refreshed. "))
-    # When loot opened, expired when 300 second passed.
+    # Expire after this many seconds from loot creation
     expire: 300
   display:
 
-    # Loot Name
+    # Loot display name (for identification)
     name: "Test Loot"
 
-    # GUI Name
+    # GUI window title
     title: "Loot Title"
 
-    # Loot rows
+    # GUI rows (1-6)
     rows: 3
 
     layout:
@@ -25,20 +25,55 @@ test_loot:
       - '         '
 
     # Manually set available slots.
-    # Leave a null for automatic find spaces in layout.
+    # Leave null to auto-detect spaces in layout.
     # available-slots: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26]
 
+  # ============================================================
+  # Unlock Flow — Optional Configuration
+  # ============================================================
+  # Binds a mini-game that players must complete before opening.
+  # References a template ID defined in unlock-uis/ directory.
+  # Omit this section to open loot directly (default behavior).
+  # ============================================================
+  # unlock:
+  #   # Referenced unlock UI template ID
+  #   template: "brute_force_demo"
+  #
+  #   # Inline mode — specify type + parameters directly without a template
+  #   # type: "brute_force"
+  #
+  #   # Whether multiple players share unlock progress on the same block
+  #   shared: false
+  #
+  #   # Action on successful unlock
+  #   # "open" = open loot GUI
+  #   # "close" = close the GUI
+  #   on-complete-action: "open"
+  #
+  #   # In shared mode, action for other players' GUIs when someone completes
+  #   shared-complete-action: "close"
+  #
+  #   # Override template parameters (lightweight override)
+  #   # Supported parameters depend on flow type:
+  #   #   brute_force: clicks
+  #   #   password: password, max-attempts
+  #   #   decipher: rounds
+  #   #   speed: total-targets
+  #   #   timer: duration
+  #   # clicks: 8
+  #   # rounds: 5
+
   defines:
-#    region_a:
-#      type: worldguard
-#      region: sample_region
-#      blocks:
-#        - LIGHT_GRAY_SHULKER_BOX
+    #    region_a:
+    #      type: worldguard
+    #      region: sample_region
+    #      blocks:
+    #        - LIGHT_GRAY_SHULKER_BOX
     region_world:
       type: world
       world: world_.+
       regex: true
-      blocks: # Don't forget add blocks to config.yml
+      blocks: # Don't forget to add blocks to config.yml
         - CHEST
   options:
     #    remove-lore: true
@@ -50,6 +85,7 @@ test_loot:
         - items:
             - item: oak_log
               amount: 1~4
+
           weight: 25
           search-time: 0.3
         - items:

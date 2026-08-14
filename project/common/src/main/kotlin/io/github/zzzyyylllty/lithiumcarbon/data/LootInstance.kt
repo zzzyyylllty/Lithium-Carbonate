@@ -56,6 +56,8 @@ data class LootInstance(
         searches[player.uniqueId.toString()]?.reset()
     }
 
+    fun isFullyLooted(): Boolean = elements.isNotEmpty() && elements.values.all { it == null }
+
     /**
      * @return null - 需要更新
      * @return LootInstance - 不需要更新

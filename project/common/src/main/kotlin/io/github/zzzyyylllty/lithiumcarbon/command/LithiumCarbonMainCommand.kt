@@ -45,7 +45,7 @@ object LithiumCarbonMainCommand {
         execute<CommandSender> { sender, context, argument ->
             sender.infoS("Reloading...")
             try {
-                reloadCustomConfig()
+                reloadCustomConfig(false)
                 sender.fineS("Reloaded.")
             } catch (e: Exception) {
                 sender.severeS("<red>Error thrown. check console for info.</red>")

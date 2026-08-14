@@ -1,0 +1,271 @@
+# ============================================
+# LithiumCarbon Unlock Flow Example Configuration
+# ============================================
+# This file demonstrates complete configuration for all 5 built-in unlock flows.
+#
+# Usage:
+#   1. Configure unlock UI templates in this file
+#   2. Reference via unlock.template in loots/*.yml loot configs
+# ============================================
+
+# ---------- Brute Force ----------
+# Player clicks a GUI slot N times to unlock; item changes show progress per click
+brute_force_demo:
+  type: brute_force
+  display:
+    title: "<gold>Brute Force"
+    rows: 3
+    layout:
+      - '##I######'
+      - '##     ##'
+      - '#########'
+    # Layout character mappings
+    # # = border    space = clickable area    I = info
+    items:
+      '#':
+        item: black_stained_glass_pane
+        name: " "
+    # Tutorial item explaining how to unlock
+    info:
+      slot: 2
+      item:
+        item: book
+        name: "<gold><bold>How to Unlock"
+        lore:
+          - "<gray>Click the empty slots to"
+          - "<gray>crack the lock!"
+          - ""
+          - "<green>Each click counts as one attempt."
+          - "<yellow>Progress: <white>%current%/%total%"
+  brute_force:
+    # Required click count (supports js: prefix for dynamic calculation)
+    clicks: "5"
+    # Progress item (shown while in progress, supports %current% %total% placeholders)
+    progress-item:
+      item: gray_stained_glass_pane
+      name: "<gray>Progress %current%/%total%"
+    # Completion item
+    complete-item:
+      item: lime_stained_glass_pane
+      name: "<green>Unlocked!"
+    sound-progress: "block.stone.hit"
+    sound-complete: "block.note_block.chime"
+
+# ---------- Password ----------
+# Player enters a password in an anvil GUI; supports static or JS-generated dynamic passwords
+password_demo:
+  type: password
+  display:
+    title: "<gold>Enter Password"
+    rows: 0
+    layout: []
+    items: {}
+  password:
+    # Password: static string, or "js:<expression>" for dynamic generation
+    # Static password example:
+    #   password: "lithium123"
+    # JS dynamic example (random 4-digit number each unlock):
+    password: "js:Math.floor(1000 + Math.random() * 9000).toString()"
+    # Maximum allowed attempts
+    max-attempts: 3
+    # Input slot item
+    input-item:
+      item: name_tag
+      name: "<yellow>Type your password"
+    # Attempt indicator item
+    attempt-item:
+      item: paper
+      name: "<gray>Remaining attempts: %remaining%"
+    # Whether to mask input (shown as ***)
+    mask-input: false
+    sound-correct: "block.note_block.chime"
+    sound-wrong: "block.note_block.bass"
+
+# ---------- Decipher ----------
+# Items rotate through a slot; click the decipher button when the correct one passes
+decipher_demo:
+  type: decipher
+  display:
+    title: "<gold>Decipher"
+    rows: 3
+    layout:
+      - '##I######'
+      - '#TTTTTTT#'
+      - '#########'
+    items:
+      '#':
+        item: black_stained_glass_pane
+        name: " "
+    # Tutorial item explaining how to unlock
+    info:
+      slot: 2
+      item:
+        item: book
+        name: "<gold><bold>How to Unlock"
+        lore:
+          - "<gray>Watch the minerals rotate."
+          - "<gray>Click the <aqua>Diamond<gray>"
+          - "<gray>when it appears!"
+          - ""
+          - "<green>Click the mineral to confirm."
+          - "<red>Wrong timing = fail!"
+  decipher:
+    rounds: 3
+    # Rotation item pool
+    items:
+      - item: diamond
+        name: "<aqua>Diamond"
+      - item: emerald
+        name: "<green>Emerald"
+      - item: gold_ingot
+        name: "<gold>Gold Ingot"
+      - item: iron_ingot
+        name: "<gray>Iron Ingot"
+      - item: redstone
+        name: "<red>Redstone"
+    # Target slots (row of minerals that rotate in sync, click to confirm)
+    target-slots:
+      - 10
+      - 11
+      - 12
+      - 13
+      - 14
+      - 15
+      - 16
+    # Index of the correct item in the pool (0 = diamond)
+    target-item-index: 0
+    # Rotation speed in ticks (20 = 1 second)
+    rotation-speed-ticks: 10
+    # Target slot display on success/failure
+    success-item:
+      item: lime_concrete
+      name: "<green>Correct!"
+    fail-item:
+      item: red_concrete
+      name: "<red>Wrong!"
+    sound-rotate: "block.note_block.hat"
+    sound-success: "block.note_block.chime"
+    sound-fail: "block.note_block.bass"
+
+# ---------- Speed ----------
+# Target items appear randomly in empty slots; click them quickly; distractors have penalties
+speed_demo:
+  type: speed
+  display:
+    title: "<gold>Speed Challenge"
+    rows: 3
+    layout:
+      - '##I######'
+      - '#       #'
+      - '#########'
+    items:
+      '#':
+        item: black_stained_glass_pane
+        name: " "
+    # Tutorial item explaining how to unlock
+    info:
+      slot: 2
+      item:
+        item: book
+        name: "<gold><bold>How to Unlock"
+        lore:
+          - "<gray>Click the <red>red targets<gray> as they"
+          - "<gray>appear to unlock the chest!"
+          - ""
+          - "<red>Avoid gray distractors!"
+          - "<yellow>Penalty: <white>time penalty"
+          - "<green>Clear all <white>%total% <green>targets!"
+  speed:
+    # Total targets to clear
+    total-targets: 10
+    # Spawn interval in ticks
+    spawn-interval-ticks: 30
+    # Target item
+    target-item:
+      item: red_wool
+      name: "<red>Click me!"
+    # Distractor item (optional; omit for no distractors)
+    distractor-item:
+      item: gray_wool
+      name: "<gray>Don't click me!"
+    # Distractor penalty type:
+    #   reset        = reset progress
+    #   time_penalty = add time penalty
+    #   fail         = instant fail
+    penalty-action: "time_penalty"
+    # Time penalty in seconds (only for time_penalty mode)
+    time-penalty-seconds: 3
+    # Time limit in seconds (omit for no limit)
+    time-limit-seconds: 30
+    sound-target: "block.note_block.pling"
+    sound-distractor: "block.note_block.bass"
+    sound-complete: "block.note_block.chime"
+
+# ---------- Timer ----------
+# Wait for a countdown to finish; auto-unlocks when done. Three display modes.
+timer_demo:
+  type: timer
+  display:
+    title: "<gold>Timer Unlock"
+    rows: 3
+    layout:
+      - '##I######'
+      - '#       #'
+      - '#########'
+    items:
+      '#':
+        item: black_stained_glass_pane
+        name: " "
+    # Tutorial item explaining how to unlock
+    info:
+      slot: 2
+      item:
+        item: book
+        name: "<gold><bold>How to Unlock"
+        lore:
+          - "<gray>Wait for the timer to count down."
+          - ""
+          - "<green>The chest unlocks automatically!"
+          - "<yellow>Remaining: <white>%remaining%s"
+  timer:
+    # Duration in seconds (supports js: prefix for dynamic calculation)
+    duration: "5"
+    # Display type:
+    #   gui        = in-GUI progress bar
+    #   boss_bar   = BossBar display
+    #   action_bar = ActionBar display
+    display-type: "gui"
+    # BossBar color (boss_bar only)
+    # BLUE / GREEN / PINK / PURPLE / RED / WHITE / YELLOW
+    boss-bar-color: "BLUE"
+    # Progress item (supports %remaining% placeholder)
+    progress-item:
+      item: clock
+      name: "<gray>Remaining: %remaining%s"
+    # Completion item
+    complete-item:
+      item: lime_stained_glass_pane
+      name: "<green>Complete!"
+    # Whether movement cancels (only applies to boss_bar mode)
+    cancel-on-move: false
+    sound-complete: "block.note_block.chime"
+
+# ---------- Boss Bar Timer ----------
+# BossBar timer example with move-to-cancel enabled
+timer_bossbar_demo:
+  type: timer
+  display:
+    title: "<gold>Unlocking..."
+    rows: 0
+    layout: []
+    items: {}
+  timer:
+    duration: "js:3 + Math.floor(Math.random() * 5)"  # Random 3-7 seconds
+    display-type: "boss_bar"
+    boss-bar-color: "GREEN"
+    progress-item:
+      item: clock
+    complete-item:
+      item: lime_stained_glass_pane
+    cancel-on-move: true
+    sound-complete: "block.note_block.chime"

@@ -5,6 +5,7 @@ import io.github.zzzyyylllty.lithiumcarbon.LithiumCarbon.allowedWorlds
 import io.github.zzzyyylllty.lithiumcarbon.LithiumCarbon.config
 import io.github.zzzyyylllty.lithiumcarbon.LithiumCarbon.lootCaches
 import io.github.zzzyyylllty.lithiumcarbon.LithiumCarbon.lootDefines
+import io.github.zzzyyylllty.lithiumcarbon.LithiumCarbon.lootIndex
 import io.github.zzzyyylllty.lithiumcarbon.LithiumCarbon.LootInstanceKey
 import io.github.zzzyyylllty.lithiumcarbon.LithiumCarbon.lootMap
 import io.github.zzzyyylllty.lithiumcarbon.LithiumCarbon.lootTemplates
@@ -14,22 +15,23 @@ import io.github.zzzyyylllty.lithiumcarbon.data.LocationHelper
 import io.github.zzzyyylllty.lithiumcarbon.data.LootInstance
 import io.github.zzzyyylllty.lithiumcarbon.data.LootLocation
 import io.github.zzzyyylllty.lithiumcarbon.data.LootTemplate
+import io.github.zzzyyylllty.lithiumcarbon.data.index.LootIndexResult
 import io.github.zzzyyylllty.lithiumcarbon.data.define.getMaxMatchingWeight
+import io.github.zzzyyylllty.lithiumcarbon.LithiumCarbon.unlockUIConfigs
+import io.github.zzzyyylllty.lithiumcarbon.event.UnlockFlowPreStartEvent
 import io.github.zzzyyylllty.lithiumcarbon.gui.openLootChest
-import io.github.zzzyyylllty.lithiumcarbon.util.DependencyHelper
+import io.github.zzzyyylllty.lithiumcarbon.unlock.UnlockContext
+import io.github.zzzyyylllty.lithiumcarbon.unlock.UnlockFlowRegistry
+import io.github.zzzyyylllty.lithiumcarbon.unlock.UnlockStateManager
+import io.github.zzzyyylllty.lithiumcarbon.logger.warningL
 import io.github.zzzyyylllty.lithiumcarbon.util.devLog
-import net.momirealms.craftengine.bukkit.api.CraftEngineBlocks
-import net.momirealms.craftengine.core.plugin.CraftEngine
-import net.momirealms.craftengine.core.world.BlockPos
 import org.bukkit.block.Block
 import org.bukkit.entity.Player
 import org.bukkit.event.block.Action
 import org.bukkit.event.player.PlayerInteractEvent
 import taboolib.common.platform.event.SubscribeEvent
 import taboolib.common.platform.function.submit
-import taboolib.common.platform.function.submitAsync
 import taboolib.platform.util.isMainhand
-import kotlin.collections.get
 
 @SubscribeEvent
 fun onInteract(e: PlayerInteractEvent) {
@@ -88,7 +90,7 @@ fun onInteract(e: PlayerInteractEvent) {
             return
         }
         e.isCancelled = true
-        submitAsync {
+        submit {
             val key = if (define.options.private) LootInstanceKey(location, player.uniqueId) else LootInstanceKey(location, null)
             // 当前战利品
             val current = lootMap[key]
@@ -108,7 +110,36 @@ fun onInteract(e: PlayerInteractEvent) {
                     }
                 }
             }
-            submit { player.openLootChest(instance, e) }
+
+            val unlockConfig = define.unlock
+            if (unlockConfig != null && unlockConfig.enabled) {
+                val uiId = unlockConfig.template ?: run { player.openLootChest(instance, e); return@submit }
+                val uiConfig = unlockUIConfigs[uiId] ?: run { player.openLootChest(instance, e); return@submit }
+                val flowType = unlockConfig.type ?: uiConfig.type
+                val flow = UnlockFlowRegistry.get(flowType) ?: run { player.openLootChest(instance, e); return@submit }
+
+                if (UnlockStateManager.getActive(player) != null) return@submit
+
+                val context = UnlockContext(
+                    player = player,
+                    block = block,
+                    event = e,
+                    lootTemplate = define,
+                    lootInstance = instance,
+                    uiConfig = uiConfig,
+                    lightConfig = unlockConfig,
+                    onSuccess = { inst -> player.openLootChest(inst, e) },
+                    onFail = { reason -> devLog("Unlock failed for ${player.name}: $reason") },
+                )
+
+                val preEvent = UnlockFlowPreStartEvent(player, context)
+                preEvent.call()
+                if (preEvent.isCancelled) return@submit
+
+                flow.start(context)
+            } else {
+                player.openLootChest(instance, e)
+            }
         }
     } else {
         return
@@ -131,6 +162,23 @@ fun resolveTemplatesByWeight(location: LootLocation, block: Block, player: Playe
 }
 
 fun getDefines(location: LootLocation, block: Block, player: Player): LootTemplate? {
+    // Loot index routing takes priority: use the indexed template directly, fall back to defines matching
+    val index = lootIndex
+    if (index != null && index.enabled) {
+        when (val result = index.resolveResult(location, block, player)) {
+            is LootIndexResult.Open -> {
+                val template = lootTemplates[result.templateId]
+                if (template != null) {
+                    devLog("Loot index matched template: ${result.templateId}")
+                    return template
+                }
+                warningL("LootIndexTemplateNotFound", result.templateId)
+            }
+            // pass 命中：直接结束，不产生任何战利品
+            LootIndexResult.Pass -> return null
+            LootIndexResult.None -> {}
+        }
+    }
     if (weightSystem) {
         // 权重系统启用：从缓存读取，或按权重解析并缓存
         val cached = lootCaches[location]

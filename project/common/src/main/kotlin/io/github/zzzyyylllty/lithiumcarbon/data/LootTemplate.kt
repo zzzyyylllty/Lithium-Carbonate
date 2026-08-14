@@ -2,7 +2,9 @@ package io.github.zzzyyylllty.lithiumcarbon.data
 
 import io.github.zzzyyylllty.lithiumcarbon.LithiumCarbon.lootMap
 import io.github.zzzyyylllty.lithiumcarbon.LithiumCarbon.reloadTimes
+import io.github.zzzyyylllty.lithiumcarbon.LithiumCarbon.updateTaskGenerations
 import io.github.zzzyyylllty.lithiumcarbon.event.LootInstanceCreateEvent
+import io.github.zzzyyylllty.lithiumcarbon.unlock.UnlockLightConfig
 import io.github.zzzyyylllty.lithiumcarbon.util.asNumberFormat
 import io.github.zzzyyylllty.lithiumcarbon.util.asNumberFormatNullable
 import io.github.zzzyyylllty.lithiumcarbon.util.devLog
@@ -25,6 +27,7 @@ data class LootTemplate (
     val agents: Agents?,
     val options: LootTemplateOptions,
     val update: LootUpdate,
+    val unlock: UnlockLightConfig? = null,
 ) {
     fun createInstance(block: Block, player: Player, bypassCondition: Boolean = false): LootInstance {
         val i = LootInstance(
@@ -68,23 +71,32 @@ data class LootUpdate(
 ) {
     fun runUpdate(template : LootTemplate) {
         val currentLoop = reloadTimes
+        // 每个模板独立代次，支持精确取消
+        val taskGen = System.nanoTime()
+        updateTaskGenerations[template.id] = taskGen
         loops?.forEach { loop ->
             val id = template.id
+            val hasRefreshEach = loop.agents?.hasAction("onRefreshEach") == true
             devLog("Starting loop $id")
             submitAsync(period = (loop.period*20).roundToLong()) {
                 devLog("Acting loop $id")
-                if (currentLoop != reloadTimes) {
+                if (currentLoop != reloadTimes || updateTaskGenerations[id] != taskGen) {
                     loop.agents?.runAgent("onCancel", linkedMapOf("loop" to loop, "timestart" to currentLoop, "template" to template, "name" to template.name), null)
                     cancel()
                 }
                 loop.agents?.runAgent("onRefresh", linkedMapOf("loop" to loop, "timestart" to currentLoop, "name" to template.name), null)
-                lootMap.forEach {
-                    val loc = it.value.loc.toBukkitLocation()
-                    val block = loc.world.getBlockAt(loc)
-                    loop.agents?.runAgent("onRefreshEach", linkedMapOf("loop" to loop, "timestart" to currentLoop, "name" to template.name, "loc" to loc, "block" to block), null)
-                    if (it.value.templateID == id) {
-                        it.value.update()
+                // 减少遍历：先按templateID分组，只处理匹配的实例；只有存在onRefreshEach时才遍历全部
+                if (hasRefreshEach) {
+                    lootMap.forEach {
+                        val loc = it.value.loc.toBukkitLocation()
+                        val block = loc.world.getBlockAt(loc)
+                        loop.agents?.runAgent("onRefreshEach", linkedMapOf("loop" to loop, "timestart" to currentLoop, "name" to template.name, "loc" to loc, "block" to block), null)
+                        if (it.value.templateID == id) {
+                            it.value.update()
+                        }
                     }
+                } else {
+                    lootMap.values.filter { it.templateID == id }.forEach { it.update() }
                 }
             }
         }

@@ -1,0 +1,65 @@
+# Loot Index. When Enabled. Will disable define
+enabled: false
+
+# match from up to down; a matched rule with `pass: true` ends all subsequent judgment and yields no loot
+when:
+  # disabled
+  - if:
+      world:
+        is: disabled_world
+    pass: true
+
+  # world
+  - if:
+      world:
+        is: loot_world.+
+    open: test_loot
+
+  # Nest
+  - if:
+      world:
+        is: loot_world.+
+    then:
+      - if:
+          block:
+            is: ".+_SHULKER_BOX"
+        open: another_test_loot
+      - else:
+          if:
+            block:
+              is: "CHEST"
+          open: chest_loot
+
+  # WorldGuard
+  - if:
+      wg_region:
+        is: "loot-region.+"
+    open: another_region_loot
+
+  # Location
+  - if:
+      position:
+        world: sample
+        in: "100 0 100 400 200 400"
+    open: another_position_loot
+
+  # Multiblocks: match plugin:namespace:id list (case-insensitive); vanilla blocks: minecraft:stone or just stone
+  # open supports %block_plugin% %block_namespace% %block_id%
+  - if:
+      multiblocks:
+        detect: |-
+          craftengine:my_namespace:my_block
+          minecraft:stone
+          chest
+    open: "%block_id%"
+
+  # kether / js / papi conditions vars: player block type world x y z
+  # papi operators: == != >= <= > < =~(regex); bare placeholder evaluates as boolean
+  - if:
+      condition:
+        papi:
+          - "%player_name% == Steve"
+        ke:
+          - "check player level >= 10"
+    open: test_loot
+

@@ -30,6 +30,7 @@ import taboolib.common.platform.command.mainCommand
 import taboolib.common.platform.command.player
 import taboolib.common.platform.command.subCommand
 import taboolib.common.platform.command.component.*
+import taboolib.common.platform.function.submit
 import taboolib.common.platform.function.submitAsync
 import taboolib.platform.util.asLangText
 import taboolib.platform.util.toBukkitLocation
@@ -178,17 +179,17 @@ object LithiumCarbonManageCommand {
                     int("y") {
                         int("z") {
                             execute<CommandSender> { sender, context, argument ->
-                                submitAsync {
+                                submit {
                                     val configId = context["configId"]
                                     val config = frameCrateConfigs[configId]
                                     if (config == null) {
                                         sender.severeS(sender.asLangText("TemplateNotFound", configId))
-                                        return@submitAsync
+                                        return@submit
                                     }
                                     val world = sender.server.getWorld(context["world"])
                                     if (world == null) {
                                         sender.severeS("世界 ${context["world"]} 不存在")
-                                        return@submitAsync
+                                        return@submit
                                     }
                                     val x = context["x"].toInt()
                                     val y = context["y"].toInt()
@@ -213,17 +214,17 @@ object LithiumCarbonManageCommand {
                                     listOf("NORTH", "SOUTH", "EAST", "WEST", "UP", "DOWN")
                                 }
                                 execute<CommandSender> { sender, context, argument ->
-                                    submitAsync {
+                                    submit {
                                         val configId = context["configId"]
                                         val config = frameCrateConfigs[configId]
                                         if (config == null) {
                                             sender.severeS(sender.asLangText("TemplateNotFound", configId))
-                                            return@submitAsync
+                                            return@submit
                                         }
                                         val world = sender.server.getWorld(context["world"])
                                         if (world == null) {
                                             sender.severeS("世界 ${context["world"]} 不存在")
-                                            return@submitAsync
+                                            return@submit
                                         }
                                         val x = context["x"].toInt()
                                         val y = context["y"].toInt()
@@ -251,12 +252,12 @@ object LithiumCarbonManageCommand {
             }
             // === Without world — player's current location ===
             execute<Player> { sender, context, argument ->
-                submitAsync {
+                submit {
                     val configId = context["configId"]
                     val config = frameCrateConfigs[configId]
                     if (config == null) {
                         sender.severeS(sender.asLangText("TemplateNotFound", configId))
-                        return@submitAsync
+                        return@submit
                     }
                     val uuid = FrameCrateManager.spawnFrame(
                         location = sender.location,

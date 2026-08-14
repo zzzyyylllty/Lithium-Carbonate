@@ -24,7 +24,7 @@ data class LootTable(
             return linkedMapOf()
         }
         pools.forEach { pool ->
-            if (availableSlotsCount >= elements.size) {
+            if (elements.size < availableSlotsCount) {
                 pool.roll(bypassConditions, extraVariables, player)?.let { elements += it }
             } else {
                 devLog("No space left to roll. skipping.")
@@ -41,12 +41,12 @@ data class LootTable(
                 }
             }
         } else {
-            var slot = 0
-            for (element in elements) {
-                if (!availableSlots.contains(slot)) break
-                sloted[slot] = element
+            val sortedSlots = availableSlots.sorted()
+            for (i in elements.indices) {
+                if (i >= sortedSlots.size) break
+                val slot = sortedSlots[i]
+                sloted[slot] = elements[i]
                 availableSlots.remove(slot)
-                slot++
             }
         }
         return sloted
@@ -70,6 +70,11 @@ data class LootPool(
         }
 
         val roll = rolls.asNumberFormat(player)
+
+        if (roll.isNaN() || roll.isInfinite()) {
+            devLog("Invalid roll value: $roll in pool")
+            return null
+        }
 
         val weightLoots = WeightHelper.parse(loots, roll.roundToInt(), player)
 

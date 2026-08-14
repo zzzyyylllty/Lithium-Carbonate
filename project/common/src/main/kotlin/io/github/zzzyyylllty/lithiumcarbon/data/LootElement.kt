@@ -7,6 +7,7 @@ import io.github.zzzyyylllty.lithiumcarbon.function.player.sendComponent
 import io.github.zzzyyylllty.lithiumcarbon.util.LootGUIHelper
 import io.github.zzzyyylllty.lithiumcarbon.util.asNumberFormat
 import io.github.zzzyyylllty.lithiumcarbon.util.mmUtil
+import io.github.zzzyyylllty.lithiumcarbon.util.toComponent
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 import taboolib.platform.util.asLangText
@@ -24,32 +25,56 @@ data class LootElement(
     val searchTime: Double = 0.0,
     val skipSearch: Boolean = false,
 ) {
+    // 首次显示时锁定各物品的数量（按 items 下标），之后显示和发放都用同一个值
+    var decidedAmounts: MutableList<Int>? = null
+    // displayItem 独立于 items 时的数量锁定
+    var decidedDisplayAmount: Int? = null
+
+    fun decideAmount(index: Int, player: Player?): Int {
+        val list = decidedAmounts ?: mutableListOf<Int>().also { decidedAmounts = it }
+        while (list.size <= index) list.add(-1)
+        if (list[index] < 0) {
+            val item = items?.getOrNull(index)
+            list[index] = item?.amount?.asNumberFormat(player)?.roundToInt() ?: 1
+        }
+        return list[index]
+    }
+
+    fun decideDisplayAmount(item: LootItem, player: Player?): Int {
+        return decidedDisplayAmount ?: (item.amount?.asNumberFormat(player)?.roundToInt() ?: 1).also { decidedDisplayAmount = it }
+    }
+
     fun getDisplayItem(stat: LootElementStat, player: Player?, options: LootTemplateOptions): ItemStack? {
         return when (stat) {
             LootElementStat.NOT_SEARCHED -> LootGUIHelper.unsearch.build(player, 1)
             LootElementStat.SEARCHING -> LootGUIHelper.searching.build(player, 1)
             LootElementStat.SEARCHED -> {
-                val copy = items
-                copy?.firstOrNull()?.amount = items?.firstOrNull()?.amount.asNumberFormat(player).toString()
-                items = copy
-                val item = (displayItem ?: items?.firstOrNull() ?: LootGUIHelper.undefinedItem)
-                var lore = item.parameters?.let { (it["lore"] as List<String>?)?.toMutableList() }
-                if (options.removeLore) {
-                    lore = null
+                val firstItem = items?.firstOrNull()
+                val display = (displayItem ?: firstItem ?: LootGUIHelper.undefinedItem)
+                val amount = if (displayItem != null) decideDisplayAmount(display, player) else decideAmount(0, player)
+                val built = display.build(player, amount)
+                // 应用lore修改到独立的物品堆，不修改共享的LootItem.parameters
+                if (options.removeLore || !options.addLore.isNullOrEmpty()) {
+                    val meta = built.itemMeta
+                    if (meta != null) {
+                        if (options.removeLore) {
+                            meta.lore(listOf())
+                        }
+                        if (!options.addLore.isNullOrEmpty()) {
+                            meta.lore((meta.lore() ?: listOf()) + options.addLore.map { it.toComponent() })
+                        }
+                        built.setItemMeta(meta)
+                    }
                 }
-                if (!options.addLore.isNullOrEmpty()) {
-                    lore = ((lore ?: listOf()) + (options.addLore)).toMutableList()
-                }
-                item.parameters?.let { it["lore"] = lore }
-                item.build(player, item.amount?.toDoubleOrNull()?.roundToInt() ?: 1)
+                built
             }
             LootElementStat.NOITEM -> null
         }
     }
 
     fun applyToPlayer(player: Player,template: LootTemplate) {
-        items?.forEach { lItem ->
-            val event = LootItemGrantEvent(player, template, this, lItem.build(player))
+        items?.forEachIndexed { index, lItem ->
+            val event = LootItemGrantEvent(player, template, this, lItem.build(player, decideAmount(index, player)))
             event.call()
             if (!event.isCancelled) {
                 player.giveItem(event.item)

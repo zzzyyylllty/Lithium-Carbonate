@@ -20,6 +20,7 @@ import io.github.zzzyyylllty.lithiumcarbon.data.define.SpecifyDefine
 import io.github.zzzyyylllty.lithiumcarbon.data.define.SquareDefine
 import io.github.zzzyyylllty.lithiumcarbon.data.define.WGDefine
 import io.github.zzzyyylllty.lithiumcarbon.data.define.WorldDefine
+import io.github.zzzyyylllty.lithiumcarbon.unlock.UnlockLightConfig
 import io.github.zzzyyylllty.lithiumcarbon.data.load.ConfigUtil.getConditions
 import io.github.zzzyyylllty.lithiumcarbon.logger.infoL
 import io.github.zzzyyylllty.lithiumcarbon.logger.severeL
@@ -42,7 +43,7 @@ fun loadLootFiles() {
         warningL("LootRegen")
         releaseResourceFile("loots/test.yml")
     }
-    val files = File(getDataFolder(), "loots").listFiles()
+    val files = File(getDataFolder(), "loots").listFiles() ?: return
     for (file in files) {
         // If directory load file in it...
         if (file.isDirectory) file.listFiles()?.forEach {
@@ -182,9 +183,22 @@ fun loadLoot(key: String, arg: Map<String, Any?>) {
     }
 
     val update = if (loops.isEmpty()) {
-        LootUpdate(null, refresh?.get("expire").toString())
+        LootUpdate(null, refresh?.get("expire")?.toString())
     } else {
-        LootUpdate(loops, refresh?.get("expire").toString())
+        LootUpdate(loops, refresh?.get("expire")?.toString())
+    }
+
+    val unlockRaw = arg["unlock"] as? Map<String, Any?>?
+    val unlock = unlockRaw?.let { u ->
+        UnlockLightConfig(
+            enabled = u["enabled"] as? Boolean ?: true,
+            template = u["template"]?.toString(),
+            type = u["type"]?.toString(),
+            shared = u["shared"] as? Boolean ?: false,
+            onCompleteAction = u["on-complete-action"]?.toString() ?: "open",
+            sharedCompleteAction = u["shared-complete-action"]?.toString() ?: "close",
+            overrides = u.filterKeys { it !in setOf("enabled", "template", "type", "shared", "on-complete-action", "shared-complete-action") },
+        )
     }
 
     val loot = LootTemplate(
@@ -197,7 +211,8 @@ fun loadLoot(key: String, arg: Map<String, Any?>) {
         lootTable = lootTable,
         agents = c.getAgents(arg),
         options = options,
-        update = update
+        update = update,
+        unlock = unlock,
     )
 
     val defines = LootDefines(parseDefines(arg))

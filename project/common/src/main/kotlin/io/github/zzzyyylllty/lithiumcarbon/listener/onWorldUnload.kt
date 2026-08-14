@@ -18,15 +18,15 @@ import org.bukkit.event.block.Action
 import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.event.world.WorldUnloadEvent
 import taboolib.common.platform.event.SubscribeEvent
-import taboolib.common.platform.function.submitAsync
+import taboolib.common.platform.function.submit
 import kotlin.collections.get
 
 @SubscribeEvent
 fun onWorldUnload(e: WorldUnloadEvent) {
     if (Bukkit.isStopping()) return
-    submitAsync {
-        lootCaches.forEach {
-            if (it.key.world == e.world.name) lootCaches.remove(it.key)
-        }
+    submit {
+        val worldName = e.world.name
+        lootCaches.keys.filter { it.world == worldName }.forEach { lootCaches.remove(it) }
+        lootMap.keys.filter { it.location.world == worldName }.forEach { lootMap.remove(it) }
     }
 }

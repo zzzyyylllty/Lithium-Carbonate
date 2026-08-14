@@ -21,12 +21,17 @@ import org.bukkit.inventory.meta.Damageable
 import taboolib.common.platform.function.submit
 import taboolib.common5.compileJS
 import io.github.zzzyyylllty.lithiumcarbon.function.kether.evalKether
+import javax.script.CompiledScript
 import javax.script.SimpleBindings
+import java.util.concurrent.ConcurrentHashMap
 
 /**
  * 卡房动作执行器
  */
 object CardRoomExecutor {
+
+    /** JS 编译缓存：原始脚本 → CompiledScript，避免每帧重复编译 */
+    private val jsCache = ConcurrentHashMap<String, CompiledScript>()
 
     /**
      * 执行动作列表
@@ -90,8 +95,8 @@ object CardRoomExecutor {
             }
         }
 
-        // 保存原始方块状态
-        if (config.reset.restore) {
+        // 保存原始方块状态（仅在尚未记录时保存，防止后续动作覆盖原始状态）
+        if (config.reset.restore && instance.modifiedBlocks[action.location] == null) {
             instance.modifiedBlocks[action.location] = block.blockData.clone()
         }
 
@@ -120,8 +125,8 @@ object CardRoomExecutor {
         val location = action.location.toBukkitLocation()
         val block = location.block
 
-        // 保存原始方块状态
-        if (config.reset.restore) {
+        // 保存原始方块状态（仅在尚未记录时保存，防止后续动作覆盖原始状态）
+        if (config.reset.restore && instance.modifiedBlocks[action.location] == null) {
             instance.modifiedBlocks[action.location] = block.blockData.clone()
         }
 
@@ -266,14 +271,13 @@ object CardRoomExecutor {
         // 执行JavaScript
         if (action.js != null) {
             try {
-                val script = action.js
-                val compiledScript = script.compileJS()
+                val compiledScript = jsCache.getOrPut(action.js) { action.js.compileJS() }
                 if (compiledScript != null) {
                     val bindings = SimpleBindings(defaultData  + extraVariables)
                     compiledScript.eval(bindings)
-                    devLog("Executed JavaScript: ${script.take(50)}...")
+                    devLog("Executed JavaScript: ${action.js.take(50)}...")
                 } else {
-                    devLog("Failed to compile JavaScript: ${script.take(50)}...")
+                    devLog("Failed to compile JavaScript: ${action.js.take(50)}...")
                 }
             } catch (e: Exception) {
                 devLog("Error executing JavaScript: ${e.message}")
@@ -407,40 +411,42 @@ object CardRoomExecutor {
      * 减少物品数量
      */
     private fun consumeItem(player: Player, amount: Int) {
-        val itemInHand = player.inventory.itemInMainHand
-        if (itemInHand.type == Material.AIR) return
-
-        val newAmount = itemInHand.amount - amount
-        if (newAmount <= 0) {
-            player.inventory.setItemInMainHand(null)
-        } else {
-            itemInHand.amount = newAmount
+        submit {
+            val itemInHand = player.inventory.itemInMainHand
+            if (itemInHand.type == Material.AIR) return@submit
+            val newAmount = itemInHand.amount - amount
+            if (newAmount <= 0) {
+                player.inventory.setItemInMainHand(null)
+            } else {
+                itemInHand.amount = newAmount
+            }
+            player.playSound(player.location, "entity.item.pickup", 1.0f, 1.0f)
+            devLog("Consumed ${amount}x item from ${player.name}")
         }
-        player.playSound(player.location, "entity.item.pickup", 1.0f, 1.0f)
-        devLog("Consumed ${amount}x item from ${player.name}")
     }
 
     /**
      * 降低物品耐久
      */
     private fun consumeDurability(player: Player, amount: Int) {
-        val itemInHand = player.inventory.itemInMainHand
-        if (itemInHand.type == Material.AIR) return
+        submit {
+            val itemInHand = player.inventory.itemInMainHand
+            if (itemInHand.type == Material.AIR) return@submit
+            val meta = itemInHand.itemMeta ?: return@submit
+            if (meta !is Damageable || meta.isUnbreakable) return@submit
 
-        val meta = itemInHand.itemMeta ?: return
-        if (meta !is Damageable || meta.isUnbreakable) return
+            val newDamage = (meta.damage + kotlin.math.abs(amount))
+                .coerceAtMost(itemInHand.type.maxDurability - 1)
+            meta.damage = newDamage
+            itemInHand.itemMeta = meta
 
-        val newDamage = (meta.damage + kotlin.math.abs(amount))
-            .coerceAtMost(itemInHand.type.maxDurability - 1)
-        meta.damage = newDamage
-        itemInHand.itemMeta = meta
-
-        if (newDamage >= itemInHand.type.maxDurability - 1) {
-            player.inventory.setItemInMainHand(null)
-            player.playSound(player.location, "entity.item.break", 1.0f, 1.0f)
+            if (newDamage >= itemInHand.type.maxDurability - 1) {
+                player.inventory.setItemInMainHand(null)
+                player.playSound(player.location, "entity.item.break", 1.0f, 1.0f)
+            }
+            player.playSound(player.location, "entity.item.pickup", 1.0f, 0.5f)
+            devLog("Reduced durability by ${amount} for ${player.name}'s item")
         }
-        player.playSound(player.location, "entity.item.pickup", 1.0f, 0.5f)
-        devLog("Reduced durability by ${amount} for ${player.name}'s item")
     }
 
     /**
@@ -448,18 +454,19 @@ object CardRoomExecutor {
      */
     private fun consumeTag(player: Player, config: ConsumeKeyConfig) {
         val tagKey = config.tag ?: return
-        val itemInHand = player.inventory.itemInMainHand
-        if (itemInHand.type == Material.AIR) return
-
-        try {
-            val itemTag = itemInHand.getItemTag()
-            val current = itemTag.getDeep(tagKey)?.asInt() ?: 0
-            itemTag.putDeep(tagKey, current + config.value)
-            itemTag.saveTo(itemInHand)
-            player.playSound(player.location, "entity.item.pickup", 1.0f, 1.0f)
-            devLog("Modified tag ${tagKey} by ${config.value} for ${player.name}'s item")
-        } catch (e: Exception) {
-            devLog("Error modifying item tag: ${e.message}")
+        submit {
+            val itemInHand = player.inventory.itemInMainHand
+            if (itemInHand.type == Material.AIR) return@submit
+            try {
+                val itemTag = itemInHand.getItemTag()
+                val current = itemTag.getDeep(tagKey)?.asInt() ?: 0
+                itemTag.putDeep(tagKey, current + config.value)
+                itemTag.saveTo(itemInHand)
+                player.playSound(player.location, "entity.item.pickup", 1.0f, 1.0f)
+                devLog("Modified tag ${tagKey} by ${config.value} for ${player.name}'s item")
+            } catch (e: Exception) {
+                devLog("Error modifying item tag: ${e.message}")
+            }
         }
     }
 }
